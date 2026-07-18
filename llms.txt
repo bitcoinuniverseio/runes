@@ -1,0 +1,39 @@
+# Runes | Bitcoin Universe Protocol Reference
+
+> Human docs: index.html
+> Field reference: reference.html
+> Network: Bitcoin
+> Classification: UTXO-native fungible tokens
+
+## Summary
+
+A fungible token protocol that represents allocations in Bitcoin transaction outputs, using a Runestone carried in an OP_RETURN output.
+
+## State model
+
+UTXO allocations described by a compact, integer-encoded Runestone. The protocol state follows transaction outputs.
+
+## Lifecycle
+
+1. Etch rune
+2. Mint or premine
+3. Allocate with edicts
+4. Spend UTXO
+
+## Operations
+
+- Etch: Creates a rune definition with an optional symbol, divisibility, premine, and mint terms.
+- Mint: Claims units under an etched rune's open mint terms.
+- Edict: Allocates unallocated rune units to a chosen transaction output.
+- Pointer: Sets the default output for units left unallocated after edicts.
+
+## Safety
+
+1. Runestones are binary integer messages, not JSON. Build them with a maintained library or the ord reference tooling.
+2. Edicts allocate to outputs, not addresses. Audit output indexes before signing.
+3. Cenotaph behavior is consensus-critical for indexers. Never substitute a high-level overview for the active specification.
+
+## Sources
+
+- Ord Runes guide: https://docs.ordinals.com/runes.html
+- Runes specification: https://docs.ordinals.com/runes/specification.html
