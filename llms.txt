@@ -1,51 +1,32 @@
 # Runes
 
-> A UTXO-native fungible token protocol with compact integer serialization.
+> Runes brings fungible assets into Bitcoin’s UTXO world with compact onchain messages, clear supply terms, and a lifecycle built for discovery.
 
-## Chain and carrier
+## Public experience
 
-- Chain: Bitcoin
-- Carrier: Runestone in OP_RETURN
+- Home: https://bitcoinuniverse.github.io/runes/
+- Discover: https://bitcoinuniverse.github.io/runes/reference.html
+- Get started: https://bitcoinuniverse.github.io/runes/guide.html
+- Bitcoin Universe: https://inscribe.bitcoinuniverse.io/
 
-## Overview
+## The experience
 
-Runes represent fungible balances in UTXOs. A Runestone appears in an OP_RETURN output, uses an OP_13 marker, and carries a varint-encoded message. Edicts allocate rune amounts to transaction outputs.
+- Etch: Create a rune identity with its symbol, divisibility, supply, and mint terms.
+- Mint: Join an open mint while its published terms and window allow.
+- Transfer: Move rune balances through compatible Bitcoin wallets and outputs.
 
-## State model
+## In plain language
 
-A transaction can etch a rune, mint an existing rune, and allocate runes. If no allocation applies, unallocated input balances default to the first non-OP_RETURN output, unless a pointer changes that destination.
+- Runestones: Rune messages live in an OP_RETURN output marked for the protocol.
+- Etchings: An etching establishes the rune and its supply personality.
+- Mints: Mint activity follows the terms chosen when the rune was etched.
+- Allocations: Edicts direct rune amounts to transaction outputs.
 
-## Lifecycle
+## User safety
 
-1. Commit a valid rune name when a commitment is required.
-2. Etch supply terms, premine, divisibility, symbol, and optional mint terms.
-3. Mint under the etched terms and add the amount to the transaction pool.
-4. Allocate the pool with sorted delta-encoded edicts or a pointer.
+Malformed Rune messages can become cenotaphs and burn rune balances. Use a compatible wallet, verify the destination and allocation, and never blind-sign a transaction.
 
-## Rules
+## Community resources
 
-- A Runestone starts with OP_RETURN followed by OP_13 and data pushes.
-- The payload is a sequence of unsigned LEB128 integers.
-- Edicts are sorted by Rune ID and encoded as deltas.
-- Unknown even tags create a cenotaph. Unknown odd tags are ignored.
-- A cenotaph burns all input runes and can make an etched rune unmintable.
-- Missing allocation defaults to the first non-OP_RETURN output when one exists.
-
-## Field reference
-
-- Body (tag 0, required: when edicts exist): Ends the tag field region and starts edict integers.
-- Rune (tag 4, required: etching): Name value for a new rune.
-- Premine (tag 6, required: no): Amount allocated during etching.
-- Cap / Amount (tags 8 / 10, required: mint terms): Maximum number of mints and units per mint.
-- Mint (tag 20, required: no): Rune ID to mint.
-- Pointer (tag 22, required: no): Output that receives unallocated runes.
-- Edict (body tuple, required: no): Rune ID delta, amount, output index.
-
-## Primary sources
-
-- Runes overview: https://docs.ordinals.com/runes.html
-- Runes specification: https://docs.ordinals.com/runes/specification.html
-
-## Operational caution
-
-Cenotaph behavior is a safety boundary, not a soft warning. Treat any malformed Runestone as a burn-risk transaction.
+- Explore Runes: https://docs.ordinals.com/runes.html
+- Read the Runes protocol: https://docs.ordinals.com/runes/specification.html
