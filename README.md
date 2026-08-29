@@ -4,7 +4,7 @@
 
 Runes brings fungible assets into Bitcoin’s UTXO world with compact onchain messages, clear supply terms, and a lifecycle built for discovery.
 
-Runes is part of the growing Bitcoin Universe—an onchain landscape for creators, collectors, and communities who want their digital stories to last.
+Runes is part of the growing Bitcoin Universe, an onchain landscape for creators, collectors, and communities who want their digital stories to last.
 
 ## Step inside
 
