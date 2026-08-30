@@ -8,9 +8,9 @@ Runes is part of the growing Bitcoin Universe, an onchain landscape for creators
 
 ## Step inside
 
-- [Experience the story](https://bitcoinuniverse.github.io/runes/)
-- [Discover how it works](https://bitcoinuniverse.github.io/runes/reference.html)
-- [Start your journey](https://bitcoinuniverse.github.io/runes/guide.html)
+- [Experience the story](https://bitcoinuniverseio.github.io/runes/)
+- [Discover how it works](https://bitcoinuniverseio.github.io/runes/reference.html)
+- [Start your journey](https://bitcoinuniverseio.github.io/runes/guide.html)
 - [Open Bitcoin Universe](https://inscribe.bitcoinuniverse.io/)
 
 ## What makes it special
@@ -29,4 +29,4 @@ Malformed Rune messages can become cenotaphs and burn rune balances. Use a compa
 
 ---
 
-Presented by [Bitcoin Universe](https://github.com/bitcoinuniverse).
+Presented by [Bitcoin Universe](https://github.com/bitcoinuniverseio).
