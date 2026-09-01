@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "runes",
+  "name": "Runes",
+  "classification": "protocol",
+  "repository": "bitcoinuniverseio/runes",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/runes/",
+  "docsRoot": ".",
+  "sourceRef": "main",
+  "lifecycle": "experimental",
+  "chains": [
+    {
+      "chain": "bitcoin",
+      "networks": ["mainnet"]
+    }
+  ],
+  "protocols": ["runes"],
+  "audiences": ["user", "app-developer", "protocol-implementer"],
+  "owners": ["bitcoinuniverseio"],
+  "securityClassification": "public",
+  "lastVerified": {
+    "commit": "1898dd2039c61e5e6b4e433cf4e614eaea1d2b22",
+    "timestamp": "2026-09-01T01:16:47Z"
+  }
+}
