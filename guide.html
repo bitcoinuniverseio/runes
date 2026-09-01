@@ -1,18 +1,196 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Get started with Runes — Bitcoin Universe</title>
-  <meta name="description" content="A simple, user-first path for exploring Runes safely.">
-  <meta name="theme-color" content="#09090f">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes guide: etching, minting, and transferring, byte by byte</title>
+<meta name="description" content="A plain-language walkthrough of the Runes protocol with worked byte-level examples for etching, minting, transferring, splitting, and burning, plus the Bitcoin Universe support matrix.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/guide.html">
+<meta property="og:title" content="Runes guide: etching, minting, and transferring">
+<meta property="og:description" content="Worked byte-level walkthroughs of every runestone operation, and what Bitcoin Universe products actually support.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/guide.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 </head>
-<body style="--accent:#f5a524;--accent-2:#ffe28a">
-<div class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">R</span><span>Runes</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html">Home</a><a href="reference.html">Discover</a><a href="guide.html" aria-current="page">Get started</a><a class="nav-cta" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a></nav></div></div>
-<main>
-  <div class="wrap hero compact"><div><div class="eyebrow">Your next onchain moment</div><h1>From curiosity to <span class="gradient">confirmation.</span></h1><p class="lede">You do not need to think like a protocol engineer. Start with the story, understand the transaction, and stay in control of your wallet.</p><div class="actions"><a class="button primary" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a><a class="button secondary" href="reference.html">Discover Runes</a></div></div><div class="hero-art" aria-hidden="true"><div class="orbit"><div class="core">R</div><span class="spark one">Bitcoin</span><span class="spark two">community</span><span class="spark three">onchain</span></div></div></div>
-  <section><div class="wrap story"><div class="story-copy"><div class="eyebrow">A simple journey</div><h2>Four steps to a confident experience.</h2><p class="lede" style="font-size:18px;margin-top:22px">Every action ends with a real network transaction. Take the time to understand what your wallet shows.</p></div><div class="story-list"><article class="story-item"><b>01</b><div><h3>Find your rune</h3><p>Explore its name, symbol, supply, divisibility, and mint terms in a compatible wallet or explorer.</p></div></article><article class="story-item"><b>02</b><div><h3>Choose your action</h3><p>Mint when eligible or select the rune balance you want to send.</p></div></article><article class="story-item"><b>03</b><div><h3>Review every output</h3><p>Confirm the rune destination, Bitcoin destination, network fee, and any change before signing.</p></div></article><article class="story-item"><b>04</b><div><h3>Watch the stone settle</h3><p>After confirmation, verify the rune allocation in a compatible explorer.</p></div></article></div></div></section>
-  <section><div class="wrap spotlight"><div class="eyebrow">Stay in control</div><h2>Your keys. Your review. Your decision.</h2><p>Malformed Rune messages can become cenotaphs and burn rune balances. Use a compatible wallet, verify the destination and allocation, and never blind-sign a transaction.</p><div class="actions"><a class="button primary" href="https://inscribe.bitcoinuniverse.io/">Explore supported experiences ↗</a></div></div></section>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html" aria-current="page">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Walkthrough</p>
+  <h1>Guide</h1>
+  <p class="lede">Every runestone in this guide is a real byte string you can paste into the <a href="decoder.html">decoder</a>. The hex shown is the complete output script: <code>6a</code> for OP_RETURN, <code>5d</code> for OP_13, one length byte, then the payload.</p>
+  <p class="status-line">These are constructed examples, encoded and verified against the ord 0.29.0 decoding rules. They are teaching material, not transactions that exist on chain.</p>
+
+  <h2 id="model">The mental model</h2>
+  <p>Forget account balances. A rune balance is a property of a transaction output, exactly like a satoshi amount. If you spend the output, you spend the runes on it. The runestone in a transaction is a note attached to the spend saying where the runes should land.</p>
+  <figure>
+    <svg class="glyph-strip" viewBox="0 0 720 210" role="img" aria-labelledby="fig-life-title fig-life-desc">
+      <title id="fig-life-title">Lifecycle of a rune</title>
+      <desc id="fig-life-desc">Four carved panels in sequence: Etch creates the rune and fixes its properties; Mint creates units while the terms hold; Transfer moves balances between outputs; Burn destroys units by sending them to an OP_RETURN output or through a cenotaph.</desc>
+      <g fill="none" stroke="var(--rule)">
+        <rect x="15" y="40" width="155" height="90"/>
+        <rect x="190" y="40" width="155" height="90"/>
+        <rect x="365" y="40" width="155" height="90"/>
+        <rect x="540" y="40" width="165" height="90" stroke="var(--accent)"/>
+        <path d="M170 85 H190 M345 85 H365 M520 85 H540" stroke="var(--rule)"/>
+      </g>
+      <g fill="var(--ink)" font-size="14" letter-spacing="2.5">
+        <text x="30" y="72">ETCH</text>
+        <text x="205" y="72">MINT</text>
+        <text x="380" y="72">TRANSFER</text>
+        <text x="555" y="72" fill="var(--accent)">BURN</text>
+      </g>
+      <g fill="var(--muted)" font-size="11">
+        <text x="30" y="96">name, divisibility,</text>
+        <text x="30" y="112">symbol, terms fixed</text>
+        <text x="205" y="96">fixed amount</text>
+        <text x="205" y="112">while terms hold</text>
+        <text x="380" y="96">edicts allocate</text>
+        <text x="380" y="112">to outputs</text>
+        <text x="555" y="96">OP_RETURN output</text>
+        <text x="555" y="112">or cenotaph</text>
+      </g>
+      <text x="15" y="165" fill="var(--muted)" font-size="11">Properties set at etching are immutable. Nobody, including the etcher, can change them afterwards.</text>
+    </svg>
+    <figcaption>The four things that ever happen to a rune.</figcaption>
+  </figure>
+
+  <h2 id="transfer">Transfer, worked</h2>
+  <p>You hold 1,500 units of rune <code>840000:3</code> on one output, and you want to send 1,000 to a friend and keep the rest. Your transaction spends that output and creates two spendable outputs plus the runestone.</p>
+  <pre><code>6a 5d 08 00 c0 a2 33 03 e8 07 01</code></pre>
+  <p>Read it byte by byte:</p>
+  <div class="table-scroll">
+  <table>
+    <caption>Transfer runestone, one edict</caption>
+    <thead><tr><th scope="col">Bytes</th><th scope="col">Integer</th><th scope="col">Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>6a</code></td><td>none</td><td>OP_RETURN</td></tr>
+      <tr><td><code>5d</code></td><td>none</td><td>OP_13, the Runes identifier</td></tr>
+      <tr><td><code>08</code></td><td>none</td><td>Push 8 bytes of payload</td></tr>
+      <tr><td><code>00</code></td><td>0</td><td>Tag 0, Body: everything after is edicts</td></tr>
+      <tr><td><code>c0 a2 33</code></td><td>840000</td><td>Block delta from the running ID <code>0:0</code></td></tr>
+      <tr><td><code>03</code></td><td>3</td><td>Transaction index. Block delta was nonzero, so this is absolute. Rune ID is <code>840000:3</code></td></tr>
+      <tr><td><code>e8 07</code></td><td>1000</td><td>Amount in atomic units</td></tr>
+      <tr><td><code>01</code></td><td>1</td><td>Destination output index</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>The edict allocates 1,000 to output 1. The remaining 500 are unallocated, and with no pointer they go to the first non-OP_RETURN output, which is output 0. Your change arrives without you asking for it. Put the runestone last and your own address at output 0, and the default does the right thing.</p>
+
+  <h3 id="two-edicts">Two runes in one transaction</h3>
+  <p>Delta encoding pays off when you move several runes at once. Here, 1,000 of <code>840000:3</code> to output 1 and 500 of <code>840000:28</code> to output 0:</p>
+  <pre><code>6a 5d 0d 00 c0 a2 33 03 e8 07 01 00 19 f4 03 00</code></pre>
+  <p>The second edict starts <code>00 19</code>: a block delta of 0 means stay in block 840,000, and 25 is added to the running transaction index of 3, giving <code>840000:28</code>. Edicts must be sorted by rune ID for this to encode correctly. Getting the order wrong does not produce an error, it produces edicts pointing at different runes than you meant.</p>
+
+  <h3 id="split">Splitting and sweeping</h3>
+  <p>Two shorthands save bytes and mistakes:</p>
+  <ul>
+    <li><strong>Amount 0</strong> means the entire remaining balance of that rune. <code>6a 5d 07 00 c0 a2 33 03 00 01</code> sweeps everything to output 1.</li>
+    <li><strong>Output equal to the output count</strong> means split. In a transaction with 3 outputs, output index 3 does not exist, so it is read as an instruction: divide across all non-OP_RETURN outputs. With amount 0 the balance is divided evenly, earlier outputs taking the remainder. With a nonzero amount, that amount goes to each non-OP_RETURN output in turn until the balance runs out. <code>6a 5d 07 00 c0 a2 33 03 00 03</code> is an even split across a 3-output transaction.</li>
+  </ul>
+  <p>The line between "split" and "cenotaph" is one integer wide. An output index of 3 in a 3-output transaction splits; an output index of 4 makes the transaction a cenotaph and burns everything.</p>
+
+  <h2 id="mint">Mint, worked</h2>
+  <p>Minting rune <code>840000:3</code> needs nothing but the Mint tag, given twice: once for the block, once for the transaction index.</p>
+  <pre><code>6a 5d 06 14 c0 a2 33 14 03</code></pre>
+  <p><code>14</code> is tag 20 with value 840000, then tag 20 again with value 3. The minted amount joins the transaction's unallocated runes and, with no edicts and no pointer, lands on the first non-OP_RETURN output. Adding a pointer sends it somewhere else:</p>
+  <pre><code>6a 5d 08 14 c0 a2 33 14 03 16 01</code></pre>
+  <p><code>16 01</code> is tag 22 (Pointer) with value 1, so the mint lands on output 1 instead.</p>
+  <p>If the mint's terms are not satisfied (the cap is reached, or the height window has closed), the mint quietly does nothing. You pay the fee and receive no runes. It is not an error and not a cenotaph. Check the rune's current mint count and window before broadcasting.</p>
+
+  <h2 id="etch">Etch, worked</h2>
+  <p>Etching is the only operation with a prerequisite outside the runestone. To claim a name, the transaction must <em>commit</em> to it: an input must spend a pay-to-taproot output whose witness tapscript contains the name's value as little-endian bytes with trailing zeros trimmed, and that output must have been confirmed at least 6 blocks earlier. That is why etching is a two-transaction dance: a commit transaction, a six-block wait, then the reveal transaction carrying the runestone.</p>
+  <p>Here is a full etching of <code>BITCOIN•UNIVERSE</code>, divisibility 2, symbol <code>⚒</code>, premine 1,000,000, and an open mint of 1,000 per mint capped at 21,000 mints, closing 12,960 blocks (about 90 days) after the etching block:</p>
+  <pre><code>6a 5d 22 02 07 04 c2 e1 d8 f3 d9 a4 f5 89 cf 10
+      01 02 03 40 05 92 4d 06 c0 84 3d 0a e8 07
+      08 88 a4 01 12 a0 65</code></pre>
+  <div class="table-scroll">
+  <table>
+    <caption>Etching runestone, field by field</caption>
+    <thead><tr><th scope="col">Bytes</th><th scope="col">Tag</th><th scope="col">Value</th><th scope="col">Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>22</code></td><td>none</td><td>none</td><td>Push 34 bytes of payload</td></tr>
+      <tr><td><code>02 07</code></td><td>2 Flags</td><td>7</td><td>Bits 0, 1, 2: Etching, Terms, Turbo</td></tr>
+      <tr><td><code>04 c2 e1 d8 f3 d9 a4 f5 89 cf 10</code></td><td>4 Rune</td><td>153272084900779274434</td><td>The name <code>BITCOINUNIVERSE</code> in modified base 26</td></tr>
+      <tr><td><code>01 02</code></td><td>1 Divisibility</td><td>2</td><td>Two decimal places</td></tr>
+      <tr><td><code>03 40</code></td><td>3 Spacers</td><td>64</td><td>Bit 6 set: a dot after the 7th letter, giving <code>BITCOIN•UNIVERSE</code></td></tr>
+      <tr><td><code>05 92 4d</code></td><td>5 Symbol</td><td>9874</td><td>U+2692, <code>⚒</code></td></tr>
+      <tr><td><code>06 c0 84 3d</code></td><td>6 Premine</td><td>1000000</td><td>10,000.00 units to the etcher, given divisibility 2</td></tr>
+      <tr><td><code>0a e8 07</code></td><td>10 Amount</td><td>1000</td><td>10.00 units created per mint</td></tr>
+      <tr><td><code>08 88 a4 01</code></td><td>8 Cap</td><td>21000</td><td>At most 21,000 mints</td></tr>
+      <tr><td><code>12 a0 65</code></td><td>18 OffsetEnd</td><td>12960</td><td>Minting closes 12,960 blocks after the etching block</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Maximum supply is <code>premine + cap × amount</code> = 1,000,000 + 21,000 × 1,000 = 22,000,000 atomic units, which displays as 220,000.00 <code>⚒</code>. That sum must fit in a 128-bit integer; if it overflows the transaction becomes a cenotaph.</p>
+  <p>Note what is <em>not</em> in the runestone: the premine has no destination. Like a mint, it joins the unallocated pool and follows the edicts, then the pointer, then the first non-OP_RETURN output. An edict with rune ID <code>0:0</code> refers to the rune being etched right here, which is how you distribute a premine in the same transaction.</p>
+
+  <h3 id="etch-fails">Ways an etching quietly fails</h3>
+  <p>These do not make a cenotaph. They make the etching disappear while your fee is spent:</p>
+  <ul>
+    <li>The name is already etched by someone else. Names are unique ignoring spacers: if <code>BITCOINUNIVERSE</code> exists, <code>BIT•COIN•UNIVERSE</code> cannot be etched.</li>
+    <li>The name is still locked. At activation only names of 13 letters and up were available; the minimum shrinks by one letter every 17,500 blocks until all names, down to single letters, unlock at block 1,050,000.</li>
+    <li>The commitment is missing, malformed, in a non-taproot input, or younger than 6 confirmations.</li>
+  </ul>
+
+  <h2 id="burn">Burning</h2>
+  <p>Runes are burned by sending them to an OP_RETURN output, either with an edict naming that output or with a pointer aimed at it. Burning is deliberate and explicit. The accidental way to burn runes is a cenotaph, which burns every rune in the transaction's inputs at once. The <a href="decoder.html">decoder</a> tells you which of the two you have built before you sign.</p>
+
+  <h2 id="review">What to check before you sign</h2>
+  <ol>
+    <li><strong>The runestone decodes as you intended.</strong> Paste the OP_RETURN script into the decoder and read the edict table. It is the only part of the transaction your wallet's summary may render loosely.</li>
+    <li><strong>Output 0 is yours.</strong> Unless a pointer says otherwise, everything unallocated lands on the first non-OP_RETURN output. If that is somebody else's address, your change goes with it.</li>
+    <li><strong>Every rune-bearing output stays above the dust limit.</strong> A rune balance rides on a spendable output; if that output is uneconomical to spend, the balance is stranded in practice.</li>
+    <li><strong>Your inputs are the ones you think they are.</strong> Spending a rune-bearing output as ordinary fee input pushes those runes into the unallocated pool, where they follow the default rule. Wallets that do not track rune outpoints will do this without warning.</li>
+    <li><strong>The mint is actually open.</strong> A closed mint returns nothing and refunds nothing.</li>
+  </ol>
+
+  <h2 id="support">Support in Bitcoin Universe products</h2>
+  <p>Runes originated outside this organization: the protocol and its reference implementation, ord, are the work of Casey Rodarmor and the Ordinals project. Bitcoin Universe indexes and displays runes. The table below reflects what is wired in the org's own code today, not what is planned.</p>
+  <div class="table-scroll">
+  <table>
+    <caption>Verified against the marketplace protocol registry and its deployed policy for protocol id <code>runes</code></caption>
+    <thead><tr><th scope="col">Capability</th><th scope="col">State</th><th scope="col">Detail</th></tr></thead>
+    <tbody>
+      <tr><td>View runes, balances, activity, transactions</td><td>Supported</td><td>The deployed policy grants the discovery action set: view, discover, view-collection, view-activity, view-transaction.</td></tr>
+      <tr><td>Token Explorer feed</td><td>Supported, partial coverage</td><td>Universe runs its own Runes indexer producing a normalized read-only feed. Confirmed history and holder state are indexed; the feed reports partial coverage because it carries no exhaustive Runes mempool stream with stable pending lifecycle.</td></tr>
+      <tr><td>Listing, buying, offers, settlement</td><td>Not currently supported</td><td>The marketplace policy for runes is read-only. Its recorded reason: rune mutations stay read-only until complete rune outpoint inventory, cardinal-input safety, a builder, signed-transaction validation, broadcast, settlement, and reorg recovery are deployed and proven on Universe infrastructure.</td></tr>
+      <tr><td>Etch, mint, transfer from inside Universe apps</td><td>Not currently supported</td><td>The registry declares these operations in the protocol's scope, but no executable order or settlement authority is deployed for runes, and no confirmation policy is set. Build and broadcast rune transactions with a wallet that supports them.</td></tr>
+      <tr><td>Reorg reconciliation of Universe rune orders</td><td>Not applicable</td><td>Read state follows the indexing authority. There is no executable order state to roll back.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>The registry also carries a separate protocol id, <code>runes_native</code> ("Runes (Native)"), under the same read-only policy. Rune amounts are asset-defined: divisibility comes from the etching, not from a protocol-wide constant.</p>
 </main>
-<footer><div class="wrap footer-inner"><span>Runes on Bitcoin</span><span>Presented by <a href="https://github.com/bitcoinuniverseio/runes">Bitcoin Universe</a></span></div></footer></body></html>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>guide.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/guide.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>
