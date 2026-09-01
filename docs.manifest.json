@@ -13,7 +13,7 @@
   "chains": [
     {
       "chain": "bitcoin",
-      "networks": ["mainnet", "testnet", "testnet4", "signet", "regtest"]
+      "networks": ["mainnet"]
     }
   ],
   "protocols": ["runes"],
@@ -35,7 +35,7 @@
   },
   "securityClassification": "public",
   "lastVerified": {
-    "commit": "1898dd2039c61e5e6b4e433cf4e614eaea1d2b22",
-    "timestamp": "2026-09-01T00:00:00Z"
+    "commit": "b03e46d121b6114c277f809eb64be77c8864fa00",
+    "timestamp": "2026-09-01T01:16:47Z"
   }
 }
