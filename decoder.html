@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runestone decoder: read an OP_RETURN script field by field</title>
+<meta name="description" content="Paste a runestone OP_RETURN script hex and read the decoded tags, etching, mint, edicts, and pointer, with cenotaph flaws explained. Runs entirely in your browser, nothing is transmitted.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/decoder.html">
+<meta property="og:title" content="Runestone decoder">
+<meta property="og:description" content="Client-side decoder for runestone OP_RETURN scripts, with cenotaph detection and explanations.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/decoder.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html" aria-current="page">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Tool</p>
+  <h1>Runestone decoder</h1>
+  <p class="lede">Paste the output script of a runestone, in hex, starting <code>6a 5d</code>. The decoder reads the varints, resolves tags and fields, reconstructs edicts, and tells you whether the result is a well-formed runestone or a cenotaph, and why.</p>
+  <p class="status-line">Decoding rules: ord 0.29.0, ordinals crate 0.0.17. Network: Bitcoin mainnet semantics. Everything runs in your browser: nothing you paste is logged, stored, or sent anywhere. Requires JavaScript; the rest of this site does not.</p>
+
+  <noscript>
+    <div class="verdict">
+      <h2>JavaScript is disabled</h2>
+      <p>The decoder needs JavaScript to run in your browser. Nothing is sent to a server either way. To decode by hand, follow the <a href="specification.html#varints">varint</a> and <a href="specification.html#tags">tag</a> rules in the specification, or compare against the worked examples in the <a href="vectors.html">test vectors</a>.</p>
+    </div>
+  </noscript>
+
+  <form id="decoder-form" class="decoder-form">
+    <label for="script-hex">Output script hex</label>
+    <textarea id="script-hex" spellcheck="false" autocomplete="off" placeholder="6a5d0800c0a23303e80701"></textarea>
+    <label for="tx-outputs">Number of outputs in the transaction (optional)</label>
+    <input type="text" id="tx-outputs" inputmode="numeric" autocomplete="off" placeholder="e.g. 2">
+    <p class="muted" style="font-size:0.9rem;margin-top:0.4rem">Two checks depend on this: an edict output greater than the output count is a cenotaph, and a pointer must be strictly less than it. Leave it blank and those checks are reported as caveats instead of applied.</p>
+    <button type="submit">Decode</button>
+  </form>
+
+  <h2 id="examples">Examples</h2>
+  <p>Each button loads a vector from the <a href="vectors.html">test vectors</a> page and decodes it.</p>
+  <div class="decoder-examples">
+    <button type="button" data-hex="6a5d" data-outputs="2">V1 empty</button>
+    <button type="button" data-hex="6a5d0800c0a23303e80701" data-outputs="2">V2 transfer</button>
+    <button type="button" data-hex="6a5d0d00c0a23303e807010019f40300" data-outputs="2">V3 two edicts</button>
+    <button type="button" data-hex="6a5d0700c0a233030003" data-outputs="3">V5 split</button>
+    <button type="button" data-hex="6a5d0814c0a23314031601" data-outputs="2">V7 mint + pointer</button>
+    <button type="button" data-hex="6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065" data-outputs="2">V8 full etching</button>
+    <button type="button" data-hex="6a5d020208" data-outputs="2">C2 unrecognized flag</button>
+    <button type="button" data-hex="6a5d0800c0a23303e80705" data-outputs="2">C6 edict output</button>
+    <button type="button" data-hex="6a5d021605" data-outputs="2">C7 bad pointer</button>
+    <button type="button" data-hex="6a5d18020308020a80808080808080808080808080808080808002" data-outputs="2">C10 supply overflow</button>
+    <button type="button" data-hex="6a5d69" data-outputs="2">C11 bad opcode</button>
+    <button type="button" data-hex="6a5d0180" data-outputs="2">C13 bad varint</button>
+    <button type="button" data-hex="6a04deadbeef" data-outputs="2">N2 not a runestone</button>
+  </div>
+
+  <div id="decode-output" role="status" aria-live="polite"></div>
+
+  <h2 id="how-it-works">What the decoder checks</h2>
+  <ol>
+    <li><strong>Carrier.</strong> The script must begin <code>6a</code> (OP_RETURN) then <code>5d</code> (OP_13). Anything else is not a runestone at all, which is different from being a broken one.</li>
+    <li><strong>Pushes.</strong> All data pushes after OP_13 are concatenated. A non-pushdata opcode gives flaw <code>Opcode</code>; a push running past the end of the script gives <code>InvalidScript</code>.</li>
+    <li><strong>Varints.</strong> The payload is decoded as LEB128 varints with the 19-byte limit and the 19th-byte overflow mask. Any failure gives flaw <code>Varint</code>.</li>
+    <li><strong>Message.</strong> Tag and value pairs are read until the Body tag, then edicts in groups of four with delta-encoded rune IDs.</li>
+    <li><strong>Fields.</strong> Flags, etching fields, terms, mint, and pointer are consumed in the reference implementation's order, with each range check applied exactly where it belongs, so odd tags degrade quietly and even tags become <code>UnrecognizedEvenTag</code>.</li>
+    <li><strong>Supply.</strong> <code>premine + cap × amount</code> is checked for u128 overflow.</li>
+  </ol>
+  <p>The decoder reads one output script. It cannot tell you whether an etching's name is available, whether a commitment exists in the transaction's inputs, or whether a mint's terms are open at the current height: those depend on chain state. See <a href="specification.html#etching">specification section 6</a> and <a href="reference.html#terms-eval">terms evaluation</a>.</p>
+
+  <h2 id="privacy">Privacy</h2>
+  <p>This page loads one stylesheet and two scripts from this same site. There are no third-party requests, no analytics, no fonts, and no network calls at all once the page has loaded. The script hex you paste never leaves the page, and nothing is written to storage except your theme preference.</p>
+</main>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>decoder.html</code>, <code>decoder.js</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/decoder.js">Edit the decoder on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+<script src="decoder.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes documentation changelog</title>
+<meta name="description" content="Version history of the Runes protocol documentation site, and the protocol milestones it documents.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/changelog.html">
+<meta property="og:title" content="Runes documentation changelog">
+<meta property="og:description" content="Document version history and protocol milestones.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/changelog.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html" aria-current="page">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">History</p>
+  <h1>Changelog</h1>
+  <p class="lede">Version history of this documentation, and the protocol milestones it describes. Documentation versions track this site, not the protocol: the Runes consensus rules have not changed since activation.</p>
+
+  <h2 id="doc-2-0-0">Document 2.0.0, released 2026-09-01</h2>
+  <ul>
+    <li>Rebuilt as a complete protocol documentation site: overview, normative specification, guide, implementer reference, test vectors, decoder, and changelog.</li>
+    <li>Added a numbered normative specification with 47 rules covering carrier anatomy, varint encoding, the full tag table, flags, etching preconditions, minting, edict delta encoding, pointer, state transitions, and all ten cenotaph flaws.</li>
+    <li>Added 24 test vectors as complete output script hex with expected outcomes: 8 valid runestones, 14 cenotaphs covering every flaw, and 2 non-runestone scripts.</li>
+    <li>Added a client-side runestone decoder that mirrors the ord decoding order, including the distinction between silently ignored odd tags and fatal unconsumed even tags.</li>
+    <li>Added worked byte-level walkthroughs for transfer, sweep, split, mint, and a full etching.</li>
+    <li>Replaced the previous marketing-oriented support language with a support matrix verified against the marketplace protocol registry and its deployed policy: runes are read-only first-party data in Bitcoin Universe products.</li>
+    <li>Added local search, a theme toggle, <code>llms.txt</code>, <code>sitemap.xml</code>, <code>robots.txt</code>, <code>docs.manifest.json</code>, a 404 page, and repository policy documents.</li>
+    <li>New visual language: engraved stone. Removed gradients, cards, and decorative animation.</li>
+  </ul>
+
+  <h2 id="doc-1-0-0">Document 1.0.0, released 2026-08</h2>
+  <ul>
+    <li>Initial three-page public site: overview, a plain-language discovery page, and a short getting-started page.</li>
+    <li>Established the accurate core facts carried forward into 2.0.0: runestones live in an OP_RETURN output marked for the protocol, etchings fix a rune's supply properties, mints follow the terms chosen at etching, edicts direct amounts to outputs, and malformed messages become cenotaphs that burn balances.</li>
+  </ul>
+
+  <h2 id="protocol">Protocol milestones</h2>
+  <div class="table-scroll">
+  <table>
+    <caption>Runes protocol timeline</caption>
+    <thead><tr><th scope="col">When</th><th scope="col">Milestone</th></tr></thead>
+    <tbody>
+      <tr><td>2023</td><td>Runes proposed by Casey Rodarmor as a UTXO-native alternative to account-based token schemes on Bitcoin.</td></tr>
+      <tr><td>Block 840,000, April 2024</td><td>Activation, at the fourth halving. Etchings before this height are not indexed. Name unlocking begins: only names of 13 letters and longer are available.</td></tr>
+      <tr><td>Every 17,500 blocks after activation</td><td>The minimum name length steps down by one letter, interpolating between thresholds.</td></tr>
+      <tr><td>Block 1,050,000</td><td>All names unlock, down to single letters. The hardcoded genesis rune <code>UNCOMMON•GOODS</code> also closes its mint window at this height.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>The consensus rules described in the <a href="specification.html">specification</a> have been stable since activation. Cenotaphs exist so that future changes can be introduced without misleading clients built against the current rules: see <a href="specification.html#r46">R46</a>.</p>
+
+  <h2 id="versioning">How this documentation is versioned</h2>
+  <ul>
+    <li><strong>Major</strong>: the site's structure or normative rule numbering changes.</li>
+    <li><strong>Minor</strong>: pages or sections are added, or rules are clarified without renumbering.</li>
+    <li><strong>Patch</strong>: corrections and editorial fixes.</li>
+  </ul>
+  <p>Every page footer carries the document version, the ord version the content is grounded in, and the date it was last verified. Corrections are welcome as pull requests against <a href="https://github.com/bitcoinuniverseio/runes">the repository</a>.</p>
+</main>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>changelog.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/changelog.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>
