@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "runes",
+  "name": "Runes",
+  "classification": "protocol",
+  "repository": "bitcoinuniverseio/runes",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/runes",
+  "docsRoot": ".",
+  "sourceRef": "main",
+  "releasedRef": "main",
+  "releaseVersion": "2.0.0",
+  "lifecycle": "stable",
+  "chains": [
+    {
+      "chain": "bitcoin",
+      "networks": ["mainnet", "testnet", "testnet4", "signet", "regtest"]
+    }
+  ],
+  "protocols": ["runes"],
+  "audiences": [
+    "user",
+    "collector",
+    "app-developer",
+    "protocol-implementer",
+    "indexer-operator"
+  ],
+  "specifications": ["specification.html"],
+  "owners": ["bitcoinuniverseio"],
+  "upstream": {
+    "project": "ord",
+    "url": "https://github.com/ordinals/ord",
+    "license": "CC0-1.0",
+    "relationship": "derived",
+    "divergenceSummary": "Documentation only. This repository carries no protocol implementation. Content is derived from the ord reference implementation, version 0.29.0 with ordinals crate 0.0.17, and restates its decoding, validity, and indexing rules without altering them. Bitcoin Universe specific material is limited to the product support matrix, which reflects the marketplace protocol registry and its deployed read-only policy for runes."
+  },
+  "securityClassification": "public",
+  "lastVerified": {
+    "commit": "1898dd2039c61e5e6b4e433cf4e614eaea1d2b22",
+    "timestamp": "2026-09-01T00:00:00Z"
+  }
+}

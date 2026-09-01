@@ -1,19 +1,194 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Discover Runes — Bitcoin Universe</title>
-  <meta name="description" content="A plain-language look at Runes and its onchain experience.">
-  <meta name="theme-color" content="#09090f">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes reference: indexer semantics, sizes, limits, and security</title>
+<meta name="description" content="Runes terminology, indexer state transitions, confirmation and reorg behavior, mempool caveats, premine and terms evaluation, runestone sizes, limitations, security considerations, and an implementation checklist.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/reference.html">
+<meta property="og:title" content="Runes reference">
+<meta property="og:description" content="Indexer semantics, confirmation and reorg behavior, sizes and limits, security considerations, and an implementation checklist.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/reference.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
 </head>
-<body style="--accent:#f5a524;--accent-2:#ffe28a">
-<div class="topbar"><div class="wrap nav"><a class="brand" href="index.html"><span class="brand-mark">R</span><span>Runes</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html">Home</a><a href="reference.html" aria-current="page">Discover</a><a href="guide.html">Get started</a><a class="nav-cta" href="https://inscribe.bitcoinuniverse.io/">Open Bitcoin Universe ↗</a></nav></div></div>
-<main>
-  <div class="wrap hero compact"><div><div class="eyebrow">Discover Runes</div><h1>See the idea behind the <span class="gradient">transaction.</span></h1><p class="lede">A Runestone carries the instructions. Rune balances move through transaction outputs, keeping every allocation connected to Bitcoin’s UTXO model.</p><div class="actions"><a class="button primary" href="guide.html">Get started →</a><a class="button secondary" href="index.html">Back home</a></div></div><div class="hero-art" aria-hidden="true"><div class="orbit"><div class="core">R</div><span class="spark one">Bitcoin</span><span class="spark two">community</span><span class="spark three">onchain</span></div></div></div>
-  <section><div class="wrap"><div class="section-head"><div><div class="eyebrow">How it comes together</div><h2>Four ideas. One connected experience.</h2></div><p>Protocol details matter most when they help you understand what you are about to create, collect, or send.</p></div><div class="grid" style="grid-template-columns:repeat(2,minmax(0,1fr))"><article class="card"><span class="num">01 / IDEA</span><h3>Runestones</h3><p>Rune messages live in an OP_RETURN output marked for the protocol.</p></article><article class="card"><span class="num">02 / IDEA</span><h3>Etchings</h3><p>An etching establishes the rune and its supply personality.</p></article><article class="card"><span class="num">03 / IDEA</span><h3>Mints</h3><p>Mint activity follows the terms chosen when the rune was etched.</p></article><article class="card"><span class="num">04 / IDEA</span><h3>Allocations</h3><p>Edicts direct rune amounts to transaction outputs.</p></article></div></div></section>
-  <section><div class="wrap spotlight"><div class="eyebrow">Keep the meaning clear</div><h2>Bitcoin confirms the transaction. Compatible services reveal the experience.</h2><p>Malformed Rune messages can become cenotaphs and burn rune balances. Use a compatible wallet, verify the destination and allocation, and never blind-sign a transaction.</p></div></section>
-  <section><div class="wrap"><div class="section-head"><div><div class="eyebrow">Explore the ecosystem</div><h2>Follow the story further.</h2></div><p>These community resources offer more context around the protocol and the world growing around it.</p></div><div class="source-list"><a class="source" href="https://docs.ordinals.com/runes.html" target="_blank" rel="noreferrer"><span>Explore Runes</span><span>Visit ↗</span></a><a class="source" href="https://docs.ordinals.com/runes/specification.html" target="_blank" rel="noreferrer"><span>Read the Runes protocol</span><span>Visit ↗</span></a></div></div></section>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html" aria-current="page">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Implementer reference</p>
+  <h1>Reference</h1>
+  <p class="lede">Terminology, the indexer's view of the chain, and the decisions an implementation has to get right. Grounded in ord 0.29.0: <code>src/index/updater/rune_updater.rs</code>, <code>src/index/entry.rs</code>, <code>src/index/reorg.rs</code>, <code>src/lib.rs</code>, and the <code>ordinals</code> crate.</p>
+
+  <h2 id="terms">Terminology</h2>
+  <dl class="terms">
+    <dt>Runestone</dt><dd>The protocol message: an OP_RETURN output beginning <code>OP_RETURN OP_13</code>, whose data pushes concatenate into a payload of varints.</dd>
+    <dt>Artifact</dt><dd>The result of deciphering a transaction. Either a well-formed runestone or a cenotaph. A transaction with no matching output has no artifact at all, which is different from having an empty one.</dd>
+    <dt>Cenotaph</dt><dd>A malformed runestone. Burns input runes, makes an etched rune unmintable, and burns mint output while still counting the mint against the cap.</dd>
+    <dt>Flaw</dt><dd>The named reason a runestone is a cenotaph. Ten exist; the reference implementation reports the first one found.</dd>
+    <dt>Etching</dt><dd>The act of creating a rune and permanently fixing its name, divisibility, symbol, spacers, premine, and terms.</dd>
+    <dt>Rune ID</dt><dd><code>BLOCK:TX</code>: the height of the etching block and the etching transaction's index within it. Assigned once, never reused.</dd>
+    <dt>Edict</dt><dd>An instruction inside a runestone: allocate an amount of one rune to one output.</dd>
+    <dt>Pointer</dt><dd>The output index that receives unallocated runes, overriding the first non-OP_RETURN output default.</dd>
+    <dt>Premine</dt><dd>Units allocated to the etching transaction itself, outside the mint.</dd>
+    <dt>Terms</dt><dd>The conditions of an open mint: amount per mint, cap, and height or offset windows.</dd>
+    <dt>Turbo</dt><dd>A flag on the etching declaring that the rune opts in to future protocol changes. It carries no meaning under the current rules.</dd>
+    <dt>Atomic unit</dt><dd>The indivisible unit of a rune. Display value is the atomic amount shifted by the rune's divisibility.</dd>
+    <dt>Unallocated pool</dt><dd>Per transaction: input balances, plus a successful mint, plus a premine. Edicts draw from it; the remainder follows the pointer.</dd>
+    <dt>Reserved name</dt><dd>A name at or above <code>6402364363415443603228541259936211926</code>. Unetchable directly; assigned by the indexer to etchings that omit a name.</dd>
+    <dt>Commitment</dt><dd>The tapscript data push in an input's witness proving the etcher claimed the name at least 6 blocks earlier.</dd>
+  </dl>
+
+  <h2 id="pipeline">Indexer pipeline</h2>
+  <figure>
+    <svg class="glyph-strip" viewBox="0 0 720 260" role="img" aria-labelledby="fig-pipe-title fig-pipe-desc">
+      <title id="fig-pipe-title">Per-transaction indexing order</title>
+      <desc id="fig-pipe-desc">Six carved steps in order: gather unallocated balances from spent inputs; apply the mint if terms allow; apply the etching and its premine; process edicts in order; assign the remainder via pointer or first non-OP_RETURN output; then record burns, including everything if the artifact is a cenotaph.</desc>
+      <g fill="none" stroke="var(--rule)">
+        <rect x="20" y="25" width="680" height="34"/>
+        <rect x="20" y="63" width="680" height="34"/>
+        <rect x="20" y="101" width="680" height="34"/>
+        <rect x="20" y="139" width="680" height="34"/>
+        <rect x="20" y="177" width="680" height="34"/>
+        <rect x="20" y="215" width="680" height="34" stroke="var(--accent)"/>
+      </g>
+      <g fill="var(--muted)" font-size="11" font-family="ui-monospace,Consolas,monospace">
+        <text x="32" y="47">1</text><text x="32" y="85">2</text><text x="32" y="123">3</text>
+        <text x="32" y="161">4</text><text x="32" y="199">5</text><text x="32" y="237">6</text>
+      </g>
+      <g fill="var(--ink)" font-size="12.5">
+        <text x="60" y="47">Drain rune balances from every spent input into the unallocated pool</text>
+        <text x="60" y="85">Apply the mint: if terms hold, increment mint count, add the amount</text>
+        <text x="60" y="123">Apply the etching: validate name, commitment, uniqueness; add the premine</text>
+        <text x="60" y="161">Process edicts in order, clamping each amount to the remaining balance</text>
+        <text x="60" y="199">Send the remainder to the pointer output, else the first non-OP_RETURN output</text>
+        <text x="60" y="237" fill="var(--accent)">Record burns: OP_RETURN allocations, or everything if the artifact is a cenotaph</text>
+      </g>
+    </svg>
+    <figcaption>Order matters. A mint's output is available to the same transaction's edicts, and a premine can be distributed by an edict with rune ID <code>0:0</code>.</figcaption>
+  </figure>
+  <p>Two consequences worth internalizing. First, the cenotaph check happens after allocation is computed, and it discards all of it: allocations are replaced wholesale by burns of the entire unallocated pool. Second, an unsuccessful mint is invisible. It leaves no trace in the index, no event, and no error, and it never counts against the cap unless the transaction is a cenotaph for some other reason.</p>
+
+  <h2 id="terms-eval">Terms evaluation</h2>
+  <p>A mint at height <var>h</var> succeeds when the rune exists, has terms, and all of the following hold:</p>
+  <ul>
+    <li><var>h</var> is not below <strong>start</strong>, where start is the larger of <code>HeightStart</code> and <code>etching block + OffsetStart</code>. If only one is present, it alone applies. If neither is present, there is no lower bound.</li>
+    <li><var>h</var> is below <strong>end</strong>, where end is the smaller of <code>HeightEnd</code> and <code>etching block + OffsetEnd</code>. Same fallback rules. The end height is exclusive: minting at <var>h</var> equal to end fails.</li>
+    <li>the recorded mint count is below the cap. An absent cap is treated as 0, so terms without a cap are unmintable from the outset.</li>
+  </ul>
+  <p>Because start takes the maximum and end takes the minimum, giving both an absolute height and an offset narrows the window rather than widening it. Amount is taken as 0 when absent, which produces successful mints that create nothing while still consuming cap.</p>
+  <p>Supply accounting: <code>supply = premine + mints × amount</code> and <code>max supply = premine + cap × amount</code>. Burned units are tracked separately and are not deducted from supply.</p>
+
+  <h2 id="confirmation">Confirmation and mempool</h2>
+  <ul>
+    <li><strong>Confirmed blocks are the only truth.</strong> Rune state is a function of confirmed transactions in block order. The reference indexer processes runes only from the activation height onward, so blocks below 840,000 on mainnet are skipped entirely.</li>
+    <li><strong>Transaction order inside a block is significant.</strong> Rune IDs use the transaction's index within its block, and a mint's success depends on the mint count at that moment. A transaction can mint a rune etched earlier in the same block.</li>
+    <li><strong>There is no mempool consensus.</strong> An unconfirmed runestone predicts nothing reliably: the rune's mint count can change, a competing etching of the same name can confirm first, and fee bumping can replace the transaction outright. Show unconfirmed rune activity as provisional or not at all.</li>
+    <li><strong>Etching has a 6-block prerequisite.</strong> A commitment output must have at least 6 confirmations relative to the etching block, which is a protocol rule, not a display convention.</li>
+    <li><strong>Bitcoin Universe's own runes feed reports partial coverage</strong> precisely because it does not carry an exhaustive rune mempool stream with a stable pending lifecycle. Confirmed history and holder state are indexed; pending activity is not promised.</li>
+  </ul>
+
+  <h2 id="reorg">Reorg behavior</h2>
+  <p>Rune state is fully derived from the chain, so a reorg is handled by rewinding rather than by patching. The reference indexer keeps periodic database savepoints (by default one every 10 blocks, retaining 2) and, on detecting that a stored block hash no longer matches the chain, restores the oldest savepoint and re-indexes forward. A reorg deeper than the retained savepoints is reported as unrecoverable and requires re-indexing.</p>
+  <p>Practical consequences for anything built on rune data:</p>
+  <ul>
+    <li>Rune IDs are not stable across a reorg. If the etching transaction moves to a different block or index, the ID changes. Treat an ID as final only after enough confirmations for your risk tolerance.</li>
+    <li>Mint counts, and therefore whether a mint is open, can move backwards.</li>
+    <li>Balances are keyed by outpoint. A reorg that invalidates a transaction invalidates every balance it created.</li>
+    <li>Cache invalidation must be driven by block hash, not block height.</li>
+  </ul>
+
+  <h2 id="sizes">Sizes and fees</h2>
+  <p>Runestones are small. These are exact script sizes in bytes from the reference implementation's own size assertions:</p>
+  <div class="table-scroll">
+  <table>
+    <caption>Encoded runestone script sizes, bytes</caption>
+    <thead><tr><th scope="col">Runestone</th><th scope="col">Size</th></tr></thead>
+    <tbody>
+      <tr><td>Empty (<code>OP_RETURN OP_13</code> only)</td><td>2</td></tr>
+      <tr><td>Etching, shortest name, no other fields</td><td>7</td></tr>
+      <tr><td>Etching, longest name, no other fields</td><td>25</td></tr>
+      <tr><td>Etching with every field at maximum</td><td>89</td></tr>
+      <tr><td>One edict, amount 0</td><td>14</td></tr>
+      <tr><td>One edict, maximum amount</td><td>32</td></tr>
+      <tr><td>Two edicts, maximum amounts</td><td>54</td></tr>
+      <tr><td>Three edicts, maximum amounts</td><td>76</td></tr>
+      <tr><td>Five edicts, u64-sized amounts</td><td>75</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Relay policy, not the protocol, sets the practical ceiling. The reference wallet refuses to build a runestone whose script exceeds <strong>83 bytes</strong>, the standard OP_RETURN size it compiles in, unless explicitly overridden, and it enforces the 400,000 weight unit standard transaction limit. Neither is a consensus rule and neither is part of the Runes specification: a miner-included runestone above those sizes is valid and will be indexed. The payload is emitted as a single data push in practice, since chunking only begins above 4 GiB.</p>
+  <p>The dominant cost is rarely the runestone. It is the outputs: every recipient of a rune balance needs a spendable output above the dust threshold, so a transfer to <var>n</var> recipients costs <var>n</var> outputs plus change plus the OP_RETURN. Sweeps (amount 0) and splits (output index equal to the output count) exist to keep the runestone itself short.</p>
+
+  <h2 id="limits">Limitations</h2>
+  <ul>
+    <li>Names are permanently unique and first-come. There is no renewal, transfer, or revocation of a name.</li>
+    <li>Etched properties are immutable. There is no upgrade path for a rune's divisibility, symbol, or terms, and no admin key.</li>
+    <li>One runestone per transaction. Multiple protocol messages require multiple transactions.</li>
+    <li>Amounts are u128 atomic units. Divisibility above 38 is rejected, so the displayed precision is bounded.</li>
+    <li>No conditional logic, no scripting, no royalties, no freeze or clawback. Runes are transfers of quantities and nothing else.</li>
+    <li>The turbo flag is declarative only. It does nothing today.</li>
+    <li>Runes and inscriptions can share an output. An inscription-aware wallet that ignores rune balances, or a rune-aware wallet that ignores inscriptions, will eventually destroy something. The org's own ordinals marketplace path requires a listed output to carry no co-located runes for exactly this reason.</li>
+  </ul>
+
+  <h2 id="security">Security considerations</h2>
+  <ul>
+    <li><strong>Cenotaphs burn silently and totally.</strong> One malformed integer burns every rune in the transaction's inputs, not just the amount you were sending. Validate the encoded runestone by decoding it before signing, not by trusting the encoder.</li>
+    <li><strong>The default destination is a footgun.</strong> Unallocated runes go to the first non-OP_RETURN output. Any transaction that spends a rune-bearing output without an explicit plan for it sends the balance to whoever holds output 0.</li>
+    <li><strong>Rune-unaware coin selection destroys value.</strong> A wallet that treats rune outputs as ordinary UTXOs will spend them as fee inputs. Maintain a rune outpoint inventory and select only cardinal (rune-free, inscription-free) inputs for fees.</li>
+    <li><strong>Names are confusable.</strong> Spacers are display-only, so <code>BITCOIN•UNIVERSE</code> and <code>BIT•COINUNIVERSE</code> cannot both exist, but visually similar distinct names can. Identify runes by ID, not by name, in anything security-relevant.</li>
+    <li><strong>Etching is racy.</strong> Between your commit and your reveal, six blocks pass in which someone else can etch the name. Handle the failure as an expected outcome.</li>
+    <li><strong>Mints can fail without failing.</strong> A closed mint produces a valid, confirmed, fee-paying transaction that creates nothing. Check terms against the current height and mint count at build time and warn on the margin.</li>
+    <li><strong>Indexer disagreement is a settlement risk.</strong> Two indexers that differ on a single edict differ on ownership. Before treating rune data as authoritative for value transfer, verify it against a second independent source, and require the chain tip and the indexer tip to agree.</li>
+    <li><strong>Do not blind-sign.</strong> Decode the OP_RETURN, check the edict table, check output 0, check the pointer.</li>
+  </ul>
+
+  <h2 id="checklist">Implementation checklist</h2>
+  <ol class="rules">
+    <li>Search outputs in order for <code>OP_RETURN OP_13</code>. Take the first match; skip unparseable and non-matching outputs without erroring.</li>
+    <li>Concatenate all data pushes. Treat any non-pushdata opcode as flaw <code>Opcode</code> and any unparseable script as <code>InvalidScript</code>.</li>
+    <li>Decode the whole payload as LEB128 varints with the 19-byte limit and the 19th-byte overflow mask. Any failure is flaw <code>Varint</code>.</li>
+    <li>Parse tag and value pairs until tag 0; then parse edicts in groups of four. Handle <code>TruncatedField</code> and <code>TrailingIntegers</code>.</li>
+    <li>Accumulate edict rune IDs by delta, rejecting overflow and block 0 with nonzero tx (<code>EdictRuneId</code>), and range-check outputs against the output count, allowing equality as a split (<code>EdictOutput</code>).</li>
+    <li>Consume flags and fields in the reference implementation's order, leaving values in place when a range check fails, so that odd tags degrade and even tags become <code>UnrecognizedEvenTag</code>.</li>
+    <li>Check <code>premine + cap × amount</code> for u128 overflow (<code>SupplyOverflow</code>) and confirm no flag bits remain set (<code>UnrecognizedFlag</code>).</li>
+    <li>Enforce the etching preconditions: minimum name at height, not reserved, not already etched ignoring spacers, and a valid taproot tapscript commitment with at least 6 confirmations.</li>
+    <li>Apply the pipeline in order: unallocated, mint, etch and premine, edicts, pointer remainder, burns. Clamp every allocation to the remaining balance.</li>
+    <li>Burn everything on a cenotaph, count the mint, and record the etched rune as unmintable with default properties.</li>
+    <li>Persist balances per outpoint and per rune, and derive account views from them. Never treat an address as the unit of ownership.</li>
+    <li>Handle reorgs by rewinding to a savepoint and re-indexing. Key caches by block hash.</li>
+    <li>Verify against the <a href="vectors.html">test vectors</a>, including every cenotaph case, before indexing real value.</li>
+  </ol>
 </main>
-<footer><div class="wrap footer-inner"><span>Runes on Bitcoin</span><span>Presented by <a href="https://github.com/bitcoinuniverseio/runes">Bitcoin Universe</a></span></div></footer></body></html>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>reference.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/reference.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>

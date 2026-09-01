@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes specification: runestone encoding and validity rules</title>
+<meta name="description" content="Normative Runes protocol rules: OP_RETURN carrier anatomy, LEB128 varints, tag table, flags, etching, minting, edict delta encoding, pointer, allocation, and every cenotaph condition.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/specification.html">
+<meta property="og:title" content="Runes specification">
+<meta property="og:description" content="Numbered normative rules for runestone encoding, parsing, and validity, grounded in the ord reference implementation.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/specification.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html" aria-current="page">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Normative specification</p>
+  <h1>Runes specification</h1>
+  <p class="lede">Numbered rules for encoding, parsing, and validating runestones. Every rule below is grounded in the ord reference implementation, version 0.29.0 (ordinals crate 0.0.17): <code>crates/ordinals/src/runestone.rs</code>, <code>varint.rs</code>, <code>runestone/tag.rs</code>, <code>runestone/flag.rs</code>, <code>runestone/message.rs</code>, <code>rune.rs</code>, <code>rune_id.rs</code>, <code>edict.rs</code>, <code>etching.rs</code>, and <code>src/index/updater/rune_updater.rs</code>. Chain: Bitcoin. Network: mainnet unless stated.</p>
+  <p class="status-line">Behavior that diverges from these rules will disagree with the ord index, and disagreement about balances means loss of funds. Follow the <a href="vectors.html">test vectors</a> when implementing.</p>
+
+  <h2 id="carrier">1 · Carrier and transaction anatomy</h2>
+  <figure>
+    <svg class="glyph-strip" viewBox="0 0 720 170" role="img" aria-labelledby="fig2-title fig2-desc">
+      <title id="fig2-title">Runestone script layout</title>
+      <desc id="fig2-desc">A horizontal strip of the runestone output script: byte 0x6a OP_RETURN, byte 0x5d OP_13, then one or more data pushes. The pushes concatenate into a payload of LEB128 varints, which parse into tag and value pairs followed by a body of edicts.</desc>
+      <g fill="none" stroke="var(--rule)">
+        <rect x="20" y="30" width="120" height="50"/>
+        <rect x="140" y="30" width="100" height="50" stroke="var(--accent)"/>
+        <rect x="240" y="30" width="460" height="50"/>
+        <path d="M250 105 V80 M690 105 V80" />
+        <rect x="20" y="105" width="330" height="40"/>
+        <rect x="350" y="105" width="350" height="40"/>
+      </g>
+      <g fill="var(--ink)" font-size="13" letter-spacing="1.5">
+        <text x="30" y="50">OP_RETURN</text>
+        <text x="150" y="50" fill="var(--accent)">OP_13</text>
+        <text x="250" y="50">DATA PUSHES · CONCATENATED</text>
+        <text x="30" y="122">TAG VALUE · TAG VALUE · …</text>
+        <text x="360" y="122">BODY (TAG 0) · EDICTS</text>
+      </g>
+      <g fill="var(--muted)" font-size="11" font-family="ui-monospace,Consolas,monospace">
+        <text x="30" y="70">6a</text>
+        <text x="150" y="70">5d</text>
+        <text x="250" y="70">LEB128 varints, u128</text>
+        <text x="30" y="138">fields</text>
+        <text x="360" y="138">block Δ, tx, amount, output</text>
+      </g>
+    </svg>
+    <figcaption>The carrier script and its two-layer decoding: bytes to integers, integers to message.</figcaption>
+  </figure>
+  <ol class="rules">
+    <li id="r1">A runestone is carried in a transaction output whose script begins with <code>OP_RETURN</code> (<code>0x6a</code>) followed immediately by <code>OP_13</code> (<code>0x5d</code>, also written <code>OP_PUSHNUM_13</code>), the Runes protocol identifier.</li>
+    <li id="r2">Outputs are examined in order. The first output matching <a href="#r1">R1</a> is the transaction's runestone. A transaction has at most one runestone; once one is found, no later output is examined.</li>
+    <li id="r3">Outputs that do not match <a href="#r1">R1</a> are skipped when searching, including outputs whose scripts do not parse and <code>OP_RETURN</code> outputs without the <code>OP_13</code> identifier. They never make the transaction invalid.</li>
+    <li id="r4">The runestone payload is the concatenation, in order, of the contents of every data push after <code>OP_13</code>. All pushdata opcodes are legal: <code>OP_0</code> (<code>0x00</code>, empty push), direct pushes <code>0x01</code> to <code>0x4b</code>, <code>OP_PUSHDATA1</code> (<code>0x4c</code>), <code>OP_PUSHDATA2</code> (<code>0x4d</code>), and <code>OP_PUSHDATA4</code> (<code>0x4e</code>). Zero pushes is legal and yields an empty runestone.</li>
+    <li id="r5">Any non-pushdata opcode (<code>0x4f</code> and above, including <code>OP_PUSHNUM</code> opcodes) after <code>OP_13</code> makes the transaction a cenotaph with flaw <code>Opcode</code>.</li>
+    <li id="r6">A script that fails to parse after <code>OP_13</code> (for example a push length running past the end of the script) makes the transaction a cenotaph with flaw <code>InvalidScript</code>.</li>
+    <li id="r7">The protocol does not constrain the runestone output's value in satoshis. It is conventionally zero, since <code>OP_RETURN</code> outputs are unspendable.</li>
+  </ol>
+
+  <h2 id="varints">2 · Varint encoding</h2>
+  <ol class="rules" style="counter-reset: rule 7">
+    <li id="r8">The payload decodes into a sequence of unsigned 128-bit integers encoded as LEB128 varints: each byte contributes its low 7 bits, least significant group first; a set high bit (<code>0x80</code>) means another byte follows.</li>
+    <li id="r9">A varint is at most 19 bytes long. Decoding fails as <code>Overlong</code> past 19 bytes, as <code>Overflow</code> when the 19th byte carries bits above the 128th (19th byte value with any of mask <code>0b0111_1100</code> set), and as <code>Unterminated</code> when the payload ends with the continuation bit set.</li>
+    <li id="r10">Any varint decoding failure anywhere in the payload makes the transaction a cenotaph with flaw <code>Varint</code>. The whole payload must decode.</li>
+    <li id="r11">Non-minimal encodings decode successfully: <code>0x80 0x00</code> decodes to the same integer as <code>0x00</code>. Encoders should emit minimal encodings; decoders must accept both.</li>
+  </ol>
+
+  <h2 id="message">3 · Message structure</h2>
+  <ol class="rules" style="counter-reset: rule 11">
+    <li id="r12">The integer sequence is parsed front to back as tag and value pairs: even positions are tags, the following integer is the value, until the <code>Body</code> tag (0) is reached.</li>
+    <li id="r13">A tag at the end of the sequence with no following value makes the transaction a cenotaph with flaw <code>TruncatedField</code>.</li>
+    <li id="r14">Repeated occurrences of the same tag accumulate their values in order into a queue for that tag. Interpretation consumes values from the front of the queue.</li>
+    <li id="r15">Everything after the <code>Body</code> tag is edict data, in groups of exactly four integers: block delta, transaction index (or delta), amount, output. A final group of fewer than four integers makes the transaction a cenotaph with flaw <code>TrailingIntegers</code>.</li>
+  </ol>
+
+  <h2 id="tags">4 · Tag table</h2>
+  <div class="table-scroll">
+  <table>
+    <caption>Runestone tags. Even tags must be understood; odd tags may be ignored.</caption>
+    <thead>
+      <tr><th scope="col">Tag</th><th scope="col">Name</th><th scope="col">Parity</th><th scope="col">Values</th><th scope="col">Meaning and range</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>0</code></td><td>Body</td><td>even</td><td>rest</td><td>Marks the start of the edicts. Everything after it is edict groups (<a href="#r15">R15</a>).</td></tr>
+      <tr><td><code>2</code></td><td>Flags</td><td>even</td><td>1</td><td>Bitfield: bit 0 Etching, bit 1 Terms, bit 2 Turbo, bit 127 reserved (<a href="#flags">section 5</a>).</td></tr>
+      <tr><td><code>4</code></td><td>Rune</td><td>even</td><td>1</td><td>The etched rune's name as a base-26 integer (<a href="#r21">R21</a>). Requires the Etching flag.</td></tr>
+      <tr><td><code>6</code></td><td>Premine</td><td>even</td><td>1</td><td>Atomic units allocated to the etching transaction itself. u128. Requires the Etching flag.</td></tr>
+      <tr><td><code>8</code></td><td>Cap</td><td>even</td><td>1</td><td>Maximum number of mints. u128. Requires the Etching and Terms flags.</td></tr>
+      <tr><td><code>10</code></td><td>Amount</td><td>even</td><td>1</td><td>Atomic units created per mint. u128. Requires the Etching and Terms flags.</td></tr>
+      <tr><td><code>12</code></td><td>HeightStart</td><td>even</td><td>1</td><td>Absolute first block in which minting is allowed. Must fit u64. Requires Etching and Terms.</td></tr>
+      <tr><td><code>14</code></td><td>HeightEnd</td><td>even</td><td>1</td><td>Absolute block at and after which minting is disallowed. Must fit u64. Requires Etching and Terms.</td></tr>
+      <tr><td><code>16</code></td><td>OffsetStart</td><td>even</td><td>1</td><td>Mint opens this many blocks after the etching block. Must fit u64. Requires Etching and Terms.</td></tr>
+      <tr><td><code>18</code></td><td>OffsetEnd</td><td>even</td><td>1</td><td>Mint closes this many blocks after the etching block. Must fit u64. Requires Etching and Terms.</td></tr>
+      <tr><td><code>20</code></td><td>Mint</td><td>even</td><td>2</td><td>The rune ID to mint, given as two values: block, then transaction index (<a href="#r31">R31</a>).</td></tr>
+      <tr><td><code>22</code></td><td>Pointer</td><td>even</td><td>1</td><td>Output index that receives unallocated runes. Must fit u32 and be less than the output count (<a href="#r39">R39</a>).</td></tr>
+      <tr><td><code>126</code></td><td>Cenotaph</td><td>even</td><td>1</td><td>Reserved. Unrecognized by definition; its presence makes the transaction a cenotaph (<a href="#r17">R17</a>).</td></tr>
+      <tr><td><code>1</code></td><td>Divisibility</td><td>odd</td><td>1</td><td>Decimal places, 0 to 38. Out-of-range values are ignored. Requires the Etching flag.</td></tr>
+      <tr><td><code>3</code></td><td>Spacers</td><td>odd</td><td>1</td><td>Bitmap of spacer dots between name letters, at most <code>0x07FFFFFF</code>. Out-of-range ignored. Requires Etching.</td></tr>
+      <tr><td><code>5</code></td><td>Symbol</td><td>odd</td><td>1</td><td>Currency symbol as a Unicode scalar value. Invalid values are ignored. Requires Etching.</td></tr>
+      <tr><td><code>127</code></td><td>Nop</td><td>odd</td><td>1</td><td>Reserved no-op. Ignored.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <ol class="rules" style="counter-reset: rule 15">
+    <li id="r16">Odd tags are informational. Unrecognized odd tags, duplicate odd-tag values beyond those consumed, and odd-tag values that fail their range checks are silently ignored.</li>
+    <li id="r17">Even tags must be understood and fully consumed. If any even-tag value remains unconsumed after interpretation, the transaction is a cenotaph with flaw <code>UnrecognizedEvenTag</code>. This covers: unrecognized even tags (including reserved tag 126), even fields present without the flag that enables them, duplicate values beyond a field's arity, a <code>Mint</code> tag with only one value, and even-tag values that fail a range check (for example a <code>Pointer</code> not less than the output count, or a <code>HeightStart</code> above u64).</li>
+  </ol>
+
+  <h2 id="flags">5 · Flags</h2>
+  <ol class="rules" style="counter-reset: rule 17">
+    <li id="r18">The value of tag 2 is a bitfield. Bit 0 (<code>Etching</code>): this runestone etches a rune. Bit 1 (<code>Terms</code>): the etching has open mint terms. Bit 2 (<code>Turbo</code>): the etching opts in to future protocol changes. Bit 127 (<code>Cenotaph</code>): reserved, never valid.</li>
+    <li id="r19">The <code>Terms</code> and <code>Turbo</code> flags are consumed only when <code>Etching</code> is set. Any flag bit still set after consumption, including <code>Terms</code> without <code>Etching</code> or any unassigned bit, makes the transaction a cenotaph with flaw <code>UnrecognizedFlag</code>.</li>
+  </ol>
+
+  <h2 id="etching">6 · Etching</h2>
+  <ol class="rules" style="counter-reset: rule 19">
+    <li id="r20">An etching is present exactly when flag bit 0 is set. Its fields, all optional, are Rune (4), Divisibility (1), Spacers (3), Symbol (5), Premine (6), and, when the Terms flag is also set, Amount (10), Cap (8), HeightStart (12), HeightEnd (14), OffsetStart (16), OffsetEnd (18). Once etched, all properties are permanently immutable.</li>
+    <li id="r21">Names are sequences of the letters A through Z, encoded as an integer in modified base 26: for each letter after the first, add one, then multiply by 26 and add the letter's index (A is 0). <code>A</code> is 0, <code>B</code> is 1, <code>Z</code> is 25, <code>AA</code> is 26, <code>AB</code> is 27, and so on. Decoding reverses this: add one, then repeatedly take <code>(n − 1) % 26</code> as the last letter and continue with <code>(n − 1) / 26</code>.</li>
+    <li id="r22">All name values at or above <code>6402364363415443603228541259936211926</code> (the value of 27 letters <code>A</code>) are reserved. Consequently, etchable names are 1 to 26 letters long.</li>
+    <li id="r23">Divisibility is the number of decimal places, at most 38. A larger value fails the range check and is ignored: the etching proceeds with default divisibility 0.</li>
+    <li id="r24">Spacers are a bitmap: bit <code>i</code> set places a dot <code>•</code> after letter <code>i + 1</code>. The maximum accepted value is <code>0x07FFFFFF</code>; larger values are ignored. Spacers are display only: a name's identity and uniqueness ignore spacers, spacers may only fall between letters, and they do not count toward name length.</li>
+    <li id="r25">The symbol is a single Unicode scalar value. Values that are not valid scalars (above <code>U+10FFFF</code> or in the surrogate range) are ignored. A rune with no symbol is displayed with the generic currency sign <code>¤</code>.</li>
+    <li id="r26">The premine is allocated to the etching transaction as unallocated runes, exactly as if it had been an input balance, and is assigned to outputs by the same edict and pointer rules.</li>
+    <li id="r27">Etching supply must fit: <code>premine + cap × amount</code> computed in u128 must not overflow. Overflow makes the transaction a cenotaph with flaw <code>SupplyOverflow</code>.</li>
+    <li id="r28">An etching with a name is honored by the indexer only if all of the following hold at indexing time; otherwise the etching is disregarded entirely (this is not a cenotaph):
+      <ol>
+        <li>the name's value is at least the minimum unlocked at the etching block height (<a href="#r30">R30</a>);</li>
+        <li>the name is not reserved (<a href="#r22">R22</a>);</li>
+        <li>the name has not already been etched, ignoring spacers;</li>
+        <li>the transaction commits to the name: some input spends a pay-to-taproot output, that input's witness contains a tapscript with a data push exactly equal to the name's value as little-endian bytes with trailing zero bytes trimmed, and the output being spent was confirmed at least 6 blocks before the etching block (<code>COMMIT_CONFIRMATIONS = 6</code>).</li>
+      </ol>
+    </li>
+    <li id="r29">An etching without a name is assigned a reserved name by the indexer: <code>6402364363415443603228541259936211926 + (block &lt;&lt; 32 | tx)</code>, where block and tx are the etching's rune ID components. Reserved-name etchings need no commitment.</li>
+    <li id="r30">Name unlock schedule, mainnet: runes activate at block 840,000 (<code>first_rune_height = 4 × 210,000</code>). At activation, names of 13 letters and longer are unlocked. The minimum steps down through the length thresholds every 17,500 blocks (one twelfth of a halving interval), interpolating linearly between thresholds, until every name, including single letters, is unlocked at block 1,050,000. Before activation no etching is honored.</li>
+  </ol>
+
+  <h2 id="minting">7 · Minting</h2>
+  <ol class="rules" style="counter-reset: rule 30">
+    <li id="r31">The Mint tag (20) is given twice: the first value is the block and the second the transaction index of the rune ID to mint. Values must fit u64 and u32 respectively, and block 0 with a nonzero tx is invalid. Values failing these checks are left unconsumed and make the transaction a cenotaph via <a href="#r17">R17</a>. A single Mint value with no pair behaves the same way.</li>
+    <li id="r32">A mint succeeds when the target rune exists and its terms are satisfied at the mint transaction's block height: the height is not below the mint's start, is below the mint's end, and the recorded number of mints is below the cap (a missing cap is 0, so a rune without terms or cap is unmintable). Start is the later of HeightStart and etching block + OffsetStart; end is the earlier of HeightEnd and etching block + OffsetEnd; whichever of the pair is absent does not constrain.</li>
+    <li id="r33">A successful mint increments the rune's mint count and adds the fixed amount (Amount at etching, 0 if absent) to the transaction's unallocated runes. A mint whose terms are not satisfied is simply ignored: it is not a cenotaph and does not count toward the cap. A mint in a transaction that is a cenotaph for other reasons does count toward the cap, and its output is burned (<a href="#r45">R45</a>).</li>
+  </ol>
+
+  <h2 id="edicts">8 · Edicts and delta encoding</h2>
+  <ol class="rules" style="counter-reset: rule 33">
+    <li id="r34">Each edict is four integers: block delta, transaction index or delta, amount, output. A running rune ID starts at <code>0:0</code>. The block delta is added to the running block. If the block delta is 0, the transaction value is added to the running transaction index; if the block delta is nonzero, the transaction value is the absolute transaction index. Encoders must sort edicts by rune ID for this encoding to be compact; decoders reconstruct absolute IDs by accumulation.</li>
+    <li id="r35">The resulting ID <code>0:0</code> refers to the rune etched by this very transaction. If the transaction etches no rune (or the etching was disregarded under <a href="#r28">R28</a>), such an edict is skipped without effect.</li>
+    <li id="r36">If ID accumulation overflows (block above u64, transaction index above u32) or produces block 0 with a nonzero transaction index, the transaction is a cenotaph with flaw <code>EdictRuneId</code>. Edict parsing stops at the first failure.</li>
+    <li id="r37">The edict output must fit u32 and must be at most the transaction's output count. An output greater than the output count makes the transaction a cenotaph with flaw <code>EdictOutput</code>.</li>
+    <li id="r38">Edicts are processed in order against the unallocated pool. An amount of 0 means the edict's entire remaining balance of that rune. A nonzero amount is clamped to the remaining balance. An edict output exactly equal to the output count is a split: with amount 0, the remaining balance is divided evenly over all non-OP_RETURN outputs, earlier outputs receiving the remainder one unit at a time; with a nonzero amount, that amount is allocated to each non-OP_RETURN output in order until the balance runs out.</li>
+  </ol>
+
+  <h2 id="pointer">9 · Pointer</h2>
+  <ol class="rules" style="counter-reset: rule 38">
+    <li id="r39">The Pointer (tag 22) must fit u32 and be strictly less than the output count; otherwise its value is unconsumed and the transaction is a cenotaph via <a href="#r17">R17</a>. After all edicts are processed, remaining unallocated runes go to the pointer output. Without a pointer they go to the first non-OP_RETURN output. If no non-OP_RETURN output exists, they are burned.</li>
+  </ol>
+
+  <h2 id="allocation">10 · State transitions</h2>
+  <ol class="rules" style="counter-reset: rule 39">
+    <li id="r40">A transaction's unallocated pool is the sum of: rune balances on every spent input outpoint, plus the minted amount when the runestone mints successfully, plus the premine when it etches.</li>
+    <li id="r41">Allocations assigned to an OP_RETURN output are burned, whether they got there by edict or by pointer. This is the deliberate burn mechanism.</li>
+    <li id="r42">A transaction with rune inputs and no runestone at all transfers every input rune balance to its first non-OP_RETURN output. Runes never disappear silently: every unit is either allocated to an output or recorded as burned.</li>
+    <li id="r43">A rune's ID is assigned at etching: the etching block height and the transaction's index within that block, written <code>BLOCK:TX</code>. IDs are permanent and never reassigned.</li>
+    <li id="r44">Balances are per rune, per outpoint, in atomic units (u128). An outpoint may carry balances of any number of runes. Spending the outpoint releases all of them into the spending transaction's unallocated pool.</li>
+  </ol>
+
+  <h2 id="cenotaphs">11 · Cenotaphs</h2>
+  <ol class="rules" style="counter-reset: rule 44">
+    <li id="r45">A cenotaph is a runestone that violates any rule marked above as producing one. In a cenotaph transaction: every input rune balance and every minted or premined amount is burned; a mint still increments the target rune's mint count; and an etching (if its name is valid and committed under <a href="#r28">R28</a>) still creates the rune, but with no recorded divisibility, symbol, spacers, premine, or terms, and permanently unmintable.</li>
+    <li id="r46">Cenotaphs are the protocol's forward-compatibility mechanism. Future upgrades may assign meaning to currently unrecognized even tags and flags. Unupgraded clients, applying these rules, will treat upgraded runestones as cenotaphs and report the affected runes as burned rather than misreporting who owns them.</li>
+    <li id="r47">Only the first flaw encountered is reported by the reference implementation, but any single flaw is sufficient: cenotaph status is not a matter of degree.</li>
+  </ol>
+  <div class="table-scroll">
+  <table>
+    <caption>Complete flaw list, as named by ord</caption>
+    <thead><tr><th scope="col">Flaw</th><th scope="col">Condition</th><th scope="col">Rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>Opcode</code></td><td>Non-pushdata opcode after <code>OP_13</code></td><td><a href="#r5">R5</a></td></tr>
+      <tr><td><code>InvalidScript</code></td><td>Unparseable script after <code>OP_13</code></td><td><a href="#r6">R6</a></td></tr>
+      <tr><td><code>Varint</code></td><td>Overlong, overflowing, or unterminated varint</td><td><a href="#r10">R10</a></td></tr>
+      <tr><td><code>TruncatedField</code></td><td>Tag with no value</td><td><a href="#r13">R13</a></td></tr>
+      <tr><td><code>TrailingIntegers</code></td><td>Edict group shorter than four integers</td><td><a href="#r15">R15</a></td></tr>
+      <tr><td><code>UnrecognizedEvenTag</code></td><td>Unconsumed even-tag value, any cause</td><td><a href="#r17">R17</a></td></tr>
+      <tr><td><code>UnrecognizedFlag</code></td><td>Flag bit left set after consumption</td><td><a href="#r19">R19</a></td></tr>
+      <tr><td><code>SupplyOverflow</code></td><td><code>premine + cap × amount</code> overflows u128</td><td><a href="#r27">R27</a></td></tr>
+      <tr><td><code>EdictRuneId</code></td><td>Edict ID accumulation invalid or overflowing</td><td><a href="#r36">R36</a></td></tr>
+      <tr><td><code>EdictOutput</code></td><td>Edict output greater than the output count</td><td><a href="#r37">R37</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="genesis">12 · Hardcoded genesis rune</h2>
+  <p>The mainnet index is initialized with one hardcoded rune: <code>UNCOMMON•GOODS</code>, rune ID <code>1:0</code>, name value <code>2055900680524219742</code>, spacers <code>128</code>, symbol <code>⧉</code> (U+29C9), divisibility 0, no premine, turbo set, and open mint terms of amount 1 per mint, cap <code>u128::MAX</code>, height window 840,000 to 1,050,000. It is the only rune whose ID block precedes activation.</p>
+</main>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>specification.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/specification.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>
