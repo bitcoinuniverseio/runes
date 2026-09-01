@@ -4,7 +4,7 @@
   "name": "Runes",
   "classification": "protocol",
   "repository": "bitcoinuniverseio/runes",
-  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/runes",
+  "documentationUrl": "https://docs.bitcoinuniverse.io/protocols/runes/",
   "docsRoot": ".",
   "sourceRef": "main",
   "releasedRef": "main",
