@@ -1,0 +1,431 @@
+{
+  "pinnedVersion": "0.29.0",
+  "pinnedCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+  "pinnedCrate": "ordinals 0.0.17",
+  "verifiedDate": "2026-09-02",
+  "records": [
+    {
+      "ruleId": "R1",
+      "title": "OP_RETURN and OP_13 carrier script",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::payload",
+      "upstreamTest": "deciphering_runestone_with_invalid_script_in_op_return_outputs",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R2",
+      "title": "First matching output is selected",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_multiple_runestones",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R3",
+      "title": "Non-matching outputs are skipped",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::payload",
+      "upstreamTest": "deciphering_runestone_with_invalid_script_in_non_op_return_outputs",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R4",
+      "title": "Payload concatenation of data pushes",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::payload",
+      "upstreamTest": "all_pushdata_opcodes_are_valid",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R5",
+      "title": "Non-pushdata opcode yields Opcode flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::payload",
+      "upstreamTest": "all_non_pushdata_opcodes_are_invalid",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R6",
+      "title": "Unparseable script yields InvalidScript flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::payload",
+      "upstreamTest": "deciphering_runestone_with_invalid_script_in_op_return_outputs",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R7",
+      "title": "Output value unconstrained",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_non_zero_value",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R8",
+      "title": "Unsigned 128-bit LEB128 varints",
+      "ordSourcePath": "crates/ordinals/src/varint.rs",
+      "symbol": "varint::decode",
+      "upstreamTest": "decode",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/varint.rs"
+    },
+    {
+      "ruleId": "R9",
+      "title": "19-byte limit and overflow mask",
+      "ordSourcePath": "crates/ordinals/src/varint.rs",
+      "symbol": "varint::decode",
+      "upstreamTest": "decode_overlong",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/varint.rs"
+    },
+    {
+      "ruleId": "R10",
+      "title": "Varint decoding failure produces Varint flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::integers",
+      "upstreamTest": "invalid_varint_produces_cenotaph",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R11",
+      "title": "Non-minimal varints accepted",
+      "ordSourcePath": "crates/ordinals/src/varint.rs",
+      "symbol": "varint::decode",
+      "upstreamTest": "decode_non_minimal",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/varint.rs"
+    },
+    {
+      "ruleId": "R12",
+      "title": "Tag and value pairs",
+      "ordSourcePath": "crates/ordinals/src/runestone/message.rs",
+      "symbol": "Message::from_integers",
+      "upstreamTest": "from_integers",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/message.rs"
+    },
+    {
+      "ruleId": "R13",
+      "title": "Trailing tag produces TruncatedField flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone/message.rs",
+      "symbol": "Message::from_integers",
+      "upstreamTest": "from_integers_truncated_field",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/message.rs"
+    },
+    {
+      "ruleId": "R14",
+      "title": "Tag value queues",
+      "ordSourcePath": "crates/ordinals/src/runestone/tag.rs",
+      "symbol": "Tag::take",
+      "upstreamTest": "take_leaves_unconsumed_values",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/tag.rs"
+    },
+    {
+      "ruleId": "R15",
+      "title": "Edicts in groups of four",
+      "ordSourcePath": "crates/ordinals/src/runestone/message.rs",
+      "symbol": "Message::from_integers",
+      "upstreamTest": "from_integers_trailing_integers",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/message.rs"
+    },
+    {
+      "ruleId": "R16",
+      "title": "Odd tags are informational",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_unrecognized_odd_tag",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R17",
+      "title": "Unconsumed even tag produces UnrecognizedEvenTag flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_unrecognized_even_tag",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R18",
+      "title": "Flag bitfield values",
+      "ordSourcePath": "crates/ordinals/src/runestone/flag.rs",
+      "symbol": "Flag",
+      "upstreamTest": "flag_mask",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/flag.rs"
+    },
+    {
+      "ruleId": "R19",
+      "title": "Unrecognized flag bit produces UnrecognizedFlag flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_unrecognized_flag",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R20",
+      "title": "Etching fields and immutability",
+      "ordSourcePath": "crates/ordinals/src/etching.rs",
+      "symbol": "Etching",
+      "upstreamTest": "etching",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/etching.rs"
+    },
+    {
+      "ruleId": "R21",
+      "title": "Modified base-26 name encoding",
+      "ordSourcePath": "crates/ordinals/src/rune.rs",
+      "symbol": "Rune",
+      "upstreamTest": "display",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/rune.rs"
+    },
+    {
+      "ruleId": "R22",
+      "title": "Reserved names threshold",
+      "ordSourcePath": "crates/ordinals/src/rune.rs",
+      "symbol": "Rune::RESERVED",
+      "upstreamTest": "reserved",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/rune.rs"
+    },
+    {
+      "ruleId": "R23",
+      "title": "Divisibility maximum 38",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_invalid_divisibility",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R24",
+      "title": "Spacers bitmap formatting",
+      "ordSourcePath": "crates/ordinals/src/spaced_rune.rs",
+      "symbol": "SpacedRune",
+      "upstreamTest": "display",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/spaced_rune.rs"
+    },
+    {
+      "ruleId": "R25",
+      "title": "Unicode scalar currency symbol",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_invalid_symbol",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R26",
+      "title": "Premine joins unallocated pool",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "etching_with_premine",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R27",
+      "title": "Supply overflow produces SupplyOverflow flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_supply_overflow",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R28",
+      "title": "Etching commitment and eligibility preconditions",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "etching_commitment",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R29",
+      "title": "Reserved name assignment for unnamed etchings",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "etching_reserved_name",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R30",
+      "title": "Name length unlock schedule",
+      "ordSourcePath": "crates/ordinals/src/rune.rs",
+      "symbol": "Rune::minimum_at_height",
+      "upstreamTest": "minimum_at_height",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/rune.rs"
+    },
+    {
+      "ruleId": "R31",
+      "title": "Mint tag arity and bounds",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "deciphering_runestone_with_invalid_mint",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R32",
+      "title": "Mint terms evaluation rules",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "mint",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R33",
+      "title": "Mint accounting and silent failure",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "mint_failure_ignored",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R34",
+      "title": "Edict quadruple and delta encoding",
+      "ordSourcePath": "crates/ordinals/src/rune_id.rs",
+      "symbol": "RuneId::next",
+      "upstreamTest": "delta",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/rune_id.rs"
+    },
+    {
+      "ruleId": "R35",
+      "title": "Rune ID 0:0 refers to current etching",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "edict_0_0",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R36",
+      "title": "Invalid edict ID produces EdictRuneId flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone/message.rs",
+      "symbol": "Message::from_integers",
+      "upstreamTest": "edict_rune_id_overflow",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/message.rs"
+    },
+    {
+      "ruleId": "R37",
+      "title": "Edict output bounds and EdictOutput flaw",
+      "ordSourcePath": "crates/ordinals/src/runestone/message.rs",
+      "symbol": "Message::from_integers",
+      "upstreamTest": "edict_output_overflow",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone/message.rs"
+    },
+    {
+      "ruleId": "R38",
+      "title": "Edict execution, sweeping, and splits",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "edict_split",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R39",
+      "title": "Pointer destination and default fallback",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "pointer_out_of_bounds",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R40",
+      "title": "Unallocated pool composition",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "unallocated_pool",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R41",
+      "title": "OP_RETURN burns",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "burn_to_op_return",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R42",
+      "title": "Default transfer without runestone",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "transfer_without_runestone",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R43",
+      "title": "Rune ID permanence",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "rune_id_permanence",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R44",
+      "title": "Outpoint balances and atomic units",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "outpoint_balances",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R45",
+      "title": "Cenotaph consequences",
+      "ordSourcePath": "src/index/updater/rune_updater.rs",
+      "symbol": "RuneUpdater::index_runes",
+      "upstreamTest": "cenotaph_burns_all_inputs",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/src/index/updater/rune_updater.rs"
+    },
+    {
+      "ruleId": "R46",
+      "title": "Upgrade mechanism through forward compatibility",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone",
+      "upstreamTest": "forward_compatibility",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    },
+    {
+      "ruleId": "R47",
+      "title": "First flaw reported",
+      "ordSourcePath": "crates/ordinals/src/runestone.rs",
+      "symbol": "Runestone::decipher",
+      "upstreamTest": "first_flaw_reported",
+      "gitCommit": "7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e",
+      "url": "https://github.com/ordinals/ord/blob/7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e/crates/ordinals/src/runestone.rs"
+    }
+  ]
+}

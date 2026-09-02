@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import StudioIsland from '../components/StudioIsland.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'suite', text: 'Studio Diagnostic Suite' },
+  { id: 'modes', text: 'The 8 Diagnostic Modes' },
+  { id: 'worker', text: 'Browser Engine & Performance' },
+];
+---
+
+<BaseLayout
+  title="Runestone Studio"
+  description="All-in-one interactive diagnostic suite for composing, decoding, inspecting, simulating, and dissecting Runestones on Bitcoin."
+  currentRoute="studio.html"
+  kicker="Interactive Protocol Diagnostic Suite"
+  toc={toc}
+>
+  <div class="status-line">
+    8 diagnostic modes · Full client-side simulation · Zero external network dependencies.
+  </div>
+
+  <h2 id="suite">Studio Diagnostic Suite</h2>
+  <p>
+    Runestone Studio gives engineers, wallet architects, and security auditors direct, interactive visibility into the Runes state machine. Select any mode below to begin:
+  </p>
+
+  <StudioIsland />
+
+  <h2 id="modes">The 8 Diagnostic Modes</h2>
+  <ol style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><strong>Compose Runestone:</strong> Visually configure etchings, open mint terms, pointer routing, and edicts. Emits verified script hex and checks standard Bitcoin relay policy (83-byte limit).</li>
+    <li><strong>Decode Script:</strong> Paste any raw OP_RETURN script hex to inspect concatenated payload pushes, LEB128 decoded integers, and parsed message fields.</li>
+    <li><strong>Inspect Raw Tx:</strong> Paste raw serialized Bitcoin transaction hex to automatically extract inputs, parse outputs, and decipher candidate Runestones in place.</li>
+    <li><strong>Simulate Allocation:</strong> Test complex multi-input, multi-output state transitions. Models edict execution order, balance sweeps, remainder pointers, and cenotaph burns.</li>
+    <li><strong>Explain Bytes:</strong> An interactive byte scrubber. Hover or tap individual hex byte pairs to inspect the exact opcode, varint, or tag definition.</li>
+    <li><strong>Compare Two Runestones:</strong> Diff two script payloads side-by-side to detect tag discrepancies, edict order differences, or size optimizations.</li>
+    <li><strong>Cenotaph Autopsy:</strong> Craft or inspect malformed scripts to pinpoint the exact failing byte offset, stage, and controlling rule.</li>
+    <li><strong>Size & Policy Analysis:</strong> Measure script weight, data push limits, and relay policy compliance.</li>
+  </ol>
+
+  <h2 id="worker">Browser Engine & Performance</h2>
+  <p>
+    The entire Studio is driven by the typed <code>@bitcoinuniverse/runes-tools</code> pure TypeScript library. It runs 100% locally in your browser session with sub-millisecond execution times and zero external API calls.
+  </p>
+
+  <FeedbackWidget pageTitle="Runestone Studio" />
+</BaseLayout>

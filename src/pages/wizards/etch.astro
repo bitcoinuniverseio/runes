@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WizardIsland from '../../components/WizardIsland.astro';
+import Callout from '../../components/Callout.astro';
+import FeedbackWidget from '../../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'wizard', text: 'Etching Planner' },
+  { id: 'unlock-schedule', text: 'Name Unlock Schedule' },
+  { id: 'commitment-timeline', text: '6-Block Commitment Timeline' },
+];
+---
+
+<BaseLayout
+  title="Etching Planner"
+  description="Plan a new rune etching, calculate modified base-26 name encodings, generate Taproot commitments, and enforce the 6-block maturity rule."
+  currentRoute="wizards/etch.html"
+  kicker="Guided Safety Wizards"
+  toc={toc}
+>
+  <div class="status-line">
+    Two-phase commitment planner · Base-26 encoding · Unlock length verification.
+  </div>
+
+  <h2 id="wizard">Etching Planner</h2>
+  <p>
+    Design and plan your new rune etching below. The wizard validates name length against the Bitcoin block height schedule, constructs the Taproot commitment script data push, and generates the reveal runestone.
+  </p>
+
+  <WizardIsland type="etch" />
+
+  <h2 id="unlock-schedule">Name Unlock Schedule</h2>
+  <p>
+    To prevent front-running of short, recognizable names at protocol launch, rune names unlock gradually:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><strong>Block 840,000:</strong> Names with 13 or more characters unlock.</li>
+    <li><strong>Every 17,500 Blocks:</strong> Minimum length decreases by 1 character (e.g. 12 characters at 857,500, 11 at 875,000).</li>
+    <li><strong>Block 1,050,000 (Halving 2028):</strong> All character lengths down to 1 character are fully unlocked.</li>
+  </ul>
+
+  <h2 id="commitment-timeline">6-Block Commitment Timeline</h2>
+  <Callout type="warning" title="Commitment Maturity (Rule R27)">
+    <p>
+      The commitment transaction output must be confirmed with at least 6 confirmations before being spent by the reveal transaction. Revealing prematurely causes the requested name to be silently disregarded and replaced with an automatic reserved sequence name.
+    </p>
+  </Callout>
+
+  <FeedbackWidget pageTitle="Etching Planner" />
+</BaseLayout>

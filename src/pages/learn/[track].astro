@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import CourseTrack from '../../components/CourseTrack.astro';
+import FeedbackWidget from '../../components/FeedbackWidget.astro';
+import tracksData from '../../data/courses/tracks.json';
+
+export function getStaticPaths() {
+  return tracksData.map((track) => ({
+    params: { track: track.slug },
+    props: { track },
+  }));
+}
+
+const { track } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'lessons', text: 'Curriculum Lessons' },
+  { id: 'quiz', text: 'Knowledge Assessment' },
+];
+---
+
+<BaseLayout
+  title={`Track ${track.order}: ${track.title}`}
+  description={track.outcomes}
+  currentRoute={`learn/${track.slug}.html`}
+  kicker="Runes Learning Academy"
+  toc={toc}
+>
+  <div style="margin-bottom: 1.5rem;">
+    <a href={`${base}/learn.html`} style="font-family: var(--font-sans); font-size: 0.8125rem; text-decoration: none;">
+      ← Back to All Academy Tracks
+    </a>
+  </div>
+
+  <CourseTrack track={track} />
+
+  <div style="display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: var(--font-sans); font-size: 0.875rem;">
+    {track.order > 1 ? (
+      <a href={`${base}/learn/${tracksData[track.order - 2].slug}.html`}>
+        ← Previous: Track {track.order - 1}
+      </a>
+    ) : <span />}
+    {track.order < tracksData.length ? (
+      <a href={`${base}/learn/${tracksData[track.order].slug}.html`}>
+        Next: Track {track.order + 1} →
+      </a>
+    ) : (
+      <a href={`${base}/learn.html`}>
+        Complete Academy Overview →
+      </a>
+    )}
+  </div>
+
+  <FeedbackWidget pageTitle={`Academy Track ${track.order}: ${track.title}`} />
+</BaseLayout>

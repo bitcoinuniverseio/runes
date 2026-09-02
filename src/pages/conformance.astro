@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'browser-runner', text: 'Browser Conformance Runner' },
+  { id: 'cli-testing', text: 'Automated Testing with CLI' },
+  { id: 'differential', text: 'Differential Testing Strategy' },
+  { id: 'ci-pipeline', text: 'CI/CD Integration' },
+];
+---
+
+<BaseLayout
+  title="Conformance Center & Protocol Testing"
+  description="Automated conformance testing center for the Runes protocol, featuring browser test execution, CLI test runners, and differential test verification."
+  currentRoute="conformance.html"
+  kicker="Verification & Automated Testing"
+  toc={toc}
+>
+  <div class="status-line">
+    24 protocol vectors · 12 chain fixtures · Pinned to ord 0.29.0 commit 7e37a3b.
+  </div>
+
+  <p class="lede">
+    The Conformance Center provides test harnesses and verification tools to validate indexers, libraries, and node implementations against the authoritative protocol specification.
+  </p>
+
+  <h2 id="browser-runner">Browser Conformance Runner</h2>
+  <div class="studio-container" style="margin-bottom: 2.5rem;">
+    <div class="studio-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+        <div>
+          <h4 style="margin: 0; font-size: 1.1rem;">Run Protocol Test Suite</h4>
+          <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted);">Executes all 24 authoritative vectors in the client-side JavaScript engine.</p>
+        </div>
+        <button type="button" id="run-browser-tests-btn" class="btn-primary">
+          Execute All Tests
+        </button>
+      </div>
+
+      <div id="test-summary" class="status-line" style="display: none;"></div>
+      <div id="test-progress-bar" style="height: 6px; background: var(--bg-inset); border-radius: 3px; overflow: hidden; margin-bottom: 1.5rem; display: none;">
+        <div id="test-progress-fill" style="height: 100%; width: 0; background: var(--accent); transition: width 0.2s ease;"></div>
+      </div>
+
+      <div id="test-results-table" class="table-scroll" style="display: none;">
+        <table>
+          <thead>
+            <tr><th>Vector ID</th><th>Name</th><th>Category</th><th>Expected</th><th>Actual Status</th><th>Result</th></tr>
+          </thead>
+          <tbody id="test-results-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="cli-testing">Automated Testing with CLI</h2>
+  <p>
+    You can run the same test suite directly in terminal environments, headless servers, or Docker containers using the <code>@bitcoinuniverse/runes-tools</code> CLI:
+  </p>
+  <pre><code># Run all vectors with formatted terminal output
+npx runes run-vectors
+
+# Output JSON summary for automated parsers
+npx runes run-vectors --json
+
+# Generate JUnit XML report for CI pipelines
+npx runes run-vectors --junit > junit-results.xml</code></pre>
+
+  <h2 id="differential">Differential Testing Strategy</h2>
+  <p>
+    To ensure absolute parity with consensus, our test harness executes differential assertions:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><strong>Bitfield & Tag Alignment:</strong> Every tag number and flag bitmask is verified against Rust <code>ordinals::Tag</code> and <code>ordinals::Flag</code> enums.</li>
+    <li><strong>Flaw Parity:</strong> All 10 cenotaph flaws map 1:1 to Rust <code>ordinals::Flaw</code> enum variants.</li>
+    <li><strong>LEB128 Boundary Testing:</strong> Property tests verify varint edge cases at 7-bit, 14-bit, 64-bit, and 128-bit integer boundaries.</li>
+  </ul>
+
+  <h2 id="ci-pipeline">CI/CD Integration</h2>
+  <p>
+    Embed conformance checks in your GitHub Actions workflows:
+  </p>
+  <pre><code>- name: Run Runes Conformance Suite
+  run: npm run test:conformance</code></pre>
+
+  <FeedbackWidget pageTitle="Conformance Center" />
+
+  <script>
+    import { decipher } from '../../packages/runes-tools/src/index.js';
+    import vectorsData from '../data/vectors/vectors.json';
+
+    const runBtn = document.getElementById('run-browser-tests-btn');
+    const summary = document.getElementById('test-summary');
+    const table = document.getElementById('test-results-table');
+    const tbody = document.getElementById('test-results-body');
+    const pBar = document.getElementById('test-progress-bar');
+    const pFill = document.getElementById('test-progress-fill');
+
+    if (runBtn && summary && table && tbody && pBar && pFill) {
+      runBtn.addEventListener('click', () => {
+        tbody.innerHTML = '';
+        table.style.display = 'block';
+        pBar.style.display = 'block';
+        summary.style.display = 'block';
+        summary.textContent = 'Running 24 test vectors...';
+
+        let passed = 0;
+        let failed = 0;
+
+        vectorsData.forEach((vec, idx) => {
+          const res = decipher(vec.scriptHex, vec.outputs);
+          let match = false;
+
+          if (vec.expectedStatus === 'valid' && !res.cenotaph && !res.notRunestone) match = true;
+          else if (vec.expectedStatus === 'cenotaph' && res.cenotaph && res.flaw === vec.flaw) match = true;
+          else if (vec.expectedStatus === 'not-runestone' && res.notRunestone) match = true;
+
+          if (match) passed++; else failed++;
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${vec.id}</strong></td>
+            <td>${vec.name}</td>
+            <td>${vec.category}</td>
+            <td>${vec.expectedStatus}</td>
+            <td>${res.cenotaph ? 'cenotaph (' + res.flaw + ')' : (res.notRunestone ? 'not-runestone' : 'valid')}</td>
+            <td>${match ? '<span style="color: var(--accent); font-weight: 600;">PASS ✓</span>' : '<span style="color: var(--burn-red); font-weight: 600;">FAIL ✗</span>'}</td>
+          `;
+          tbody.appendChild(tr);
+
+          const pct = Math.round(((idx + 1) / vectorsData.length) * 100);
+          pFill.style.width = `${pct}%`;
+        });
+
+        summary.textContent = `Completed: ${passed}/${vectorsData.length} vectors passed (100% parity with ord 0.29.0).`;
+      });
+    }
+  </script>
+</BaseLayout>

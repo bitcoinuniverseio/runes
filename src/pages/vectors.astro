@@ -1,0 +1,77 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import VectorsTable from '../components/VectorsTable.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'how', text: '1. How to Run the Vectors' },
+  { id: 'valid', text: '2. Valid Runestones (V1–V8)' },
+  { id: 'cenotaph-vectors', text: '3. Cenotaph Vectors (C1–C14)' },
+  { id: 'non-runestone', text: '4. Non-Runestone Outputs (N1–N2)' },
+  { id: 'ignored', text: '5. Ignored Values & Edge Cases' },
+  { id: 'beyond', text: '6. Beyond the Payload' },
+];
+---
+
+<BaseLayout
+  title="Runes Test Vectors"
+  description="Authoritative conformance test suite containing all 24 vectors (V1–V8, C1–C14, N1–N2) verified against ord 0.29.0."
+  currentRoute="vectors.html"
+  kicker="Protocol Conformance Suite"
+  toc={toc}
+>
+  <div class="status-line">
+    24 authoritative test vectors verified against Casey Rodarmor's ord 0.29.0 reference test suite.
+  </div>
+
+  <h2 id="how">1. How to Run the Vectors</h2>
+  <p>
+    You can run this test suite in your browser, via the command line, or in automated CI:
+  </p>
+  <pre><code># Run vectors via local CLI
+npm run test:conformance
+
+# Or run via @bitcoinuniverse/runes-tools CLI
+npx runes run-vectors --json</code></pre>
+  <p>
+    You can also test any vector interactively in the browser by clicking the <strong>Test →</strong> button next to each vector below, or in the <a href={`${base}/conformance.html`}>Conformance Center</a>.
+  </p>
+
+  <h2 id="valid">2. Valid Runestones (V1–V8)</h2>
+  <p>
+    These vectors represent valid runestones that parse without flaws under consensus rules.
+  </p>
+  <VectorsTable category="valid" caption="Valid Runestones (V1 through V8)" />
+
+  <h2 id="cenotaph-vectors">3. Cenotaph Vectors (C1–C14)</h2>
+  <p>
+    These vectors demonstrate malformed or adversarial scripts that trigger Cenotaph flaws under Rule R45.
+  </p>
+  <VectorsTable category="cenotaph" caption="Cenotaph Vectors (C1 through C14)" />
+
+  <h2 id="non-runestone">4. Non-Runestone Outputs (N1–N2)</h2>
+  <p>
+    These scripts do not begin with the protocol identifier <code>OP_RETURN OP_13</code> and are therefore skipped by indexers without triggering a cenotaph.
+  </p>
+  <VectorsTable category="non-runestone" caption="Non-Runestone Outputs (N1 through N2)" />
+
+  <h2 id="ignored">5. Ignored Values & Edge Cases</h2>
+  <p>
+    Under Rule R16, unrecognized odd tags are ignored silently without producing a cenotaph. For example, tag 1 with divisibility &gt; 38 is ignored, defaulting divisibility to 0.
+  </p>
+
+  <h2 id="beyond">6. Beyond the Payload</h2>
+  <p>
+    Some protocol rules depend on chain state and transaction structure outside the OP_RETURN script itself:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Output Count Bounds:</strong> Edict output indices and pointer index must be strictly less than transaction output count.</li>
+    <li><strong>Commitment Maturity:</strong> Etching commitment must have at least 6 confirmations.</li>
+    <li><strong>Name Length at Height:</strong> Name must meet the minimum letter length for the block height.</li>
+  </ul>
+
+  <FeedbackWidget pageTitle="Runes Test Vectors" />
+</BaseLayout>

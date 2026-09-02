@@ -1,0 +1,17 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@bitcoinuniverse/runes-tools": ["./packages/runes-tools/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*", "packages/*/src/**/*"]
+}
