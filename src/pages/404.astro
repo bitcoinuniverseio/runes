@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<BaseLayout
+  title="Page Not Found (404)"
+  description="The requested page could not be found in the Runes Documentation Platform."
+  currentRoute="404.html"
+  kicker="Protocol Error 404"
+>
+  <div class="callout callout-warning">
+    <div class="callout-title">Unrouted Path</div>
+    <p>The path you navigated to does not exist or has been moved.</p>
+  </div>
+
+  <p>Here are several recommended destinations:</p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><a href={`${base}/`}>Overview & Mental Model</a></li>
+    <li><a href={`${base}/specification.html`}>Normative Protocol Specification (R1–R47)</a></li>
+    <li><a href={`${base}/studio.html`}>Runestone Studio (8 Diagnostic Modes)</a></li>
+    <li><a href={`${base}/decoder.html`}>Standalone Runestone Decoder</a></li>
+    <li><a href={`${base}/learn.html`}>Runes Learning Academy</a></li>
+    <li><a href={`${base}/developers.html`}>Developer Hub & SDK</a></li>
+  </ul>
+</BaseLayout>

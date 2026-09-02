@@ -1,0 +1,62 @@
+[
+  {
+    "term": "Runestone",
+    "definition": "The protocol message: an OP_RETURN output beginning OP_RETURN OP_13, whose data pushes concatenate into a payload of varints."
+  },
+  {
+    "term": "Artifact",
+    "definition": "The result of deciphering a transaction. Either a well-formed runestone or a cenotaph. A transaction with no matching output has no artifact at all, which is different from having an empty one."
+  },
+  {
+    "term": "Cenotaph",
+    "definition": "A malformed runestone. Burns input runes, makes an etched rune unmintable, and burns mint output while still counting the mint against the cap."
+  },
+  {
+    "term": "Flaw",
+    "definition": "The named reason a runestone is a cenotaph. Ten exist; the reference implementation reports the first one found."
+  },
+  {
+    "term": "Etching",
+    "definition": "The act of creating a rune and permanently fixing its name, divisibility, symbol, spacers, premine, and terms."
+  },
+  {
+    "term": "Rune ID",
+    "definition": "BLOCK:TX: the height of the etching block and the etching transaction's index within it. Assigned once, never reused."
+  },
+  {
+    "term": "Edict",
+    "definition": "An instruction inside a runestone: allocate an amount of one rune to one output."
+  },
+  {
+    "term": "Pointer",
+    "definition": "The output index that receives unallocated runes, overriding the first non-OP_RETURN output default."
+  },
+  {
+    "term": "Premine",
+    "definition": "Units allocated to the etching transaction itself, outside the mint."
+  },
+  {
+    "term": "Terms",
+    "definition": "The conditions of an open mint: amount per mint, cap, and height or offset windows."
+  },
+  {
+    "term": "Turbo",
+    "definition": "A flag on the etching declaring that the rune opts in to future protocol changes. It carries no meaning under the current rules."
+  },
+  {
+    "term": "Atomic unit",
+    "definition": "The indivisible unit of a rune. Display value is the atomic amount shifted by the rune's divisibility."
+  },
+  {
+    "term": "Unallocated pool",
+    "definition": "Per transaction: input balances, plus a successful mint, plus a premine. Edicts draw from it; the remainder follows the pointer."
+  },
+  {
+    "term": "Reserved name",
+    "definition": "A name at or above 6402364363415443603228541259936211926. Unetchable directly; assigned by the indexer to etchings that omit a name."
+  },
+  {
+    "term": "Commitment",
+    "definition": "The tapscript data push in an input's witness proving the etcher claimed the name at least 6 blocks earlier."
+  }
+]

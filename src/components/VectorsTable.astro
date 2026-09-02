@@ -1,0 +1,54 @@
+---
+import vectorsData from '../data/vectors/vectors.json';
+
+interface Props {
+  category?: 'valid' | 'cenotaph' | 'non-runestone';
+  caption?: string;
+}
+
+const { category, caption = 'Protocol test vectors' } = Astro.props;
+
+const filtered = category ? vectorsData.filter(v => v.category === category) : vectorsData;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="table-scroll">
+  <table>
+    <caption>{caption}</caption>
+    <thead>
+      <tr>
+        <th scope="col">ID</th>
+        <th scope="col">Case Name</th>
+        <th scope="col">Script Hex</th>
+        <th scope="col">Outputs</th>
+        <th scope="col">{category === 'cenotaph' ? 'Flaw & Rationale' : 'Expected Decoding'}</th>
+        <th scope="col">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filtered.map((v) => (
+        <tr id={v.id.toLowerCase()}>
+          <td><strong>{v.id}</strong></td>
+          <td>{v.name}</td>
+          <td>
+            <code style="word-break: break-all;">{v.scriptHex}</code>
+          </td>
+          <td>{v.outputs}</td>
+          <td>
+            {v.flaw && <p><strong>Flaw:</strong> <code>{v.flaw}</code></p>}
+            <p>{v.expectedSummary}</p>
+          </td>
+          <td>
+            <a
+              href={`${base}/decoder.html?hex=${v.scriptHex}&outputs=${v.outputs}`}
+              class="page-action-btn"
+              style="display: inline-block; white-space: nowrap;"
+            >
+              Test →
+            </a>
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,35 @@
+{
+  "name": "@bitcoinuniverse/runes-docs-mcp",
+  "version": "3.0.0",
+  "description": "Read-only Model Context Protocol server for Runes protocol documentation and tooling",
+  "type": "module",
+  "main": "./dist/server.js",
+  "types": "./dist/server.d.ts",
+  "bin": {
+    "runes-docs-mcp": "./dist/server.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "default": "./dist/server.js"
+    }
+  },
+  "dependencies": {
+    "@bitcoinuniverse/runes-tools": "^3.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": "24.19.0",
+    "npm": "11.17.0"
+  },
+  "license": "CC0-1.0"
+}

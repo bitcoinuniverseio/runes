@@ -1,0 +1,306 @@
+---
+import '../styles/global.css';
+
+interface TocItem {
+  id: string;
+  text: string;
+  depth?: number;
+}
+
+interface Props {
+  title: string;
+  description: string;
+  currentRoute?: string;
+  kicker?: string;
+  toc?: TocItem[];
+  primaryUrl?: string;
+}
+
+const {
+  title,
+  description,
+  currentRoute = '',
+  kicker = 'Bitcoin Protocol Documentation',
+  toc = [],
+  primaryUrl = `https://bitcoinuniverseio.github.io/runes/${currentRoute}`
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{title} | Runes Documentation Platform</title>
+  <meta name="description" content={description}>
+  <link rel="alternate" href={primaryUrl}>
+  <meta property="og:title" content={title}>
+  <meta property="og:description" content={description}>
+  <meta property="og:type" content="article">
+  <meta property="og:url" content={primaryUrl}>
+  <meta name="theme-color" content="#F3EFE6">
+  <script is:inline>
+    try {
+      var t = localStorage.getItem('runes-theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <a class="brand-link" href={`${base}/`}>
+          <span>ᚱ</span>
+          <span>Runes</span>
+        </a>
+        <span class="brand-badge">v3.0.0</span>
+      </div>
+
+      <button id="search-trigger" class="search-trigger-btn" type="button" aria-label="Open command center search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Search protocol or type /</span>
+        <span class="kbd-shortcut">/</span>
+      </button>
+
+      <div class="header-actions">
+        <select id="version-select" class="theme-toggle-btn" aria-label="Documentation version" onchange="window.location.href=this.value">
+          <option value={`${base}/`} selected>v3.0.0 (Latest)</option>
+          <option value={`${base}/versions/2.0.0/`}>v2.0.0 (Archived)</option>
+          <option value={`${base}/versions.html`}>Compare versions...</option>
+        </select>
+        <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle light/dark theme">Limestone</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="shell-container">
+    <aside class="doc-rail" aria-label="Documentation navigation">
+      <div class="rail-section">
+        <div class="rail-section-title">Core Protocol</div>
+        <ul class="rail-links">
+          <li><a class:list={["rail-link", { active: currentRoute === '' || currentRoute === 'index.html' }]} href={`${base}/`}>Overview</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'specification.html' }]} href={`${base}/specification.html`}>Specification (R1–R47)</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'reference.html' }]} href={`${base}/reference.html`}>Implementer Reference</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'guide.html' }]} href={`${base}/guide.html`}>Step-by-Step Guide</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'vectors.html' }]} href={`${base}/vectors.html`}>Test Vectors (24 Cases)</a></li>
+        </ul>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-section-title">Interactive Tooling</div>
+        <ul class="rail-links">
+          <li><a class:list={["rail-link", { active: currentRoute === 'studio.html' }]} href={`${base}/studio.html`}>Runestone Studio</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'decoder.html' }]} href={`${base}/decoder.html`}>Standalone Decoder</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'wizards/transfer.html' }]} href={`${base}/wizards/transfer.html`}>Transfer Wizard</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'wizards/mint.html' }]} href={`${base}/wizards/mint.html`}>Mint Readiness Wizard</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'wizards/etch.html' }]} href={`${base}/wizards/etch.html`}>Etching Planner</a></li>
+        </ul>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-section-title">Education & Evidence</div>
+        <ul class="rail-links">
+          <li><a class:list={["rail-link", { active: currentRoute === 'learn.html' }]} href={`${base}/learn.html`}>Learning Academy</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'atlas.html' }]} href={`${base}/atlas.html`}>Transaction Atlas</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'conformance.html' }]} href={`${base}/conformance.html`}>Conformance Center</a></li>
+        </ul>
+      </div>
+
+      <div class="rail-section">
+        <div class="rail-section-title">Developers & Agents</div>
+        <ul class="rail-links">
+          <li><a class:list={["rail-link", { active: currentRoute === 'developers.html' }]} href={`${base}/developers.html`}>Developer Hub & SDK</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'agents.html' }]} href={`${base}/agents.html`}>Agent Docs & MCP</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'provenance.html' }]} href={`${base}/provenance.html`}>Source Provenance</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'status.html' }]} href={`${base}/status.html`}>Platform Status</a></li>
+          <li><a class:list={["rail-link", { active: currentRoute === 'changelog.html' }]} href={`${base}/changelog.html`}>Changelog</a></li>
+        </ul>
+      </div>
+    </aside>
+
+    <main id="main" class="main-column">
+      <div class="reading-container">
+        <div class="breadcrumbs">
+          <a href={`${base}/`}>Runes</a>
+          <span>/</span>
+          <span>{title}</span>
+        </div>
+
+        {kicker && <p class="kicker">{kicker}</p>}
+        <h1>{title}</h1>
+        <p class="lede">{description}</p>
+
+        <slot />
+
+        <div class="page-actions" aria-label="Page tools">
+          <button id="copy-markdown-btn" class="page-action-btn" type="button">Copy Markdown</button>
+          <a class="page-action-btn" href={`${base}/${currentRoute.replace(/\.html$/, '.md')}`} target="_blank">Raw Markdown</a>
+          <button id="copy-url-btn" class="page-action-btn" type="button">Copy Link</button>
+          <a class="page-action-btn" href={`https://github.com/bitcoinuniverseio/runes/edit/main/src/pages/${currentRoute || 'index.astro'}`} target="_blank" rel="noreferrer">Edit on GitHub</a>
+          <button id="print-page-btn" class="page-action-btn" type="button" onclick="window.print()">Print Document</button>
+        </div>
+      </div>
+    </main>
+
+    {toc.length > 0 && (
+      <aside class="toc-rail" aria-label="In-page navigation">
+        <div class="toc-title">On This Page</div>
+        <ul class="toc-list">
+          {toc.map(item => (
+            <li>
+              <a class="toc-link" href={`#${item.id}`} style={item.depth === 3 ? 'padding-left: 0.75rem;' : ''}>
+                {item.text}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </aside>
+    )}
+  </div>
+
+  <!-- Search and Command Modal -->
+  <div id="command-modal" class="modal-backdrop" hidden>
+    <div class="command-modal" role="dialog" aria-modal="true" aria-label="Command search">
+      <div class="command-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="command-input" class="command-input" type="search" placeholder="Search rules (R31), flaws (C7), tags, topics..." autocomplete="off">
+        <span class="kbd-shortcut">ESC</span>
+      </div>
+      <ul id="command-results" class="command-results"></ul>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p>
+        <strong>Runes Documentation Platform 3.0</strong> · Authoritative protocol documentation, simulator, and tooling.
+      </p>
+      <p>
+        Documented against Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> 0.29.0 (ordinals crate 0.0.17) · Chain: Bitcoin mainnet, activation block 840,000 · Verified 2026-09-02.
+      </p>
+      <p>
+        Part of the <a href="https://github.com/bitcoinuniverseio" target="_blank" rel="noreferrer">Bitcoin Universe</a> ecosystem · <a href={`${base}/offline.html`}>Offline mode</a> · <a href={`${base}/status.html`}>System status</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Security reports</a>
+      </p>
+    </div>
+  </footer>
+
+  <script is:inline>
+    // Theme toggle
+    var root = document.documentElement;
+    var KEY = 'runes-theme';
+    var toggleBtn = document.getElementById('theme-toggle');
+    function currentTheme() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function updateThemeBtn() {
+      if (!toggleBtn) return;
+      toggleBtn.textContent = currentTheme() === 'dark' ? 'Basalt (Dark)' : 'Limestone (Light)';
+    }
+    updateThemeBtn();
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        var next = currentTheme() === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem(KEY, next); } catch(e) {}
+        updateThemeBtn();
+      });
+    }
+
+    // Command Center Search
+    var modal = document.getElementById('command-modal');
+    var trigger = document.getElementById('search-trigger');
+    var input = document.getElementById('command-input');
+    var results = document.getElementById('command-results');
+    var searchIndex = null;
+
+    function openSearch() {
+      if (!modal) return;
+      modal.hidden = false;
+      input.focus();
+      if (!searchIndex) {
+        fetch(window.location.origin + '/runes/search-index.json')
+          .then(function(r) { return r.json(); })
+          .then(function(d) { searchIndex = d; })
+          .catch(function() {});
+      }
+    }
+    function closeSearch() {
+      if (!modal) return;
+      modal.hidden = true;
+      if (input) input.value = '';
+      if (results) results.innerHTML = '';
+    }
+
+    if (trigger) trigger.addEventListener('click', openSearch);
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeSearch();
+      });
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal && modal.hidden) openSearch(); else closeSearch();
+      } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        openSearch();
+      } else if (e.key === 'Escape') {
+        closeSearch();
+      }
+    });
+
+    if (input) {
+      input.addEventListener('input', function() {
+        var q = input.value.trim().toLowerCase();
+        if (!q || !searchIndex) {
+          results.innerHTML = '';
+          return;
+        }
+        var matches = searchIndex.filter(function(item) {
+          return item.title.toLowerCase().indexOf(q) !== -1 ||
+            (item.aliases && item.aliases.some(function(a) { return a.toLowerCase().indexOf(q) !== -1; })) ||
+            (item.text && item.text.toLowerCase().indexOf(q) !== -1);
+        }).slice(0, 10);
+
+        results.innerHTML = matches.map(function(m) {
+          var href = window.location.origin + '/runes/' + m.page + (m.anchor ? '#' + m.anchor : '');
+          return '<li class="command-item" onclick="window.location.href=\'' + href + '\'">' +
+            '<span class="command-item-title">' + m.title + '</span>' +
+            '<span class="command-item-snippet">' + (m.where || '') + ' · ' + (m.text ? m.text.substring(0, 90) + '...' : '') + '</span>' +
+            '</li>';
+        }).join('');
+      });
+    }
+
+    // Copy actions
+    var copyUrlBtn = document.getElementById('copy-url-btn');
+    if (copyUrlBtn) {
+      copyUrlBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(window.location.href);
+        var prev = copyUrlBtn.textContent;
+        copyUrlBtn.textContent = 'Copied URL!';
+        setTimeout(function() { copyUrlBtn.textContent = prev; }, 1500);
+      });
+    }
+
+    var copyMdBtn = document.getElementById('copy-markdown-btn');
+    if (copyMdBtn) {
+      copyMdBtn.addEventListener('click', function() {
+        var text = '# ' + document.title + '\n\n' + (document.querySelector('.reading-container') ? document.querySelector('.reading-container').innerText : '');
+        navigator.clipboard.writeText(text);
+        var prev = copyMdBtn.textContent;
+        copyMdBtn.textContent = 'Copied Markdown!';
+        setTimeout(function() { copyMdBtn.textContent = prev; }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>

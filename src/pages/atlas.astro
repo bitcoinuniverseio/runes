@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AtlasCards from '../components/AtlasCards.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'atlas', text: 'Transaction Atlas' },
+  { id: 'cases', text: 'Verified Mainnet Case Studies' },
+  { id: 'methodology', text: 'Forensic Methodology' },
+];
+---
+
+<BaseLayout
+  title="Real Transaction Atlas"
+  description="Curated atlas of 12 verified Bitcoin mainnet transactions dissecting genesis etchings, multi-rune transfers, reorg safety, and cenotaph autopsies."
+  currentRoute="atlas.html"
+  kicker="Mainnet Case Studies & Forensics"
+  toc={toc}
+>
+  <div class="status-line">
+    12 verified transactions · Real mainnet data from Block 840,000+ · Dissected inputs, outputs, and runestones.
+  </div>
+
+  <p class="lede">
+    The Real Transaction Atlas provides deep, forensic case studies of actual Bitcoin transactions on mainnet. Each case analyzes input UTXOs, OP_RETURN payload structure, edict routing, and engineering takeaways.
+  </p>
+
+  <h2 id="cases">Verified Mainnet Case Studies</h2>
+  <AtlasCards />
+
+  <h2 id="methodology">Forensic Methodology</h2>
+  <p>
+    All transaction hexes and state transitions in this atlas were independently fetched from Bitcoin mainnet block data, verified with Casey Rodarmor's <code>ord</code> 0.29.0 reference indexer, and cross-checked against our pure TypeScript <code>@bitcoinuniverse/runes-tools</code> core library.
+  </p>
+
+  <FeedbackWidget pageTitle="Real Transaction Atlas" />
+</BaseLayout>
