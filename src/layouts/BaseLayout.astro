@@ -167,11 +167,21 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
   <div id="command-modal" class="modal-backdrop" hidden>
     <div class="command-modal" role="dialog" aria-modal="true" aria-label="Command search">
       <div class="command-input-wrap">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input id="command-input" class="command-input" type="search" placeholder="Search rules (R31), flaws (C7), tags, topics..." autocomplete="off">
-        <span class="kbd-shortcut">ESC</span>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input id="command-input" class="command-input" type="text" placeholder="Search rules (R31), flaws (C7), tags, topics..." autocomplete="off">
+        <button type="button" id="command-close-btn" class="kbd-shortcut" style="cursor: pointer;">ESC</button>
       </div>
-      <ul id="command-results" class="command-results"></ul>
+      <div class="command-body">
+        <ul id="command-results" class="command-results"></ul>
+      </div>
+      <div class="command-footer">
+        <div class="command-footer-hints">
+          <span><kbd>↑</kbd> <kbd>↓</kbd> Navigate</span>
+          <span><kbd>↵</kbd> Select</span>
+          <span><kbd>ESC</kbd> Close</span>
+        </div>
+        <span class="command-footer-badge">152 Search Items</span>
+      </div>
     </div>
   </div>
 
@@ -218,31 +228,129 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     var trigger = document.getElementById('search-trigger');
     var input = document.getElementById('command-input');
     var results = document.getElementById('command-results');
+    var closeBtn = document.getElementById('command-close-btn');
     var searchIndex = null;
+    var selectedIndex = -1;
+    var currentItems = [];
+
+    var SUGGESTIONS = [
+      { page: 'specification.html', anchor: 'r1', title: 'R1: OP_RETURN and OP_13 Carrier Script', where: 'Rule [Carrier]', text: 'Carrier output identifier (0x6a 0x5d) defining standard Runestone payload boundaries.' },
+      { page: 'specification.html', anchor: 'r27', title: 'R27: Taproot Commitment for Etching Names', where: 'Rule [Etching]', text: '6-block commit requirement preventing frontrunning of named rune deployments.' },
+      { page: 'specification.html', anchor: 'r34', title: 'R34: Edict Delta Encoding and Ordering', where: 'Rule [Edicts]', text: 'Ordered edict execution (RuneId, Amount, Output) with cumulative ID delta compaction.' },
+      { page: 'specification.html', anchor: 'r45', title: 'R45: Cenotaph Consequences & Permanent Burns', where: 'Rule [Cenotaphs]', text: 'All input runes are permanently burned on malformation. Etchings rendered unmintable.' },
+      { page: 'studio.html', title: 'Runestone Studio (8 Diagnostic Modes)', where: 'Interactive Tool', text: 'Visual composer, raw transaction parser, UTXO balance simulator, and side-by-side compare.' },
+      { page: 'decoder.html', title: 'Standalone Runestone Decoder', where: 'Interactive Tool', text: 'Pure client-side script decoder with field breakdown and sharable permalinks.' },
+      { page: 'vectors.html', title: 'Conformance Test Vectors (24 Cases)', where: 'Conformance', text: 'Authoritative V1-V8 valid, C1-C14 cenotaphs, and N1-N2 non-runestone test suite.' },
+      { page: 'learn.html', title: 'Runes Learning Academy (7 Tracks)', where: 'Academy', text: 'Structured curriculum from fundamentals to indexer architecture with interactive quizzes.' },
+      { page: 'atlas.html', title: 'Transaction Atlas (12 Case Studies)', where: 'Forensics', text: 'Verified Bitcoin mainnet transactions dissecting genesis etchings and cenotaph autopsies.' },
+      { page: 'agents.html', title: 'Agent Suite & @bitcoinuniverse/runes-docs-mcp', where: 'Agents', text: '17 MCP tools, llms.txt, and developer skill format for autonomous AI coding agents.' }
+    ];
+
+    function getBasePath() {
+      var p = window.location.pathname;
+      if (p.indexOf('/runes') === 0) return '/runes';
+      return '';
+    }
+
+    function renderItems(items, isInitial) {
+      currentItems = items;
+      selectedIndex = items.length > 0 ? 0 : -1;
+      if (!results) return;
+
+      if (items.length === 0) {
+        results.innerHTML = '<li class="command-empty">No matching protocol rules or topics found.</li>';
+        return;
+      }
+
+      var headerHtml = isInitial ? '<li class="command-section-label">Quick Navigation</li>' : '';
+      var itemsHtml = items.map(function(m, idx) {
+        var base = getBasePath();
+        var targetPage = m.page ? (m.page.charAt(0) === '/' ? m.page : '/' + m.page) : '/';
+        var href = base + targetPage + (m.anchor ? '#' + m.anchor : '');
+        var activeClass = idx === selectedIndex ? ' active' : '';
+        return '<li class="command-item' + activeClass + '" data-index="' + idx + '" data-href="' + href + '">' +
+          '<div class="command-item-header">' +
+            '<span class="command-item-title">' + m.title + '</span>' +
+            '<span class="command-item-badge">' + (m.where || 'Topic') + '</span>' +
+          '</div>' +
+          '<span class="command-item-snippet">' + (m.text ? m.text.substring(0, 110) + '...' : '') + '</span>' +
+          '</li>';
+      }).join('');
+
+      results.innerHTML = headerHtml + itemsHtml;
+
+      // Add click listeners to items
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li) {
+        li.addEventListener('click', function() {
+          var h = li.getAttribute('data-href');
+          if (h) window.location.href = h;
+        });
+      });
+    }
+
+    function updateActiveItem() {
+      if (!results) return;
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li, idx) {
+        if (idx === selectedIndex) {
+          li.classList.add('active');
+          li.scrollIntoView({ block: 'nearest' });
+        } else {
+          li.classList.remove('active');
+        }
+      });
+    }
+
+    function loadIndex() {
+      if (searchIndex) return;
+      var base = getBasePath();
+      fetch(base + '/search-index.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          searchIndex = d;
+          if (modal && !modal.hidden && input && !input.value.trim()) {
+            renderItems(SUGGESTIONS, true);
+          }
+        })
+        .catch(function() {});
+    }
 
     function openSearch() {
       if (!modal) return;
       modal.hidden = false;
-      input.focus();
-      if (!searchIndex) {
-        fetch(window.location.origin + '/runes/search-index.json')
-          .then(function(r) { return r.json(); })
-          .then(function(d) { searchIndex = d; })
-          .catch(function() {});
+      document.body.style.overflow = 'hidden';
+      if (input) {
+        input.value = '';
+        input.focus();
       }
+      renderItems(SUGGESTIONS, true);
+      loadIndex();
     }
+
     function closeSearch() {
       if (!modal) return;
       modal.hidden = true;
+      document.body.style.overflow = '';
       if (input) input.value = '';
       if (results) results.innerHTML = '';
+      currentItems = [];
+      selectedIndex = -1;
     }
 
     if (trigger) trigger.addEventListener('click', openSearch);
+    if (closeBtn) closeBtn.addEventListener('click', closeSearch);
     if (modal) {
       modal.addEventListener('click', function(e) {
         if (e.target === modal) closeSearch();
       });
+    }
+
+    // Preload search index when idle
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(loadIndex);
+    } else {
+      setTimeout(loadIndex, 2000);
     }
 
     window.addEventListener('keydown', function(e) {
@@ -252,31 +360,51 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
         openSearch();
-      } else if (e.key === 'Escape') {
+      } else if (e.key === 'Escape' && modal && !modal.hidden) {
         closeSearch();
+      } else if (modal && !modal.hidden) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex + 1) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex - 1 + currentItems.length) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < currentItems.length) {
+            var item = currentItems[selectedIndex];
+            var base = getBasePath();
+            var targetPage = item.page ? (item.page.charAt(0) === '/' ? item.page : '/' + item.page) : '/';
+            window.location.href = base + targetPage + (item.anchor ? '#' + item.anchor : '');
+          }
+        }
       }
     });
 
     if (input) {
       input.addEventListener('input', function() {
         var q = input.value.trim().toLowerCase();
-        if (!q || !searchIndex) {
-          results.innerHTML = '';
+        if (!q) {
+          renderItems(SUGGESTIONS, true);
+          return;
+        }
+        if (!searchIndex) {
+          renderItems([], false);
           return;
         }
         var matches = searchIndex.filter(function(item) {
           return item.title.toLowerCase().indexOf(q) !== -1 ||
             (item.aliases && item.aliases.some(function(a) { return a.toLowerCase().indexOf(q) !== -1; })) ||
             (item.text && item.text.toLowerCase().indexOf(q) !== -1);
-        }).slice(0, 10);
+        }).slice(0, 12);
 
-        results.innerHTML = matches.map(function(m) {
-          var href = window.location.origin + '/runes/' + m.page + (m.anchor ? '#' + m.anchor : '');
-          return '<li class="command-item" onclick="window.location.href=\'' + href + '\'">' +
-            '<span class="command-item-title">' + m.title + '</span>' +
-            '<span class="command-item-snippet">' + (m.where || '') + ' · ' + (m.text ? m.text.substring(0, 90) + '...' : '') + '</span>' +
-            '</li>';
-        }).join('');
+        renderItems(matches, false);
       });
     }
 
