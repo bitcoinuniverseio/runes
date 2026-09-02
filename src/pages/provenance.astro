@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import provenanceData from '../data/provenance/provenance.json';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'authority', text: '1. Upstream Consensus Authority' },
+  { id: 'file-mapping', text: '2. Upstream File & Symbol Mapping' },
+  { id: 'drift-monitoring', text: '3. Drift Detection & Freshness' },
+];
+---
+
+<BaseLayout
+  title="Source Provenance & Upstream Mapping"
+  description="Exact source traceability mapping every protocol rule, tag, flaw, and vector to Casey Rodarmor's ord 0.29.0 reference repository."
+  currentRoute="provenance.html"
+  kicker="Consensus Authority & Traceability"
+  toc={toc}
+>
+  <div class="status-line">
+    Pinned to Casey Rodarmor's ord 0.29.0 (commit <code>7e37a3b</code>) · Full source-level traceability.
+  </div>
+
+  <h2 id="authority">1. Upstream Consensus Authority</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Attribute</th><th>Pinned Upstream Value</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Repository</strong></td><td><a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">github.com/ordinals/ord</a></td></tr>
+        <tr><td><strong>Release Tag</strong></td><td><code>0.29.0</code></td></tr>
+        <tr><td><strong>Git Commit</strong></td><td><code>7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e</code></td></tr>
+        <tr><td><strong>Rust Crate</strong></td><td><code>ordinals 0.0.17</code></td></tr>
+        <tr><td><strong>Activation Block</strong></td><td>840,000 (Bitcoin mainnet halving block)</td></tr>
+        <tr><td><strong>Author</strong></td><td>Casey Rodarmor</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="file-mapping">2. Upstream File & Symbol Mapping</h2>
+  <p>
+    The table below establishes exact traceability from our documentation rules and tools to the reference Rust codebase:
+  </p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Rule</th><th>Title</th><th>Upstream Rust File</th><th>Symbol</th><th>Reference Test</th></tr>
+      </thead>
+      <tbody>
+        {provenanceData.records.map((r: any) => (
+          <tr>
+            <td><strong>{r.ruleId}</strong></td>
+            <td>{r.title}</td>
+            <td><code>{r.ordSourcePath}</code></td>
+            <td><code>{r.symbol}</code></td>
+            <td><code>{r.upstreamTest}</code></td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="drift-monitoring">3. Drift Detection & Freshness</h2>
+  <p>
+    To guarantee that this documentation never drifts from upstream consensus changes or new <code>ord</code> releases, our GitHub Actions pipeline executes an automated upstream drift audit (<code>.github/workflows/drift.yml</code>).
+    Any modification to the <code>ordinals</code> crate or rune updater in new releases triggers immediate review and versioned documentation updates.
+  </p>
+
+  <FeedbackWidget pageTitle="Source Provenance" />
+</BaseLayout>

@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'releases', text: 'Documentation Releases' },
+  { id: 'diff-2-3', text: 'What Changed in 3.0.0' },
+  { id: 'archive-policy', text: 'Archival & Immutability Policy' },
+];
+---
+
+<BaseLayout
+  title="Documentation Versions & Upgrades"
+  description="Historical documentation releases, version comparisons, and links to archived frozen versions of the Runes documentation."
+  currentRoute="versions.html"
+  kicker="Version Archive & Changelog"
+  toc={toc}
+>
+  <div class="status-line">
+    Access previous documentation versions and compare architectural changes.
+  </div>
+
+  <h2 id="releases">Documentation Releases</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Version</th><th>Release Date</th><th>Protocol Pin</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>v3.0.0</strong></td>
+          <td>2026-09-02</td>
+          <td>ord 0.29.0</td>
+          <td><span style="color: var(--accent); font-weight: 600;">Current (Latest)</span></td>
+          <td><a href={`${base}/`}>Active Site</a></td>
+        </tr>
+        <tr>
+          <td><strong>v2.0.0</strong></td>
+          <td>2025-06-15</td>
+          <td>ord 0.29.0</td>
+          <td><span style="color: var(--text-muted);">Archived (Frozen)</span></td>
+          <td><a href={`${base}/versions/2.0.0/`}>Browse v2.0.0 Archive →</a></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="diff-2-3">What Changed in 3.0.0</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Capability</th><th>Version 2.0.0</th><th>Version 3.0.0</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Design System</strong></td><td>Static stylesheet with basic dark mode toggle</td><td>Runic Ledger visual language, WCAG AA, engraved borders, responsive 3-column shell</td></tr>
+        <tr><td><strong>Core Engine</strong></td><td>Single browser decoder script</td><td>Unified typed <code>@bitcoinuniverse/runes-tools</code> pure TypeScript library</td></tr>
+        <tr><td><strong>Interactive Studio</strong></td><td>Simple decoder only</td><td>8 diagnostic modes (composer, decoder, raw tx parser, simulator, scrubber, autopsy, etc.)</td></tr>
+        <tr><td><strong>Safety Wizards</strong></td><td>None</td><td>3 guided wizards for Transfer safety, Mint readiness, and Etching commitments</td></tr>
+        <tr><td><strong>Education</strong></td><td>Single guide page</td><td>Runes Learning Academy with 7 tracks, quizzes, and local progress tracking</td></tr>
+        <tr><td><strong>Forensics</strong></td><td>Synthetic vectors only</td><td>Transaction Atlas with 12 verified mainnet case studies</td></tr>
+        <tr><td><strong>Developer Tooling</strong></td><td>None</td><td>TypeScript SDK, 10 runnable quickstarts, and local CLI</td></tr>
+        <tr><td><strong>AI Agents & MCP</strong></td><td>None</td><td>llms.txt, llms-full.txt, Agent Skill, and local stdio MCP server with 17 tools</td></tr>
+        <tr><td><strong>Offline Capability</strong></td><td>Online only</td><td>Progressive Web App (PWA) with Service Worker and downloadable ZIP bundle</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="archive-policy">Archival & Immutability Policy</h2>
+  <p>
+    Previous documentation releases are permanently archived at static subdirectories (such as <code>/versions/2.0.0/</code>).
+    Archived releases are never overwritten, modified, or redirected, guaranteeing that historical hyperlinks in papers, codebases, and forum discussions remain functional forever.
+  </p>
+
+  <FeedbackWidget pageTitle="Documentation Versions" />
+</BaseLayout>

@@ -1,0 +1,78 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'offline-first', text: '1. Offline-First Architecture' },
+  { id: 'pwa-install', text: '2. Installing the Web App' },
+  { id: 'download-pack', text: '3. Downloadable Documentation Bundle' },
+  { id: 'offline-test', text: '4. Testing Offline Capabilities' },
+];
+---
+
+<BaseLayout
+  title="Offline Mode & PWA Installation"
+  description="Guide to installing the Runes documentation as a Progressive Web App (PWA) or downloading the offline HTML bundle for air-gapped environments."
+  currentRoute="offline.html"
+  kicker="Offline-First Documentation"
+  toc={toc}
+>
+  <div class="status-line">
+    100% Offline Capable · Zero External Tracking · Air-gap safe.
+  </div>
+
+  <p class="lede">
+    The Runes Documentation Platform is engineered from the ground up as an offline-first resource. It requires no continuous internet connection, no external CDN dependencies, and no remote API calls.
+  </p>
+
+  <h2 id="offline-first">1. Offline-First Architecture</h2>
+  <p>
+    When you visit the site, an automated Service Worker (<code>sw.js</code>) caches:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li>All HTML pages (specification, reference, guide, studio, academy, etc.).</li>
+    <li>All stylesheets, system font fallbacks, and SVG icons.</li>
+    <li>The client-side search index and protocol JSON databases.</li>
+    <li>The full client-side JavaScript execution engine and decoders.</li>
+  </ul>
+
+  <h2 id="pwa-install">2. Installing the Web App</h2>
+  <p>
+    You can install this documentation directly as a standalone desktop application on Windows, macOS, Linux, Android, or iOS:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li>Click the <strong>Install</strong> icon in your browser address bar (Chrome, Edge, Brave) or select <strong>Add to Home Screen</strong> (Safari iOS).</li>
+    <li>The platform opens in a clean, dedicated window without browser chrome or URL bars.</li>
+    <li>Use <code>Ctrl+K</code> or <code>/</code> anywhere to invoke the instant command search.</li>
+  </ol>
+
+  <h2 id="download-pack">3. Downloadable Documentation Bundle</h2>
+  <p>
+    For secure, air-gapped signing machines or offline development environments:
+  </p>
+  <div class="callout callout-note">
+    <div class="callout-title">Complete Standalone Archive</div>
+    <p>
+      Download the static HTML documentation bundle: <a href={`${base}/runes-docs-v3.0.0.zip`}><strong>runes-docs-v3.0.0.zip</strong></a>.
+    </p>
+    <p style="margin-bottom: 0; font-size: 0.8125rem; color: var(--text-muted);">
+      Extract the archive and open <code>index.html</code> in any web browser. Every interactive tool, studio mode, and reference search works without a local web server.
+    </p>
+  </div>
+
+  <h2 id="offline-test">4. Testing Offline Capabilities</h2>
+  <p>
+    To verify offline readiness:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li>Open developer tools (F12) and toggle network to <strong>Offline</strong> (or disconnect your network cable).</li>
+    <li>Navigate to the <a href={`${base}/studio.html`}>Runestone Studio</a> and decipher any script hex.</li>
+    <li>Open the command center (<code>/</code>) and search for any rule or vector.</li>
+    <li>All calculations, parsing, and searches execute with zero latency.</li>
+  </ol>
+
+  <FeedbackWidget pageTitle="Offline Mode" />
+</BaseLayout>

@@ -1,0 +1,443 @@
+[
+  {
+    "id": "basics",
+    "slug": "basics",
+    "title": "Runes in 10 Minutes",
+    "order": 1,
+    "audience": "Anyone new to Runes who wants an accurate, hype-free mental model.",
+    "prerequisites": "Basic familiarity with Bitcoin transactions and UTXOs.",
+    "outcomes": "Explain how runestones live in Bitcoin outputs, how balances move, and why cenotaphs exist.",
+    "estimatedMinutes": 10,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "UTXOs, Not Account Balances",
+        "summary": "Rune units are held by Bitcoin outpoints. Spending an outpoint spends its runes.",
+        "ruleRefs": [
+          "R44"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "The Carrier Script",
+        "summary": "OP_RETURN OP_13 identifies the runestone. All data pushes concatenate into the payload.",
+        "ruleRefs": [
+          "R1",
+          "R4"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "The Four Lifecycle Events",
+        "summary": "Etch, mint, transfer, and burn: the four operations in the protocol.",
+        "ruleRefs": [
+          "R20",
+          "R32",
+          "R38",
+          "R41"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Cenotaphs and Upgrade Safety",
+        "summary": "Malformed messages burn balances rather than misallocating them.",
+        "ruleRefs": [
+          "R45",
+          "R46"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "Where are rune balances stored on Bitcoin?",
+        "options": [
+          "In a global smart contract account",
+          "On transaction outpoints (UTXOs), alongside satoshis",
+          "Inside the OP_RETURN script itself",
+          "In an offchain database operated by miners"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R44 states that balances are per rune, per outpoint. The OP_RETURN runestone carries instructions, not a vault."
+      },
+      {
+        "question": "What happens if a runestone contains a malformed field producing a cenotaph?",
+        "options": [
+          "The Bitcoin transaction is rejected by miners",
+          "All input runes in the transaction are burned",
+          "The invalid field is skipped and remaining edicts execute",
+          "Runes automatically return to the sender"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R45 states that in a cenotaph transaction, every input rune balance and every minted or premined amount is burned."
+      }
+    ]
+  },
+  {
+    "id": "inspect",
+    "slug": "inspect",
+    "title": "Inspect a Runestone Safely",
+    "order": 2,
+    "audience": "Users, operators, and analysts verifying raw scripts before signing or indexing.",
+    "prerequisites": "Understanding of hex encoding and Bitcoin script opcodes.",
+    "outcomes": "Dissect carrier scripts byte by byte, extract varints, decode tags, and identify flaws.",
+    "estimatedMinutes": 15,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Finding the Runestone in a Transaction",
+        "summary": "Search outputs in order for OP_RETURN OP_13; the first match controls.",
+        "ruleRefs": [
+          "R1",
+          "R2",
+          "R3"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Payload Push Opcodes",
+        "summary": "Distinguish pushdata opcodes from non-pushdata opcodes that trigger flaw Opcode.",
+        "ruleRefs": [
+          "R4",
+          "R5",
+          "R6"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "LEB128 Varint Decoding",
+        "summary": "Decode up to 19 bytes per integer, observing the 19th-byte overflow mask.",
+        "ruleRefs": [
+          "R8",
+          "R9",
+          "R10"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Tag Queue Consumption",
+        "summary": "Observe how even tags require full consumption while odd tags degrade silently.",
+        "ruleRefs": [
+          "R14",
+          "R16",
+          "R17"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "What opcode sequence starts an authentic Runes carrier script?",
+        "options": [
+          "0x6a 0x13",
+          "0x6a 0x5d (OP_RETURN OP_13)",
+          "0x00 0x14",
+          "0x6a 0x00"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R1 specifies OP_RETURN (0x6a) followed immediately by OP_13 (0x5d)."
+      }
+    ]
+  },
+  {
+    "id": "transfer",
+    "slug": "transfer",
+    "title": "Transfer Runes Safely",
+    "order": 3,
+    "audience": "Users and wallet integrators sending or batching rune balances.",
+    "prerequisites": "Runes in 10 Minutes track.",
+    "outcomes": "Construct edicts, handle delta encoding, avoid change loss, and calculate splits safely.",
+    "estimatedMinutes": 20,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Edict Quadruple Anatomy",
+        "summary": "Block delta, tx delta/index, amount, and output index.",
+        "ruleRefs": [
+          "R34"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Delta Encoding Mechanics",
+        "summary": "How accumulating block and transaction deltas saves payload bytes.",
+        "ruleRefs": [
+          "R34"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "The Output 0 Default Footgun",
+        "summary": "Why unallocated runes go to the first non-OP_RETURN output unless a pointer directs them.",
+        "ruleRefs": [
+          "R39",
+          "R42"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Sweeps and Splits",
+        "summary": "Amount 0 sweeps remaining balance; output equal to output count splits.",
+        "ruleRefs": [
+          "R38"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "Where do unallocated runes go if no pointer is specified?",
+        "options": [
+          "They are permanently burned",
+          "They go to the first non-OP_RETURN spendable output",
+          "They stay on the input outpoint",
+          "They are split among all outputs"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R39 and R42 state that without a pointer, unallocated runes go to the first non-OP_RETURN output."
+      }
+    ]
+  },
+  {
+    "id": "mint",
+    "slug": "mint",
+    "title": "Understand and Evaluate a Mint",
+    "order": 4,
+    "audience": "Users evaluating mint eligibility and developers building mint checkers.",
+    "prerequisites": "Familiarity with block height and transaction indexing.",
+    "outcomes": "Calculate effective mint start and end windows, evaluate caps, and detect silent mint failures.",
+    "estimatedMinutes": 15,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Tag 20 Mint Pair",
+        "summary": "Mint tag requires exactly two values: target block and tx index.",
+        "ruleRefs": [
+          "R31"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Window Intersection Rules",
+        "summary": "Start is the maximum of absolute and offset bounds; end is the minimum.",
+        "ruleRefs": [
+          "R32"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Exclusive End Height",
+        "summary": "Minting at the exact end height is closed and fails.",
+        "ruleRefs": [
+          "R32"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Silent Failure Semantics",
+        "summary": "An invalid or closed mint does not error or burn: it produces nothing.",
+        "ruleRefs": [
+          "R33"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "If a mint has HeightEnd set to block 850,000, can a transaction mint at block 850,000?",
+        "options": [
+          "Yes, end height is inclusive",
+          "No, end height is strictly exclusive",
+          "Yes, if the transaction is confirmed before block 850,001",
+          "Only if the cap has not been reached"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R32 specifies that the end height is exclusive: minting at block height equal to end fails."
+      }
+    ]
+  },
+  {
+    "id": "etch",
+    "slug": "etch",
+    "title": "Plan an Etching",
+    "order": 5,
+    "audience": "Creators, asset architects, and tooling builders creating new runes.",
+    "prerequisites": "Understanding of Bitcoin Taproot commitments and confirmation windows.",
+    "outcomes": "Encode rune names, calculate commitment data pushes, check unlock schedules, and prevent supply overflow.",
+    "estimatedMinutes": 25,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Name Encoding in Modified Base 26",
+        "summary": "A through Z to numeric integer conversion.",
+        "ruleRefs": [
+          "R21",
+          "R22"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "The Commit-Reveal Sequence",
+        "summary": "Taproot tapscript data push confirmed at least 6 blocks earlier.",
+        "ruleRefs": [
+          "R28"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Unlock Schedule Milestones",
+        "summary": "13-letter minimum at block 840,000 stepping down to single letters at block 1,050,000.",
+        "ruleRefs": [
+          "R30"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Divisibility, Symbol, and Spacers",
+        "summary": "Formatting rules and maximum allowed ranges.",
+        "ruleRefs": [
+          "R23",
+          "R24",
+          "R25"
+        ]
+      },
+      {
+        "id": "5",
+        "title": "Supply Overflow Math",
+        "summary": "Enforcing premine + cap * amount <= u128::MAX.",
+        "ruleRefs": [
+          "R27"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "How many confirmations must an etching commitment have before the reveal transaction?",
+        "options": [
+          "1 confirmation",
+          "At least 6 confirmations",
+          "12 confirmations",
+          "No wait is required"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rule R28 mandates COMMIT_CONFIRMATIONS = 6: the output spent must be confirmed at least 6 blocks before the etching block."
+      }
+    ]
+  },
+  {
+    "id": "developers",
+    "slug": "developers",
+    "title": "Build a Wallet or Application Integration",
+    "order": 6,
+    "audience": "Wallet architects, frontend engineers, and Bitcoin backend developers.",
+    "prerequisites": "TypeScript/JavaScript and Bitcoin transaction serialization experience.",
+    "outcomes": "Integrate @bitcoinuniverse/runes-tools, manage cardinal inputs, build safe review screens, and prevent balance destruction.",
+    "estimatedMinutes": 30,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Rune Outpoint Inventory",
+        "summary": "Track UTXO rune balances separately to avoid spending rune UTXOs as fee inputs.",
+        "ruleRefs": [
+          "R44"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "Runestone Assembly Pipeline",
+        "summary": "Encode edicts, sort by RuneId, calculate minimal varints, and assemble scriptPubKey.",
+        "ruleRefs": [
+          "R4",
+          "R34"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Pre-Signing Validation Gate",
+        "summary": "Decode built runestones locally before requesting signatures.",
+        "ruleRefs": [
+          "R17",
+          "R45"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Avoiding Blind Signing",
+        "summary": "Surface exact rune amounts, change destination, and burn warnings to users.",
+        "ruleRefs": [
+          "R38",
+          "R41"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "Why must a wallet maintain a separate rune outpoint inventory?",
+        "options": [
+          "To display token logos",
+          "To prevent rune-bearing UTXOs from being consumed as ordinary fee inputs",
+          "To broadcast transactions faster",
+          "To bypass the dust limit"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rune-unaware coin selection destroys value: spending a rune-bearing UTXO as fee releases its runes into the unallocated pool where they follow output 0."
+      }
+    ]
+  },
+  {
+    "id": "indexers",
+    "slug": "indexers",
+    "title": "Build or Operate a Runes Indexer",
+    "order": 7,
+    "audience": "Backend engineers and infrastructure operators indexing Bitcoin blocks.",
+    "prerequisites": "Bitcoin Core RPC knowledge and relational or key-value storage design.",
+    "outcomes": "Implement state transitions, handle reorgs via savepoint rewinding, compute allocations, and maintain zero-drift consensus.",
+    "estimatedMinutes": 35,
+    "lessons": [
+      {
+        "id": "1",
+        "title": "Block Processing Sequence",
+        "summary": "Process transactions strictly in block order starting from block 840,000.",
+        "ruleRefs": [
+          "R43",
+          "R44"
+        ]
+      },
+      {
+        "id": "2",
+        "title": "The Six State Transition Steps",
+        "summary": "Gather unallocated, apply mint, apply etching, process edicts, assign remainder, record burns.",
+        "ruleRefs": [
+          "R40",
+          "R41",
+          "R45"
+        ]
+      },
+      {
+        "id": "3",
+        "title": "Reorg Handling via Savepoint Rollback",
+        "summary": "Rewind state on block hash mismatch rather than patching in-place.",
+        "ruleRefs": [
+          "R43"
+        ]
+      },
+      {
+        "id": "4",
+        "title": "Verification Against Test Vectors",
+        "summary": "Automate conformance runs against vectors V1-V8 and C1-C14.",
+        "ruleRefs": [
+          "R47"
+        ]
+      }
+    ],
+    "quiz": [
+      {
+        "question": "How does a conformant Runes indexer handle a blockchain reorganization?",
+        "options": [
+          "By deleting historical blocks and starting from genesis",
+          "By rewinding to a confirmed savepoint before the fork and re-indexing forward",
+          "By ignoring the reorg if it is under 6 blocks",
+          "By mutating balances with delta patches"
+        ],
+        "correctIndex": 1,
+        "explanation": "Rune state is derived from the chain. Indexers rewind to a database savepoint before the split and re-index forward using block hashes."
+      }
+    ]
+  }
+]

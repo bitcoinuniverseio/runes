@@ -1,0 +1,138 @@
+[
+  {
+    "tag": 0,
+    "name": "Body",
+    "parity": "even",
+    "values": "rest",
+    "description": "Marks the start of the edicts. Everything after it is edict groups (R15).",
+    "ruleRef": "R15"
+  },
+  {
+    "tag": 2,
+    "name": "Flags",
+    "parity": "even",
+    "values": "1",
+    "description": "Bitfield: bit 0 Etching, bit 1 Terms, bit 2 Turbo, bit 127 reserved (R18).",
+    "ruleRef": "R18"
+  },
+  {
+    "tag": 4,
+    "name": "Rune",
+    "parity": "even",
+    "values": "1",
+    "description": "The etched rune's name as a base-26 integer (R21). Requires the Etching flag.",
+    "ruleRef": "R21"
+  },
+  {
+    "tag": 6,
+    "name": "Premine",
+    "parity": "even",
+    "values": "1",
+    "description": "Atomic units allocated to the etching transaction itself. u128. Requires the Etching flag.",
+    "ruleRef": "R26"
+  },
+  {
+    "tag": 8,
+    "name": "Cap",
+    "parity": "even",
+    "values": "1",
+    "description": "Maximum number of mints. u128. Requires the Etching and Terms flags.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 10,
+    "name": "Amount",
+    "parity": "even",
+    "values": "1",
+    "description": "Atomic units created per mint. u128. Requires the Etching and Terms flags.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 12,
+    "name": "HeightStart",
+    "parity": "even",
+    "values": "1",
+    "description": "Absolute first block in which minting is allowed. Must fit u64. Requires Etching and Terms.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 14,
+    "name": "HeightEnd",
+    "parity": "even",
+    "values": "1",
+    "description": "Absolute block at and after which minting is disallowed. Must fit u64. Requires Etching and Terms.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 16,
+    "name": "OffsetStart",
+    "parity": "even",
+    "values": "1",
+    "description": "Mint opens this many blocks after the etching block. Must fit u64. Requires Etching and Terms.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 18,
+    "name": "OffsetEnd",
+    "parity": "even",
+    "values": "1",
+    "description": "Mint closes this many blocks after the etching block. Must fit u64. Requires Etching and Terms.",
+    "ruleRef": "R32"
+  },
+  {
+    "tag": 20,
+    "name": "Mint",
+    "parity": "even",
+    "values": "2",
+    "description": "The rune ID to mint, given as two values: block, then transaction index (R31).",
+    "ruleRef": "R31"
+  },
+  {
+    "tag": 22,
+    "name": "Pointer",
+    "parity": "even",
+    "values": "1",
+    "description": "Output index that receives unallocated runes. Must fit u32 and be less than the output count (R39).",
+    "ruleRef": "R39"
+  },
+  {
+    "tag": 126,
+    "name": "Cenotaph",
+    "parity": "even",
+    "values": "1",
+    "description": "Reserved. Unrecognized by definition; its presence makes the transaction a cenotaph (R17).",
+    "ruleRef": "R17"
+  },
+  {
+    "tag": 1,
+    "name": "Divisibility",
+    "parity": "odd",
+    "values": "1",
+    "description": "Decimal places, 0 to 38. Out-of-range values are ignored. Requires the Etching flag.",
+    "ruleRef": "R23"
+  },
+  {
+    "tag": 3,
+    "name": "Spacers",
+    "parity": "odd",
+    "values": "1",
+    "description": "Bitmap of spacer dots between name letters, at most 0x07FFFFFF. Out-of-range ignored. Requires Etching.",
+    "ruleRef": "R24"
+  },
+  {
+    "tag": 5,
+    "name": "Symbol",
+    "parity": "odd",
+    "values": "1",
+    "description": "Currency symbol as a Unicode scalar value. Invalid values are ignored. Requires Etching.",
+    "ruleRef": "R25"
+  },
+  {
+    "tag": 127,
+    "name": "Nop",
+    "parity": "odd",
+    "values": "1",
+    "description": "Reserved no-op. Ignored.",
+    "ruleRef": "R16"
+  }
+]

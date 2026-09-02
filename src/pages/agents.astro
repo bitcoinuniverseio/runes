@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'agent-first', text: '1. Agent-First Architecture' },
+  { id: 'manifests', text: '2. Machine Indexes: llms.txt and skill.md' },
+  { id: 'mcp-server', text: '3. Model Context Protocol (MCP) Server' },
+  { id: 'mcp-tools', text: '4. The 17 MCP Tools' },
+  { id: 'mcp-config', text: '5. Configuring Antigravity & Claude Desktop' },
+];
+---
+
+<BaseLayout
+  title="Agent-Ready Documentation Suite & MCP"
+  description="Machine-readable documentation formats, llms.txt, Agent Skills, and Model Context Protocol (MCP) stdio server for AI coding agents."
+  currentRoute="agents.html"
+  kicker="Machine Documentation & Model Context Protocol"
+  toc={toc}
+>
+  <div class="status-line">
+    Standardized machine endpoints · 17 typed MCP tools · Native integration for AI coding assistants.
+  </div>
+
+  <h2 id="agent-first">1. Agent-First Architecture</h2>
+  <p>
+    Runes Documentation Platform 3.0 treats AI coding agents and automated developer tools as first-class consumers. Every page, rule, tag, flaw, test vector, and transaction case is backed by structured JSON data with strict schemas.
+  </p>
+
+  <h2 id="manifests">2. Machine Indexes: llms.txt and skill.md</h2>
+  <p>
+    For large language models and autonomous agents, we publish clean markdown mirrors:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><a href={`${base}/llms.txt`} target="_blank"><strong>/runes/llms.txt</strong></a>: Concise agent overview, table of contents, and key invariants formatted for LLM context limits.</li>
+    <li><a href={`${base}/llms-full.txt`} target="_blank"><strong>/runes/llms-full.txt</strong></a>: Complete, unrolled technical specification containing all 47 rules, tags, flaws, and vectors in a single document.</li>
+    <li><a href={`${base}/skill.md`} target="_blank"><strong>/runes/skill.md</strong></a>: Official Agent Skill definition for Google Antigravity, Claude Code, and autonomous developer agents.</li>
+    <li><a href={`${base}/docs.manifest.json`} target="_blank"><strong>/runes/docs.manifest.json</strong></a>: Complete machine manifest with file hashes and routing.</li>
+  </ul>
+
+  <h2 id="mcp-server">3. Model Context Protocol (MCP) Server</h2>
+  <p>
+    The <code>@bitcoinuniverse/runes-docs-mcp</code> package implements a local <code>stdio</code> MCP server exposing 17 deterministic protocol tools.
+  </p>
+  <pre><code># Run the MCP server locally
+npx @bitcoinuniverse/runes-docs-mcp</code></pre>
+
+  <h2 id="mcp-tools">4. The 17 MCP Tools</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Tool Name</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>get_rule</code></td><td>Retrieves full text, ord source file, and flaw triggers for any rule (R1 through R47).</td></tr>
+        <tr><td><code>get_tag</code></td><td>Returns tag details, parity, value range, and behavior.</td></tr>
+        <tr><td><code>get_flaw</code></td><td>Explains a cenotaph flaw, its trigger conditions, and burn consequences.</td></tr>
+        <tr><td><code>get_vector</code></td><td>Retrieves test vector details, script hex, and expected decoding.</td></tr>
+        <tr><td><code>get_fixture</code></td><td>Returns chain-level fixture details and consensus assertions.</td></tr>
+        <tr><td><code>get_case</code></td><td>Fetches real transaction atlas case studies from mainnet.</td></tr>
+        <tr><td><code>get_glossary_term</code></td><td>Retrieves authoritative definition and rule citations for protocol terms.</td></tr>
+        <tr><td><code>decode_script</code></td><td>Deciphers raw script hex into structured Runestone fields and checks for flaws.</td></tr>
+        <tr><td><code>encode_runestone</code></td><td>Enciphers structured fields into minimal OP_RETURN script hex.</td></tr>
+        <tr><td><code>inspect_raw_transaction</code></td><td>Parses raw Bitcoin transactions and deciphers any embedded runestones.</td></tr>
+        <tr><td><code>simulate_allocation</code></td><td>Simulates state machine balance transitions across outputs.</td></tr>
+        <tr><td><code>analyze_size</code></td><td>Audits script byte size against Bitcoin Core relay limits.</td></tr>
+        <tr><td><code>explain_bytes</code></td><td>Breaks down raw hex byte-by-byte with technical explanations.</td></tr>
+        <tr><td><code>compare_runestones</code></td><td>Diffs two script hexes side-by-side.</td></tr>
+        <tr><td><code>run_conformance</code></td><td>Executes all 24 vectors and returns structured test results.</td></tr>
+        <tr><td><code>query_protocol</code></td><td>Natural language search across the offline protocol knowledge base.</td></tr>
+        <tr><td><code>get_provenance</code></td><td>Returns upstream ord source commits, file mappings, and test locations.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="mcp-config">5. Configuring Antigravity & Claude Desktop</h2>
+  <p>
+    Add the server to your <code>mcpSettings.json</code> or Claude Desktop configuration:
+  </p>
+  <pre is:raw><code>{
+  "mcpServers": {
+    "runes-docs": {
+      "command": "node",
+      "args": ["D:/universe/worktrees/runes-docs-v3/packages/runes-docs-mcp/dist/index.js"]
+    }
+  }
+}</code></pre>
+
+  <FeedbackWidget pageTitle="Agent-Ready Documentation Suite & MCP" />
+</BaseLayout>

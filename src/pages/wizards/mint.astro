@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WizardIsland from '../../components/WizardIsland.astro';
+import Callout from '../../components/Callout.astro';
+import FeedbackWidget from '../../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'wizard', text: 'Mint Readiness Wizard' },
+  { id: 'windows', text: 'Evaluating Mint Windows' },
+  { id: 'reorg-risk', text: 'Reorg & Cap Exhaustion Risk' },
+];
+---
+
+<BaseLayout
+  title="Mint Readiness Wizard"
+  description="Evaluate open mint terms, height boundaries, offset windows, cap exhaustion, and fee volatility before broadcasting a mint transaction."
+  currentRoute="wizards/mint.html"
+  kicker="Guided Safety Wizards"
+  toc={toc}
+>
+  <div class="status-line">
+    Mint term verification · Reorg risk analysis · Non-refundable fee protection.
+  </div>
+
+  <h2 id="wizard">Mint Readiness Wizard</h2>
+  <p>
+    Before spending Bitcoin transaction fees on a mint transaction, verify that the target rune's mint cap has not been exhausted and that the current block height falls inside the open window.
+  </p>
+
+  <WizardIsland type="mint" />
+
+  <h2 id="windows">Evaluating Mint Windows</h2>
+  <p>
+    Mint terms can specify both absolute block heights and relative block offsets:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><strong>Absolute Height (Tags 12 & 14):</strong> The mint is valid only while <code>heightStart &lt;= blockHeight &lt; heightEnd</code>.</li>
+    <li><strong>Relative Offset (Tags 16 & 18):</strong> The mint is valid only while <code>etchingBlock + offsetStart &lt;= blockHeight &lt; etchingBlock + offsetEnd</code>.</li>
+  </ul>
+
+  <h2 id="reorg-risk">Reorg & Cap Exhaustion Risk</h2>
+  <Callout type="warning" title="Mining Fees Are Non-Refundable">
+    <p>
+      If multiple transactions compete for the final units of a mint cap, miners prioritize transactions with higher fee rates. If your mint confirms after the cap is exhausted, ord indexes 0 units minted and your transaction fee cannot be recovered.
+    </p>
+  </Callout>
+
+  <FeedbackWidget pageTitle="Mint Readiness Wizard" />
+</BaseLayout>

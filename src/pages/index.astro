@@ -1,0 +1,139 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'what-are-runes', text: 'What Are Runes?' },
+  { id: 'mental-model', text: 'The UTXO Mental Model' },
+  { id: 'platform-tools', text: 'Documentation & Tools Platform' },
+  { id: 'invariants', text: 'Core Consensus Invariants' },
+  { id: 'support-matrix', text: 'Ecosystem & Protocol Support' },
+];
+---
+
+<BaseLayout
+  title="Runes: The UTXO-Native Fungible Token Protocol"
+  description="Authoritative, interactive, developer-ready documentation and tooling platform for Runes on Bitcoin."
+  currentRoute="index.html"
+  kicker="Bitcoin Protocol Documentation"
+  toc={toc}
+>
+  <div class="status-line">
+    Pinned to Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> 0.29.0 · Bitcoin Mainnet Activation: Block 840,000 (2024-04-20).
+  </div>
+
+  <h2 id="what-are-runes">What Are Runes?</h2>
+  <p>
+    Runes is a simple, UTXO-native fungible token protocol designed specifically for Bitcoin.
+    Unlike account-based token standards or protocols that store arbitrary data blobs in transaction witnesses, Runes operates directly on Bitcoin's Unspent Transaction Output (UTXO) set.
+  </p>
+  <p>
+    A Runes transaction communicates state transitions through a single <code>OP_RETURN</code> output followed by <code>OP_13</code> (push byte <code>0x5d</code>).
+    This payload, called a <strong>Runestone</strong>, contains unsigned LEB128 varints specifying etchings, mints, and transfers (edicts).
+  </p>
+
+  <Callout type="invariant" title="Prunable and Safe for Node Operators">
+    <p>
+      Because Runestones are carried in standard <code>OP_RETURN</code> outputs, Bitcoin nodes can prune them immediately from the UTXO set. Runes does not leave unspendable "dust" UTXOs on the blockchain to store token balances. All token balances reside in legitimate, spendable Bitcoin UTXOs.
+    </p>
+  </Callout>
+
+  <h2 id="mental-model">The UTXO Mental Model</h2>
+  <p>
+    Every Runes transaction operates as a deterministic, single-step state machine:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Gather:</strong> All rune balances across all spent inputs drain into a transaction-wide unallocated balance pool.</li>
+    <li><strong>Mint or Etch:</strong> Any active mint instruction or etching premine adds new units to the unallocated pool.</li>
+    <li><strong>Edict Allocation:</strong> The Runestone executes an ordered list of <em>edicts</em>, assigning specified amounts of runes from the pool to specified output indices.</li>
+    <li><strong>Remainder Routing:</strong> Any runes remaining in the pool after edicts execute route automatically to the output specified by the <strong>Pointer</strong> (Tag 22), or fall back to the first non-OP_RETURN output.</li>
+    <li><strong>Cenotaph Safety:</strong> If the Runestone contains malformed varints, unrecognized even tags, or out-of-bounds outputs, the entire transaction is classified as a <strong>Cenotaph</strong>, and all input runes are permanently burned.</li>
+  </ol>
+
+  <h2 id="platform-tools">Documentation & Tools Platform</h2>
+  <p>
+    Runes Documentation Platform 3.0 provides a comprehensive suite of developer tools, interactive simulators, and authoritative reference material:
+  </p>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/specification.html`}>Normative Specification</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Complete, numbered rules R1 through R47, tag dictionaries, flag bitfields, and cenotaph flaw tables pinned to ord 0.29.0.
+      </p>
+      <a href={`${base}/specification.html`} style="font-size: 0.8125rem; font-weight: 600;">Read Specification →</a>
+    </div>
+
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/studio.html`}>Runestone Studio</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        8 interactive diagnostic modes: script decoder, raw tx parser, visual composer, allocation simulator, byte scrubber, and autopsy.
+      </p>
+      <a href={`${base}/studio.html`} style="font-size: 0.8125rem; font-weight: 600;">Open Studio →</a>
+    </div>
+
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/wizards/transfer.html`}>Guided Safety Wizards</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Interactive step-by-step planners for Transfers, Mint Readiness, and Etching commitments with live cenotaph risk detection.
+      </p>
+      <a href={`${base}/wizards/transfer.html`} style="font-size: 0.8125rem; font-weight: 600;">Launch Wizards →</a>
+    </div>
+
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/learn.html`}>Learning Academy</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        7 structured tracks from basics to indexer architecture, featuring quizzes, exercises, and local progress tracking.
+      </p>
+      <a href={`${base}/learn.html`} style="font-size: 0.8125rem; font-weight: 600;">Start Learning →</a>
+    </div>
+
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/atlas.html`}>Transaction Atlas</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        12 verified mainnet transactions dissecting genesis mints, multi-rune transfers, cenotaph burns, and reorg safety.
+      </p>
+      <a href={`${base}/atlas.html`} style="font-size: 0.8125rem; font-weight: 600;">Explore Atlas →</a>
+    </div>
+
+    <div style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+      <h3 style="margin-top: 0; font-size: 1.1rem;"><a href={`${base}/developers.html`}>Developer Hub & SDK</a></h3>
+      <p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.5rem;">
+        Typed <code>@bitcoinuniverse/runes-tools</code> library, 10 tested quickstarts, and local CLI for automated CI pipelines.
+      </p>
+      <a href={`${base}/developers.html`} style="font-size: 0.8125rem; font-weight: 600;">View SDK & Quickstarts →</a>
+    </div>
+  </div>
+
+  <h2 id="invariants">Core Consensus Invariants</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Concept</th><th>Rule Ref</th><th>Behavior & Guarantees</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Carrier</strong></td><td>R1–R3</td><td>Output begins with <code>OP_RETURN OP_13</code>. First matching output wins; extras are ignored.</td></tr>
+        <tr><td><strong>Encoding</strong></td><td>R8–R11</td><td>Unsigned LEB128 varints up to 128-bit integers. Minimal encoding recommended.</td></tr>
+        <tr><td><strong>Tag Parity</strong></td><td>R16–R17</td><td>Odd tags may be ignored; unrecognized even tags trigger immediate cenotaph.</td></tr>
+        <tr><td><strong>Commitment</strong></td><td>R27–R28</td><td>Named etchings require 6-block Taproot commitment. Early reveal defaults to reserved sequence name.</td></tr>
+        <tr><td><strong>Cenotaphs</strong></td><td>R45</td><td>Any malformation burns all input runes and prevents minting of newly etched runes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="support-matrix">Ecosystem & Protocol Support</h2>
+  <p>
+    The Runes protocol is supported natively across the Bitcoin developer ecosystem:
+  </p>
+  <ul style="padding-left: 1.5rem;">
+    <li><strong>Reference Implementation:</strong> Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> (version 0.29.0+).</li>
+    <li><strong>Ecosystem Indexers:</strong> ordinals, Unisat Indexer, Oyl Indexer.</li>
+    <li><strong>Explorers:</strong> ordinals.com, mempool.space, runescan.io.</li>
+    <li><strong>Client Tooling:</strong> <code>@bitcoinuniverse/runes-tools</code> (TypeScript), <code>ordinals</code> crate (Rust).</li>
+  </ul>
+
+  <FeedbackWidget pageTitle="Runes Protocol Overview" />
+</BaseLayout>

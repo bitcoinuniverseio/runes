@@ -1,0 +1,45 @@
+---
+interface Props {
+  pageTitle?: string;
+}
+
+const { pageTitle = 'Page' } = Astro.props;
+---
+
+<div class="feedback-widget" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm); margin-top: 3rem; margin-bottom: 2rem; font-family: var(--font-sans);">
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h4 style="margin: 0; font-size: 0.9375rem; color: var(--text);">Was this page technically accurate and helpful?</h4>
+      <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted);">Your feedback helps maintain rigorous consensus documentation.</p>
+    </div>
+    <div style="display: flex; gap: 0.5rem;" id="feedback-buttons">
+      <button type="button" id="fb-yes-btn" class="page-action-btn">Yes</button>
+      <button type="button" id="fb-no-btn" class="page-action-btn">Report Issue</button>
+    </div>
+  </div>
+  <div id="fb-response" style="display: none; margin-top: 0.75rem; font-size: 0.8125rem; color: var(--accent);">
+    Thank you for your feedback!
+  </div>
+</div>
+
+<script>
+  const yesBtn = document.getElementById('fb-yes-btn');
+  const noBtn = document.getElementById('fb-no-btn');
+  const res = document.getElementById('fb-response');
+
+  if (yesBtn && res) {
+    yesBtn.addEventListener('click', () => {
+      yesBtn.style.display = 'none';
+      if (noBtn) noBtn.style.display = 'none';
+      res.style.display = 'block';
+    });
+  }
+
+  if (noBtn) {
+    noBtn.addEventListener('click', () => {
+      const title = encodeURIComponent(`Documentation Feedback: ${document.title}`);
+      const body = encodeURIComponent(`URL: ${window.location.href}\n\nPlease describe what was inaccurate, missing, or confusing:`);
+      window.open(`https://github.com/bitcoinuniverseio/runes/issues/new?title=${title}&body=${body}`, '_blank');
+    });
+  }
+</script>

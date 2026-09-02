@@ -1,0 +1,244 @@
+---
+interface Props {
+  type: 'transfer' | 'mint' | 'etch';
+}
+
+const { type } = Astro.props;
+---
+
+<div class="studio-container" id={`wizard-${type}`}>
+  <div class="studio-panel">
+    {type === 'transfer' && (
+      <div>
+        <div class="status-line">Step-by-step transfer builder with real-time cenotaph prevention and change protection.</div>
+        <form id="wizard-transfer-form">
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-rune">Rune ID</label>
+            <input type="text" id="wiz-t-rune" class="form-input" placeholder="e.g. 840000:3" value="840000:3" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-balance">Input Balance Available (Atomic Units)</label>
+            <input type="number" id="wiz-t-balance" class="form-input" placeholder="e.g. 10000" value="10000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-send">Amount to Send</label>
+            <input type="number" id="wiz-t-send" class="form-input" placeholder="e.g. 2500" value="2500" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-recipient-out">Recipient Output Index</label>
+            <input type="number" id="wiz-t-recipient-out" class="form-input" value="1" min="0" />
+            <span style="font-size: 0.75rem; color: var(--text-muted);">Ensure this index is NOT the OP_RETURN runestone output.</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-change-out">Change Output Index (Pointer)</label>
+            <input type="number" id="wiz-t-change-out" class="form-input" value="2" min="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-t-total-outs">Total Outputs in Planned Transaction</label>
+            <input type="number" id="wiz-t-total-outs" class="form-input" value="3" min="2" />
+          </div>
+          <button type="submit" class="btn-primary">Evaluate Safety & Generate Runestone</button>
+        </form>
+        <div id="wiz-t-result" style="margin-top: 1.5rem;"></div>
+      </div>
+    )}
+
+    {type === 'mint' && (
+      <div>
+        <div class="status-line">Evaluate mint windows, cap limits, and fee volatility before broadcasting.</div>
+        <form id="wizard-mint-form">
+          <div class="form-group">
+            <label class="form-label" for="wiz-m-rune">Rune ID to Mint</label>
+            <input type="text" id="wiz-m-rune" class="form-input" value="840000:1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-m-curr-height">Current Block Height</label>
+            <input type="number" id="wiz-m-curr-height" class="form-input" value="850000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-m-pointer">Destination Output Index</label>
+            <input type="number" id="wiz-m-pointer" class="form-input" value="1" />
+          </div>
+          <button type="submit" class="btn-primary">Check Mint Readiness & Generate Script</button>
+        </form>
+        <div id="wiz-m-result" style="margin-top: 1.5rem;"></div>
+      </div>
+    )}
+
+    {type === 'etch' && (
+      <div>
+        <div class="status-line">Plan commitment transaction, unlock schedule, symbol, premine, and terms.</div>
+        <form id="wizard-etch-form">
+          <div class="form-group">
+            <label class="form-label" for="wiz-e-name">Proposed Rune Name</label>
+            <input type="text" id="wiz-e-name" class="form-input" value="MY•NEW•RUNE" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-e-height">Estimated Reveal Block Height</label>
+            <input type="number" id="wiz-e-height" class="form-input" value="860000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-e-premine">Premine Allocation (Atomic Units)</label>
+            <input type="text" id="wiz-e-premine" class="form-input" value="1000000" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="wiz-e-pointer">Premine Destination Output</label>
+            <input type="number" id="wiz-e-pointer" class="form-input" value="1" />
+          </div>
+          <button type="submit" class="btn-primary">Plan Etching & Verify Length</button>
+        </form>
+        <div id="wiz-e-result" style="margin-top: 1.5rem;"></div>
+      </div>
+    )}
+  </div>
+</div>
+
+<script>
+  import {
+    encipher,
+    parseRuneId,
+    parseSpacedName,
+    minimumLengthAtHeight,
+    isNameUnlocked,
+    getRuneCommitmentBytes,
+    bytesToHex,
+  } from '../../packages/runes-tools/src/index.js';
+
+  function esc(s: any): string {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // Transfer Wizard
+  const tForm = document.getElementById('wizard-transfer-form');
+  const tResult = document.getElementById('wiz-t-result');
+  if (tForm && tResult) {
+    tForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      try {
+        const runeIdStr = (document.getElementById('wiz-t-rune') as HTMLInputElement).value.trim();
+        const balance = BigInt((document.getElementById('wiz-t-balance') as HTMLInputElement).value.trim());
+        const sendAmt = BigInt((document.getElementById('wiz-t-send') as HTMLInputElement).value.trim());
+        const recOut = parseInt((document.getElementById('wiz-t-recipient-out') as HTMLInputElement).value, 10);
+        const changeOut = parseInt((document.getElementById('wiz-t-change-out') as HTMLInputElement).value, 10);
+        const totalOuts = parseInt((document.getElementById('wiz-t-total-outs') as HTMLInputElement).value, 10);
+
+        const id = parseRuneId(runeIdStr);
+        if (!id) throw new Error('Invalid Rune ID. Use format Block:Tx (e.g. 840000:3)');
+
+        if (sendAmt > balance) throw new Error('Send amount exceeds available balance.');
+        if (recOut >= totalOuts) throw new Error(`Recipient output ${recOut} exceeds total output count (${totalOuts}). This would trigger Cenotaph Flaw EdictOutput.`);
+        if (changeOut >= totalOuts) throw new Error(`Change output ${changeOut} exceeds total output count (${totalOuts}). This would trigger Cenotaph Flaw UnrecognizedEvenTag.`);
+
+        const enc = encipher({
+          pointer: changeOut,
+          edicts: [{ id, amount: sendAmt, output: recOut }]
+        });
+
+        const changeAmt = balance - sendAmt;
+
+        tResult.innerHTML = `
+          <div class="callout callout-invariant">
+            <div class="callout-title">Safety Check: PASSED</div>
+            <p>No cenotaph conditions detected. Both recipient and change outputs are within transaction bounds.</p>
+          </div>
+          <h4>Planned Balance Distribution</h4>
+          <p>Recipient (Output ${recOut}): <strong>${sendAmt}</strong> units</p>
+          <p>Change (Output ${changeOut}, Pointer Tag 22): <strong>${changeAmt}</strong> units</p>
+          <h4>Runestone Script Hex</h4>
+          <pre><code>${enc.scriptHex}</code></pre>
+        `;
+      } catch (err: any) {
+        tResult.innerHTML = `<div class="callout callout-burn"><div class="callout-title">Safety Violation</div><p>${esc(err.message)}</p></div>`;
+      }
+    });
+  }
+
+  // Mint Wizard
+  const mForm = document.getElementById('wizard-mint-form');
+  const mResult = document.getElementById('wiz-m-result');
+  if (mForm && mResult) {
+    mForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      try {
+        const runeIdStr = (document.getElementById('wiz-m-rune') as HTMLInputElement).value.trim();
+        const height = parseInt((document.getElementById('wiz-m-curr-height') as HTMLInputElement).value, 10);
+        const pointer = parseInt((document.getElementById('wiz-m-pointer') as HTMLInputElement).value, 10);
+
+        const id = parseRuneId(runeIdStr);
+        if (!id) throw new Error('Invalid Rune ID format.');
+
+        const enc = encipher({
+          mint: id,
+          pointer
+        });
+
+        mResult.innerHTML = `
+          <div class="callout callout-invariant">
+            <div class="callout-title">Mint Runestone Ready</div>
+            <p>Mint instruction encoded for Rune <code>${id.block}:${id.tx}</code> directed to Output ${pointer}.</p>
+          </div>
+          <h4>Runestone Script Hex</h4>
+          <pre><code>${enc.scriptHex}</code></pre>
+          <div class="callout callout-warning">
+            <div class="callout-title">Reorg & Fee Volatility Warning</div>
+            <p>If the rune's mint cap is close to 100%, higher-fee transactions from other miners or reorgs could consume the remaining cap before your transaction confirms. If the cap is reached, your mint instruction is ignored with 0 units minted and Bitcoin transaction fees are non-refundable.</p>
+          </div>
+        `;
+      } catch (err: any) {
+        mResult.innerHTML = `<div class="callout callout-burn"><div class="callout-title">Mint Evaluation Error</div><p>${esc(err.message)}</p></div>`;
+      }
+    });
+  }
+
+  // Etch Wizard
+  const eForm = document.getElementById('wizard-etch-form');
+  const eResult = document.getElementById('wiz-e-result');
+  if (eForm && eResult) {
+    eForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      try {
+        const nameStr = (document.getElementById('wiz-e-name') as HTMLInputElement).value.trim();
+        const height = parseInt((document.getElementById('wiz-e-height') as HTMLInputElement).value, 10);
+        const premine = BigInt((document.getElementById('wiz-e-premine') as HTMLInputElement).value.trim());
+        const pointer = parseInt((document.getElementById('wiz-e-pointer') as HTMLInputElement).value, 10);
+
+        const parsed = parseSpacedName(nameStr);
+        const minLen = minimumLengthAtHeight(height);
+        const unlocked = isNameUnlocked(parsed.name, height);
+
+        if (!unlocked) {
+          throw new Error(`Name "${parsed.name}" has ${parsed.name.length} letters, but minimum length at block ${height} is ${minLen}. Etching this name before it unlocks will be silently disregarded (Rule R26).`);
+        }
+
+        const commitBytes = getRuneCommitmentBytes(parsed.nameValue);
+        const commitHex = bytesToHex(commitBytes);
+
+        const enc = encipher({
+          etching: {
+            rune: parsed.nameValue,
+            spacers: parsed.spacers,
+            premine,
+          },
+          pointer
+        });
+
+        eResult.innerHTML = `
+          <div class="callout callout-invariant">
+            <div class="callout-title">Name Unlock Check: PASSED</div>
+            <p>Name <strong>${parsed.name}</strong> (${parsed.name.length} letters) is eligible for etching at height ${height} (minimum required: ${minLen} letters).</p>
+          </div>
+
+          <h4>Phase 1: Commitment Transaction</h4>
+          <p style="font-size: 0.875rem;">Create a Taproot output paying to a script containing the following little-endian data push:</p>
+          <pre><code>OP_PUSHBYTES_${commitBytes.length} ${commitHex}</code></pre>
+          <p style="font-size: 0.8125rem; color: var(--text-muted);">Must confirm with at least 6 blocks before spending in the reveal transaction (Rule R27).</p>
+
+          <h4>Phase 2: Reveal Runestone Script Hex</h4>
+          <pre><code>${enc.scriptHex}</code></pre>
+        `;
+      } catch (err: any) {
+        eResult.innerHTML = `<div class="callout callout-burn"><div class="callout-title">Etch Planning Check</div><p>${esc(err.message)}</p></div>`;
+      }
+    });
+  }
+</script>

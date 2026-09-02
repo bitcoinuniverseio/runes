@@ -1,0 +1,55 @@
+{
+  "name": "@bitcoinuniverse/runes-docs-platform",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Runes Documentation Platform 3.0: interactive, offline-capable, developer-ready, agent-ready protocol platform",
+  "packageManager": "npm@11.17.0",
+  "engines": {
+    "node": "24.19.0",
+    "npm": "11.17.0"
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node scripts/build.mjs",
+    "preview": "astro preview",
+    "test": "vitest run tests/unit",
+    "test:unit": "vitest run tests/unit",
+    "test:conformance": "vitest run tests/conformance",
+    "test:fixtures": "vitest run tests/conformance/fixtures.test.ts",
+    "test:differential": "vitest run tests/conformance/differential.test.ts",
+    "test:e2e": "node scripts/test-e2e.mjs",
+    "test:a11y": "node scripts/test-a11y.mjs",
+    "test:visual": "node scripts/test-visual.mjs",
+    "test:offline": "node scripts/test-offline.mjs",
+    "test:mcp": "vitest run packages/runes-docs-mcp",
+    "test:examples": "node scripts/test-examples.mjs",
+    "check:content": "node scripts/check-content.mjs",
+    "check:links": "node scripts/check-links.mjs",
+    "check:anchors": "node scripts/check-anchors.mjs",
+    "check:routes": "node scripts/check-routes.mjs",
+    "check:provenance": "node scripts/check-provenance.mjs",
+    "check:markdown": "node scripts/check-markdown.mjs",
+    "check:search": "node scripts/check-search.mjs",
+    "check:media": "node scripts/check-media.mjs",
+    "check:csp": "node scripts/check-csp.mjs",
+    "check:external-requests": "node scripts/check-external-requests.mjs",
+    "check:performance": "node scripts/check-performance.mjs",
+    "verify": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@bitcoinuniverse/runes-tools": "^3.0.0",
+    "@bitcoinuniverse/runes-docs-mcp": "^3.0.0",
+    "astro": "7.2.10",
+    "typescript": "5.9.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "vitest": "4.1.11"
+  }
+}

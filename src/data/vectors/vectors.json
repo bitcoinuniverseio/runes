@@ -1,0 +1,340 @@
+[
+  {
+    "id": "V1",
+    "category": "valid",
+    "name": "Empty runestone",
+    "scriptHex": "6a5d",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Runestone with no fields. Input runes transfer to the first non-OP_RETURN output.",
+    "rules": [
+      "R1",
+      "R4",
+      "R42"
+    ]
+  },
+  {
+    "id": "V2",
+    "category": "valid",
+    "name": "Single edict transfer",
+    "scriptHex": "6a5d0800c0a23303e80701",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "One edict: rune 840000:3, amount 1000, output 1. Remainder to output 0.",
+    "rules": [
+      "R15",
+      "R34",
+      "R38"
+    ]
+  },
+  {
+    "id": "V3",
+    "category": "valid",
+    "name": "Two edicts, delta encoded",
+    "scriptHex": "6a5d0d00c0a23303e807010019f40300",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Edict 1: 840000:3, 1000, output 1. Edict 2: block delta 0 and tx delta 25 give 840000:28, 500, output 0.",
+    "rules": [
+      "R15",
+      "R34"
+    ]
+  },
+  {
+    "id": "V4",
+    "category": "valid",
+    "name": "Sweep, amount zero",
+    "scriptHex": "6a5d0700c0a233030001",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "One edict: 840000:3, amount 0 meaning the entire remaining balance, to output 1.",
+    "rules": [
+      "R38"
+    ]
+  },
+  {
+    "id": "V5",
+    "category": "valid",
+    "name": "Even split",
+    "scriptHex": "6a5d0700c0a233030003",
+    "outputs": 3,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Output index 3 equals the output count, so the balance is divided evenly across all non-OP_RETURN outputs, earlier outputs taking the remainder. The identical bytes with 2 outputs are vector C6.",
+    "rules": [
+      "R38"
+    ]
+  },
+  {
+    "id": "V6",
+    "category": "valid",
+    "name": "Mint",
+    "scriptHex": "6a5d0614c0a2331403",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Mint of rune 840000:3 (tag 20 given twice: block, then tx). Minted amount goes to output 0.",
+    "rules": [
+      "R31",
+      "R32",
+      "R33"
+    ]
+  },
+  {
+    "id": "V7",
+    "category": "valid",
+    "name": "Mint with pointer",
+    "scriptHex": "6a5d0814c0a23314031601",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Same mint, plus pointer (tag 22) = 1, so the minted amount goes to output 1.",
+    "rules": [
+      "R31",
+      "R39"
+    ]
+  },
+  {
+    "id": "V8",
+    "category": "valid",
+    "name": "Full etching",
+    "scriptHex": "6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065",
+    "outputs": 2,
+    "expectedStatus": "valid",
+    "flaw": null,
+    "expectedSummary": "Etching of BITCOIN•UNIVERSE: flags 7 (Etching, Terms, Turbo), name value 153272084900779274434, divisibility 2, spacers 64, symbol U+2692, premine 1000000, amount 1000, cap 21000, offset end 12960. Max supply 22,000,000 atomic units.",
+    "rules": [
+      "R18",
+      "R20",
+      "R21",
+      "R23",
+      "R24",
+      "R25",
+      "R26",
+      "R27"
+    ]
+  },
+  {
+    "id": "C1",
+    "category": "cenotaph",
+    "name": "Rune tag without Etching flag",
+    "scriptHex": "6a5d020404",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "UnrecognizedEvenTag",
+    "expectedSummary": "Tag 4 is an etching field. With no Etching flag it is never consumed, and an unconsumed even tag is fatal.",
+    "rules": [
+      "R17",
+      "R20"
+    ]
+  },
+  {
+    "id": "C2",
+    "category": "cenotaph",
+    "name": "Unrecognized flag bit",
+    "scriptHex": "6a5d020208",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "UnrecognizedFlag",
+    "expectedSummary": "Flags value 8 sets bit 3, which has no assigned meaning. Bits left set after consumption are fatal.",
+    "rules": [
+      "R18",
+      "R19"
+    ]
+  },
+  {
+    "id": "C3",
+    "category": "cenotaph",
+    "name": "Tag with no value",
+    "scriptHex": "6a5d03020302",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "TruncatedField",
+    "expectedSummary": "Integers are 2, 3, 2: the trailing tag 2 has no following value.",
+    "rules": [
+      "R12",
+      "R13"
+    ]
+  },
+  {
+    "id": "C4",
+    "category": "cenotaph",
+    "name": "Trailing integers in body",
+    "scriptHex": "6a5d0400010101",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "TrailingIntegers",
+    "expectedSummary": "After the Body tag, three integers remain. Edicts come in groups of exactly four.",
+    "rules": [
+      "R15"
+    ]
+  },
+  {
+    "id": "C5",
+    "category": "cenotaph",
+    "name": "Invalid edict rune ID",
+    "scriptHex": "6a5d050000010200",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "EdictRuneId",
+    "expectedSummary": "Block delta 0 with tx delta 1 yields ID 0:1. Block 0 with a nonzero tx index is not a valid rune ID.",
+    "rules": [
+      "R34",
+      "R36"
+    ]
+  },
+  {
+    "id": "C6",
+    "category": "cenotaph",
+    "name": "Edict output beyond count",
+    "scriptHex": "6a5d0800c0a23303e80705",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "EdictOutput",
+    "expectedSummary": "Output index 5 exceeds the output count of 2. Only equality is allowed, as a split.",
+    "rules": [
+      "R37",
+      "R38"
+    ]
+  },
+  {
+    "id": "C7",
+    "category": "cenotaph",
+    "name": "Pointer beyond output count",
+    "scriptHex": "6a5d021605",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "UnrecognizedEvenTag",
+    "expectedSummary": "Pointer 5 is not less than the output count, so the range check fails, the value is left unconsumed, and the even-tag rule fires. Note the flaw is not a dedicated pointer flaw.",
+    "rules": [
+      "R17",
+      "R39"
+    ]
+  },
+  {
+    "id": "C8",
+    "category": "cenotaph",
+    "name": "Partial mint",
+    "scriptHex": "6a5d0414c0a233",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "UnrecognizedEvenTag",
+    "expectedSummary": "Tag 20 needs two values. One value cannot be consumed, so it remains and is fatal.",
+    "rules": [
+      "R17",
+      "R31"
+    ]
+  },
+  {
+    "id": "C9",
+    "category": "cenotaph",
+    "name": "Reserved even tag",
+    "scriptHex": "6a5d027e00",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "UnrecognizedEvenTag",
+    "expectedSummary": "Tag 126 is reserved and unrecognized by definition.",
+    "rules": [
+      "R17"
+    ]
+  },
+  {
+    "id": "C10",
+    "category": "cenotaph",
+    "name": "Supply overflow",
+    "scriptHex": "6a5d18020308020a80808080808080808080808080808080808002",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "SupplyOverflow",
+    "expectedSummary": "Etching with Terms, cap 2 and amount 2^127. cap * amount overflows u128.",
+    "rules": [
+      "R27"
+    ]
+  },
+  {
+    "id": "C11",
+    "category": "cenotaph",
+    "name": "Non-pushdata opcode",
+    "scriptHex": "6a5d69",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "Opcode",
+    "expectedSummary": "0x69 is OP_VERIFY. Anything that is not a pushdata opcode after OP_13 is fatal, including OP_PUSHNUM opcodes.",
+    "rules": [
+      "R5"
+    ]
+  },
+  {
+    "id": "C12",
+    "category": "cenotaph",
+    "name": "Push runs past end of script",
+    "scriptHex": "6a5d04beef",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "InvalidScript",
+    "expectedSummary": "A 4-byte push is declared but only 2 bytes follow, so the script does not parse.",
+    "rules": [
+      "R6"
+    ]
+  },
+  {
+    "id": "C13",
+    "category": "cenotaph",
+    "name": "Unterminated varint",
+    "scriptHex": "6a5d0180",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "Varint",
+    "expectedSummary": "The single payload byte 0x80 has the continuation bit set with nothing after it.",
+    "rules": [
+      "R9",
+      "R10"
+    ]
+  },
+  {
+    "id": "C14",
+    "category": "cenotaph",
+    "name": "Overlong varint",
+    "scriptHex": "6a5d148080808080808080808080808080808080808000",
+    "outputs": 2,
+    "expectedStatus": "cenotaph",
+    "flaw": "Varint",
+    "expectedSummary": "Nineteen continuation bytes then a terminator: the varint exceeds the 19-byte limit.",
+    "rules": [
+      "R9",
+      "R10"
+    ]
+  },
+  {
+    "id": "N1",
+    "category": "non-runestone",
+    "name": "Not an OP_RETURN output",
+    "scriptHex": "51",
+    "outputs": 2,
+    "expectedStatus": "not-runestone",
+    "flaw": null,
+    "expectedSummary": "Skipped when searching for a runestone. No artifact.",
+    "rules": [
+      "R1",
+      "R3"
+    ]
+  },
+  {
+    "id": "N2",
+    "category": "non-runestone",
+    "name": "OP_RETURN without OP_13",
+    "scriptHex": "6a04deadbeef",
+    "outputs": 2,
+    "expectedStatus": "not-runestone",
+    "flaw": null,
+    "expectedSummary": "A plain data-carrier output. Skipped. No artifact, no cenotaph.",
+    "rules": [
+      "R1",
+      "R3"
+    ]
+  }
+]

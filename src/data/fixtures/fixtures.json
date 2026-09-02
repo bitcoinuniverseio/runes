@@ -1,0 +1,150 @@
+[
+  {
+    "id": "F1",
+    "title": "Commitment absent on etching",
+    "category": "chain",
+    "description": "An etching transaction provides a valid name in tag 4, but no input spends a taproot commitment. The etching is disregarded by the indexer; no cenotaph is produced.",
+    "ruleRef": "R28",
+    "preconditions": [
+      "Name given: SAMPLE•RUNE",
+      "No taproot input with name commitment push in witness"
+    ],
+    "expectedStateTransition": "Etching disregarded. No new rune created. Any input balances allocated via default rules. No cenotaph burn."
+  },
+  {
+    "id": "F2",
+    "title": "Commitment too young (5 confirmations)",
+    "category": "chain",
+    "description": "The commitment output was confirmed at block 840,010 and spent at block 840,015 (5 confirmations difference, less than COMMIT_CONFIRMATIONS = 6).",
+    "ruleRef": "R28",
+    "preconditions": [
+      "Etching block: 840,015",
+      "Commitment block: 840,010",
+      "Difference: 5 < 6 required"
+    ],
+    "expectedStateTransition": "Etching disregarded due to immature commitment. Fee spent, no rune created."
+  },
+  {
+    "id": "F3",
+    "title": "Commitment mature (6 confirmations)",
+    "category": "chain",
+    "description": "The commitment output was confirmed at block 840,010 and spent at block 840,016 (exactly 6 confirmations difference). Name unlocked and unreserved.",
+    "ruleRef": "R28",
+    "preconditions": [
+      "Etching block: 840,016",
+      "Commitment block: 840,010",
+      "Difference: 6 >= 6 required"
+    ],
+    "expectedStateTransition": "Etching succeeds. Rune ID 840016:tx assigned. Premine and terms initialized."
+  },
+  {
+    "id": "F4",
+    "title": "Name already taken",
+    "category": "chain",
+    "description": "An etching commits to an already-etched name, with different spacer placement (e.g. BITCOIN•UNIVERSE vs BIT•COINUNIVERSE).",
+    "ruleRef": "R28",
+    "preconditions": [
+      "Underlying unspaced base-26 integer already recorded in index"
+    ],
+    "expectedStateTransition": "Etching disregarded. Colliding name cannot overwrite or alter existing rune."
+  },
+  {
+    "id": "F5",
+    "title": "Name still locked at height",
+    "category": "chain",
+    "description": "An etching at block 845,000 attempts to etch an 11-letter name when the minimum unlocked length at that height is 12 letters.",
+    "ruleRef": "R30",
+    "preconditions": [
+      "Height: 845,000",
+      "Name length: 11 letters",
+      "Minimum required: 12 letters"
+    ],
+    "expectedStateTransition": "Etching disregarded. Name length exceeds current unlock threshold."
+  },
+  {
+    "id": "F6",
+    "title": "Reserved name assigned to unnamed etching",
+    "category": "chain",
+    "description": "An etching transaction sets flag bit 0 (Etching) but omits tag 4 (Rune). No commitment provided.",
+    "ruleRef": "R29",
+    "preconditions": [
+      "Etching flag set",
+      "Tag 4 omitted",
+      "Block 840,005, tx 12"
+    ],
+    "expectedStateTransition": "Indexer assigns reserved name: 6402364363415443603228541259936211926 + (840005 << 32 | 12)."
+  },
+  {
+    "id": "F7",
+    "title": "Successful mint within active window and cap",
+    "category": "chain",
+    "description": "Transaction mints rune 840000:1 at block 840,500. Rune has open terms, current mint count 150 < cap 1000, height inside [840000, 850000).",
+    "ruleRef": "R32",
+    "preconditions": [
+      "Height: 840,500",
+      "Target: 840000:1",
+      "Cap: 1000",
+      "Current count: 150"
+    ],
+    "expectedStateTransition": "Mint count increments to 151. Fixed amount added to transaction unallocated pool."
+  },
+  {
+    "id": "F8",
+    "title": "Mint before start height",
+    "category": "chain",
+    "description": "Transaction attempts to mint a rune at block 841,000 where HeightStart is 842,000.",
+    "ruleRef": "R32",
+    "preconditions": [
+      "Height: 841,000",
+      "HeightStart: 842,000"
+    ],
+    "expectedStateTransition": "Mint ignored silently. Cap not incremented, no units minted, no cenotaph."
+  },
+  {
+    "id": "F9",
+    "title": "Mint at exclusive end height",
+    "category": "chain",
+    "description": "Transaction attempts to mint at block 850,000 where HeightEnd is 850,000. Protocol rule specifies height must be strictly less than end.",
+    "ruleRef": "R32",
+    "preconditions": [
+      "Height: 850,000",
+      "HeightEnd: 850,000"
+    ],
+    "expectedStateTransition": "Mint ignored silently. End height is exclusive."
+  },
+  {
+    "id": "F10",
+    "title": "Mint after cap reached",
+    "category": "chain",
+    "description": "Transaction attempts to mint when indexer records mint count equal to cap.",
+    "ruleRef": "R32",
+    "preconditions": [
+      "Recorded mint count = Cap"
+    ],
+    "expectedStateTransition": "Mint ignored silently. No units minted."
+  },
+  {
+    "id": "F11",
+    "title": "First matching runestone output selected among multiple",
+    "category": "chain",
+    "description": "Transaction contains two OP_RETURN OP_13 outputs (output 1 and output 3). Output 1 is evaluated; output 3 is ignored.",
+    "ruleRef": "R2",
+    "preconditions": [
+      "Output 1: valid runestone",
+      "Output 3: invalid script or another runestone"
+    ],
+    "expectedStateTransition": "Output 1 governs transaction. Output 3 skipped without evaluating."
+  },
+  {
+    "id": "F12",
+    "title": "Co-located inscription and rune UTXO spend safety",
+    "category": "chain",
+    "description": "An input outpoint carries both an inscription and 500 units of rune 840000:3. Transaction transfers runes to output 1 while preserving cardinal inputs for fee.",
+    "ruleRef": "R44",
+    "preconditions": [
+      "Outpoint contains inscription + runes",
+      "Rune-aware builder explicitly directs inscription destination and rune edicts"
+    ],
+    "expectedStateTransition": "Inscription and rune balance correctly separated without accidental burn or unintended transfer."
+  }
+]

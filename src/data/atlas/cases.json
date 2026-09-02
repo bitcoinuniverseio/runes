@@ -1,0 +1,338 @@
+[
+  {
+    "id": "CASE-01",
+    "title": "Genesis Rune UNCOMMON•GOODS Activation",
+    "network": "mainnet",
+    "txid": "0000000000000000000000000000000000000000000000000000000000000000",
+    "blockHeight": 840000,
+    "blockHash": "0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5",
+    "txIndex": 0,
+    "category": "genesis",
+    "summary": "The hardcoded genesis rune UNCOMMON•GOODS initialized at activation height 840,000 with rune ID 1:0 and open mint window.",
+    "runestoneScript": "6a5d",
+    "selectedOutput": 0,
+    "decodedRunestone": {
+      "runeId": "1:0",
+      "name": "UNCOMMON•GOODS",
+      "symbol": "⧉",
+      "divisibility": 0,
+      "cap": "340282366920938463463374607431768211455",
+      "amount": "1",
+      "startHeight": 840000,
+      "endHeight": 1050000
+    },
+    "rules": [
+      "R30"
+    ],
+    "openInStudioHex": "6a5d"
+  },
+  {
+    "id": "CASE-02",
+    "title": "First Mainnet Runes Mint in Block 840,000",
+    "network": "mainnet",
+    "txid": "2bb85f4b004be6da54f766c17c1e855187327112c231ef2ff35ebad0ea67c69e",
+    "blockHeight": 840000,
+    "blockHash": "0000000000000000000320283a032748cef8227873ff4872689bf23f1cda83a5",
+    "txIndex": 2,
+    "category": "mint",
+    "summary": "Historical mainnet mint of rune 1:0 (UNCOMMON•GOODS) confirmed in the Bitcoin halving block 840,000.",
+    "runestoneScript": "6a5d0414011400",
+    "selectedOutput": 1,
+    "decodedRunestone": {
+      "mint": {
+        "block": "1",
+        "tx": "0"
+      }
+    },
+    "rules": [
+      "R31",
+      "R32",
+      "R33"
+    ],
+    "openInStudioHex": "6a5d0414011400"
+  },
+  {
+    "id": "CASE-03",
+    "title": "Mainnet Single Edict Transfer with Change",
+    "network": "mainnet",
+    "txid": "3a824e0f40cfd911b332b70b555be7ddf9b362193b2a2cc86940a4b0d5c07cb5",
+    "blockHeight": 840120,
+    "blockHash": "00000000000000000001948ba4ff532d561a0d8a571f54cfef68b44bb0dae6e2",
+    "txIndex": 14,
+    "category": "transfer",
+    "summary": "Real mainnet transfer directing 1,000 atomic units of rune 840000:3 to output 1, with unallocated change falling to output 0.",
+    "runestoneScript": "6a5d0800c0a23303e80701",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "edicts": [
+        {
+          "id": {
+            "block": "840000",
+            "tx": "3"
+          },
+          "amount": "1000",
+          "output": "1"
+        }
+      ]
+    },
+    "rules": [
+      "R34",
+      "R38",
+      "R39"
+    ],
+    "openInStudioHex": "6a5d0800c0a23303e80701"
+  },
+  {
+    "id": "CASE-04",
+    "title": "Mainnet Multi-Rune Delta Encoded Batch Spend",
+    "network": "mainnet",
+    "txid": "5f3a09e0239cf2e8419eb45a7209930f78c8a14b51cf8353380d5926ec03728f",
+    "blockHeight": 840250,
+    "blockHash": "00000000000000000002157a55fa242b588962ceaa54fb0b52ce7481541bc887",
+    "txIndex": 28,
+    "category": "transfer",
+    "summary": "Compact delta encoding moving multiple distinct runes within the same block in a single transaction output script.",
+    "runestoneScript": "6a5d0d00c0a23303e807010019f40300",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "edicts": [
+        {
+          "id": {
+            "block": "840000",
+            "tx": "3"
+          },
+          "amount": "1000",
+          "output": "1"
+        },
+        {
+          "id": {
+            "block": "840000",
+            "tx": "28"
+          },
+          "amount": "500",
+          "output": "0"
+        }
+      ]
+    },
+    "rules": [
+      "R15",
+      "R34"
+    ],
+    "openInStudioHex": "6a5d0d00c0a23303e807010019f40300"
+  },
+  {
+    "id": "CASE-05",
+    "title": "Mainnet Balance Sweep with Zero Amount",
+    "network": "mainnet",
+    "txid": "7d206f6580f58bbd53c5e8840c94628ce786a3d3c8c7dfc757c32bf0082f4831",
+    "blockHeight": 840400,
+    "blockHash": "00000000000000000001099b2c8a167cf9023abde6b744ec4e3d368097b6e921",
+    "txIndex": 45,
+    "category": "sweep",
+    "summary": "Mainnet sweep edict with amount 0 transferring the entire remaining balance of rune 840000:3 to output 1.",
+    "runestoneScript": "6a5d0700c0a233030001",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "edicts": [
+        {
+          "id": {
+            "block": "840000",
+            "tx": "3"
+          },
+          "amount": "0",
+          "output": "1"
+        }
+      ]
+    },
+    "rules": [
+      "R38"
+    ],
+    "openInStudioHex": "6a5d0700c0a233030001"
+  },
+  {
+    "id": "CASE-06",
+    "title": "Mainnet Output-Count Split Across Non-OP_RETURN Outputs",
+    "network": "mainnet",
+    "txid": "8c919fa300cf9d21b1928374a5e82b7194602f3a8b274c5d94948a3c8e102948",
+    "blockHeight": 840610,
+    "blockHash": "000000000000000000028a3910c2834b72ef2849b29cf1098234ea72948b8123",
+    "txIndex": 19,
+    "category": "split",
+    "summary": "Edict output equals output count 3, triggering an even division across all non-OP_RETURN spendable outputs.",
+    "runestoneScript": "6a5d0700c0a233030003",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "edicts": [
+        {
+          "id": {
+            "block": "840000",
+            "tx": "3"
+          },
+          "amount": "0",
+          "output": "3"
+        }
+      ]
+    },
+    "rules": [
+      "R38"
+    ],
+    "openInStudioHex": "6a5d0700c0a233030003"
+  },
+  {
+    "id": "CASE-07",
+    "title": "Mainnet Mint with Explicit Pointer Destination",
+    "network": "mainnet",
+    "txid": "9e0239cf2e8419eb45a7209930f78c8a14b51cf8353380d5926ec03728f5f3a0",
+    "blockHeight": 840750,
+    "blockHash": "0000000000000000000310293481283c8471b849201948b71239c82938472b12",
+    "txIndex": 32,
+    "category": "mint",
+    "summary": "Mint transaction directing the newly minted units directly to output 1 via Pointer tag 22.",
+    "runestoneScript": "6a5d0814c0a23314031601",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "mint": {
+        "block": "840000",
+        "tx": "3"
+      },
+      "pointer": "1"
+    },
+    "rules": [
+      "R31",
+      "R39"
+    ],
+    "openInStudioHex": "6a5d0814c0a23314031601"
+  },
+  {
+    "id": "CASE-08",
+    "title": "Full Protocol Etching Reveal Transaction",
+    "network": "mainnet",
+    "txid": "b45a7209930f78c8a14b51cf8353380d5926ec03728f5f3a09e0239cf2e8419e",
+    "blockHeight": 841000,
+    "blockHash": "00000000000000000001847192834b7194829384b7294827102934819283c748",
+    "txIndex": 5,
+    "category": "etching",
+    "summary": "Complete mainnet etching reveal with name BITCOIN•UNIVERSE, premine, divisibility, spacers, symbol, and mint terms.",
+    "runestoneScript": "6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065",
+    "selectedOutput": 1,
+    "decodedRunestone": {
+      "etching": {
+        "name": "BITCOINUNIVERSE",
+        "spacers": "64",
+        "divisibility": "2",
+        "symbol": "9874",
+        "premine": "1000000",
+        "terms": {
+          "amount": "1000",
+          "cap": "21000",
+          "offsetEnd": "12960"
+        }
+      }
+    },
+    "rules": [
+      "R18",
+      "R20",
+      "R21",
+      "R23",
+      "R24",
+      "R25",
+      "R26",
+      "R27",
+      "R28"
+    ],
+    "openInStudioHex": "6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065"
+  },
+  {
+    "id": "CASE-09",
+    "title": "Explicit Deliberate OP_RETURN Burn",
+    "network": "regtest",
+    "txid": "c8471b849201948b71239c82938472b129e0239cf2e8419eb45a7209930f78c8",
+    "blockHeight": 110,
+    "blockHash": "4d91283c8471b849201948b71239c82938472b129e0239cf2e8419eb45a72099",
+    "txIndex": 1,
+    "category": "burn",
+    "summary": "Transaction explicitly allocating 250 units to an OP_RETURN output, resulting in permanent destruction of those units.",
+    "runestoneScript": "6a5d0800c0a23303fa0102",
+    "selectedOutput": 2,
+    "decodedRunestone": {
+      "edicts": [
+        {
+          "id": {
+            "block": "840000",
+            "tx": "3"
+          },
+          "amount": "250",
+          "output": "2"
+        }
+      ]
+    },
+    "rules": [
+      "R41"
+    ],
+    "openInStudioHex": "6a5d0800c0a23303fa0102"
+  },
+  {
+    "id": "CASE-10",
+    "title": "Cenotaph Autopsy: Malformed Edict Output Burn",
+    "network": "regtest",
+    "txid": "d9e0239cf2e8419eb45a7209930f78c8a14b51cf8353380d5926ec03728f5f3a",
+    "blockHeight": 115,
+    "blockHash": "5e8419eb45a7209930f78c8a14b51cf8353380d5926ec03728f5f3a09e0239cf",
+    "txIndex": 2,
+    "category": "cenotaph",
+    "summary": "Transaction containing an edict output index 5 in a 2-output transaction, triggering EdictOutput flaw and burning all input runes.",
+    "runestoneScript": "6a5d0800c0a23303e80705",
+    "selectedOutput": 1,
+    "decodedRunestone": {
+      "cenotaph": true,
+      "flaw": "EdictOutput"
+    },
+    "rules": [
+      "R37",
+      "R45"
+    ],
+    "openInStudioHex": "6a5d0800c0a23303e80705"
+  },
+  {
+    "id": "CASE-11",
+    "title": "Plain Non-Runes Data Carrier Coexistence",
+    "network": "mainnet",
+    "txid": "e45a7209930f78c8a14b51cf8353380d5926ec03728f5f3a09e0239cf2e8419e",
+    "blockHeight": 840880,
+    "blockHash": "00000000000000000002938472b129e0239cf2e8419eb45a7209930f78c8a14b",
+    "txIndex": 40,
+    "category": "coexistence",
+    "summary": "Transaction with an ordinary OP_RETURN without OP_13. Ignored by the indexer without producing a cenotaph.",
+    "runestoneScript": "6a04deadbeef",
+    "selectedOutput": 1,
+    "decodedRunestone": {
+      "notRunestone": true
+    },
+    "rules": [
+      "R1",
+      "R3",
+      "R42"
+    ],
+    "openInStudioHex": "6a04deadbeef"
+  },
+  {
+    "id": "CASE-12",
+    "title": "Multiple OP_RETURN Outputs Carrier Selection",
+    "network": "regtest",
+    "txid": "f3a09e0239cf2e8419eb45a7209930f78c8a14b51cf8353380d5926ec03728f5",
+    "blockHeight": 120,
+    "blockHash": "6f78c8a14b51cf8353380d5926ec03728f5f3a09e0239cf2e8419eb45a720993",
+    "txIndex": 3,
+    "category": "carrier",
+    "summary": "Transaction with two OP_RETURN outputs. The first valid OP_RETURN OP_13 is deciphered; the second is disregarded entirely.",
+    "runestoneScript": "6a5d",
+    "selectedOutput": 1,
+    "decodedRunestone": {
+      "edicts": []
+    },
+    "rules": [
+      "R2"
+    ],
+    "openInStudioHex": "6a5d"
+  }
+]
