@@ -1,0 +1,164 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'sdk', text: '1. @bitcoinuniverse/runes-tools SDK' },
+  { id: 'quickstarts', text: '2. Ten Practical Quickstarts' },
+  { id: 'architecture', text: '3. Architecture & Data Flow' },
+  { id: 'cli-ref', text: '4. CLI Reference' },
+];
+---
+
+<BaseLayout
+  title="Developer Hub & Companion Toolkit"
+  description="Typed TypeScript SDK, runnable quickstarts, architecture diagrams, and CLI reference for building Runes applications on Bitcoin."
+  currentRoute="developers.html"
+  kicker="SDK & Integration Architecture"
+  toc={toc}
+>
+  <div class="status-line">
+    Pure TypeScript SDK · Zero native dependencies · Node.js & browser isomorphic.
+  </div>
+
+  <h2 id="sdk">1. @bitcoinuniverse/runes-tools SDK</h2>
+  <p>
+    Install the official companion toolkit from npm or use it directly via workspace imports:
+  </p>
+  <pre is:raw><code>npm install @bitcoinuniverse/runes-tools</code></pre>
+  <p>
+    The library contains no C++ bindings, WebAssembly blobs, or native binary shims. It runs identically in Node.js 20+, modern web browsers, Cloudflare Workers, and Deno.
+  </p>
+
+  <h2 id="quickstarts">2. Ten Practical Quickstarts</h2>
+
+  <h3>1. Decipher a Script Hex</h3>
+  <pre is:raw><code>import { decipher } from '@bitcoinuniverse/runes-tools';
+
+const result = decipher('6a5d0800c0a23303e80701', 2);
+if (result.cenotaph) {
+  console.error('Cenotaph flaw:', result.flaw);
+} else {
+  console.log('Valid runestone. Edicts count:', result.edicts.length);
+}</code></pre>
+
+  <h3>2. Encipher a Transfer Runestone</h3>
+  <pre is:raw><code>import { encipher } from '@bitcoinuniverse/runes-tools';
+
+const { scriptHex } = encipher({
+  pointer: 1, // Change routes to output 1
+  edicts: [
+    { id: { block: 840000n, tx: 3 }, amount: 1000n, output: 0 }
+  ]
+});
+console.log('Script Hex:', scriptHex);</code></pre>
+
+  <h3>3. Encipher an Open Mint</h3>
+  <pre is:raw><code>import { encipher } from '@bitcoinuniverse/runes-tools';
+
+const { scriptHex } = encipher({
+  mint: { block: 840000n, tx: 1 },
+  pointer: 1
+});</code></pre>
+
+  <h3>4. Encipher a New Rune Etching</h3>
+  <pre is:raw><code>import { encipher, parseSpacedName } from '@bitcoinuniverse/runes-tools';
+
+const { nameValue, spacers } = parseSpacedName('UNCOMMON•GOODS');
+const { scriptHex } = encipher({
+  etching: {
+    rune: nameValue,
+    spacers,
+    divisibility: 0n,
+    symbol: 0x25c8n,
+    turbo: true,
+    terms: {
+      amount: 1n,
+      cap: 21000000n,
+      offsetEnd: 1050000n
+    }
+  },
+  pointer: 1
+});</code></pre>
+
+  <h3>5. Encode and Decode Modified Base-26 Names</h3>
+  <pre is:raw><code>import { encodeRuneName, decodeRuneName } from '@bitcoinuniverse/runes-tools';
+
+const intVal = encodeRuneName('BITCOIN');
+console.log('Integer value:', intVal);
+console.log('Decoded back:', decodeRuneName(intVal)); // 'BITCOIN'</code></pre>
+
+  <h3>6. Format and Parse Spacers</h3>
+  <pre is:raw><code>import { formatSpacedName, parseSpacedName } from '@bitcoinuniverse/runes-tools';
+
+const parsed = parseSpacedName('BITCOIN•UNIVERSE');
+console.log('Name:', parsed.name);
+console.log('Spacers bitmask:', parsed.spacers);
+console.log('Formatted:', formatSpacedName(parsed.nameValue, parsed.spacers));</code></pre>
+
+  <h3>7. Generate Taproot Commitment Script Data Push</h3>
+  <pre is:raw><code>import { encodeRuneName, getRuneCommitmentBytes, bytesToHex } from '@bitcoinuniverse/runes-tools';
+
+const nameVal = encodeRuneName('MYRUNENAME');
+const commitBytes = getRuneCommitmentBytes(nameVal);
+console.log('Commitment push bytes:', bytesToHex(commitBytes));</code></pre>
+
+  <h3>8. Parse a Raw Bitcoin Transaction</h3>
+  <pre is:raw><code>import { parseRawTransaction } from '@bitcoinuniverse/runes-tools';
+
+const tx = parseRawTransaction(rawHex);
+console.log('Inputs count:', tx.inputs.length);
+console.log('Outputs count:', tx.outputs.length);
+if (tx.runestone) {
+  console.log('Runestone found at output:', tx.runestoneOutputIndex);
+}</code></pre>
+
+  <h3>9. Simulate Multi-Output Allocation State Transitions</h3>
+  <pre is:raw><code>import { simulateAllocation } from '@bitcoinuniverse/runes-tools';
+
+const sim = simulateAllocation({
+  numOutputs: 3,
+  inputBalances: { '840000:3': 5000n },
+  edicts: [{ id: { block: 840000n, tx: 3 }, amount: 2000n, output: 1 }],
+  pointer: 2
+});
+console.log('Recipient balance:', sim.outputs[1].balances['840000:3']); // 2000n
+console.log('Change balance:', sim.outputs[2].balances['840000:3']);    // 3000n</code></pre>
+
+  <h3>10. Verify Supply Conservation</h3>
+  <pre is:raw><code>import { simulateAllocation } from '@bitcoinuniverse/runes-tools';
+
+const sim = simulateAllocation({ /* ... */ });
+if (!sim.conserved) {
+  throw new Error('Critical: Supply violation detected!');
+}</code></pre>
+
+  <h2 id="architecture">3. Architecture & Data Flow</h2>
+  <div class="callout callout-note">
+    <div class="callout-title">Linear Pipeline Architecture</div>
+    <p>
+      Raw Hex → Bitcoin Script Push Splitter → LEB128 Varint Stream → Tag-Value Consuming Queue → Etching/Mint Parser → Delta Edict Accumulator → UTXO Allocation Engine → Output Balance Commit.
+    </p>
+  </div>
+
+  <h2 id="cli-ref">4. CLI Reference</h2>
+  <p>
+    The command-line tool provides terminal commands for scripting:
+  </p>
+  <pre><code># Decode script hex
+npx runes decode &lt;script-hex&gt; [--outputs &lt;n&gt;] [--json]
+
+# Inspect raw transaction
+npx runes inspect-tx &lt;raw-tx-hex&gt; [--json]
+
+# Run all 24 vectors
+npx runes run-vectors [--json] [--junit]
+
+# Explain a cenotaph flaw
+npx runes explain-flaw SupplyOverflow</code></pre>
+
+  <FeedbackWidget pageTitle="Developer Hub & SDK" />
+</BaseLayout>

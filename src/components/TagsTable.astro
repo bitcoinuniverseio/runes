@@ -1,0 +1,38 @@
+---
+import tagsData from '../data/protocol/tags.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="table-scroll">
+  <table>
+    <caption>Runestone tags. Even tags must be understood; odd tags may be ignored.</caption>
+    <thead>
+      <tr>
+        <th scope="col">Tag</th>
+        <th scope="col">Name</th>
+        <th scope="col">Parity</th>
+        <th scope="col">Values</th>
+        <th scope="col">Meaning and Range</th>
+      </tr>
+    </thead>
+    <tbody>
+      {tagsData.map((t) => (
+        <tr>
+          <td><code>{t.tag}</code></td>
+          <td><strong>{t.name}</strong></td>
+          <td>
+            <span class={`badge badge-${t.parity}`}>{t.parity}</span>
+          </td>
+          <td><code>{t.values}</code></td>
+          <td>
+            {t.description}
+            {t.ruleRef && (
+              <span> (<a href={`${base}/specification.html#${t.ruleRef.toLowerCase()}`}>{t.ruleRef}</a>)</span>
+            )}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

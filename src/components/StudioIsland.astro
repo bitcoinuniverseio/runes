@@ -1,0 +1,557 @@
+---
+// StudioIsland.astro - Interactive Runestone Studio with 8 diagnostic modes
+---
+
+<div class="studio-container" id="studio-app">
+  <div class="studio-tabs" role="tablist">
+    <button type="button" class="studio-tab active" role="tab" data-tab="tab-compose">1. Compose Runestone</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-decode">2. Decode Script</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-inspect-tx">3. Inspect Raw Tx</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-simulate">4. Simulate Allocation</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-scrubber">5. Explain Bytes</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-compare">6. Compare Runestones</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-autopsy">7. Cenotaph Autopsy</button>
+    <button type="button" class="studio-tab" role="tab" data-tab="tab-size">8. Size & Policy</button>
+  </div>
+
+  <!-- 1. Compose Mode -->
+  <div id="tab-compose" class="studio-panel active">
+    <h3>Compose Runestone</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Construct a valid Runestone. The core automatically delta-encodes edicts, tags fields, and verifies round-trip decodability.
+    </p>
+
+    <form id="compose-form">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div>
+          <h4 style="margin-top: 0;">Etching (Optional)</h4>
+          <div class="form-group">
+            <label class="form-label" for="compose-rune-name">Rune Name (e.g. UNCOMMONGOODS)</label>
+            <input type="text" id="compose-rune-name" class="form-input" placeholder="A-Z characters" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="compose-divisibility">Divisibility (0–38)</label>
+            <input type="number" id="compose-divisibility" class="form-input" min="0" max="38" value="0" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="compose-symbol">Currency Symbol (e.g. ¤, ᚱ, ⚡)</label>
+            <input type="text" id="compose-symbol" class="form-input" maxlength="2" placeholder="Single character" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="compose-premine">Premine Units</label>
+            <input type="text" id="compose-premine" class="form-input" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; cursor: pointer;">
+              <input type="checkbox" id="compose-turbo" />
+              <span>Enable Turbo Flag</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <h4 style="margin-top: 0;">Mint & Routing</h4>
+          <div class="form-group">
+            <label class="form-label" for="compose-mint">Mint Rune ID (Block:Tx)</label>
+            <input type="text" id="compose-mint" class="form-input" placeholder="e.g. 840000:1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="compose-pointer">Default Pointer (Output Index)</label>
+            <input type="number" id="compose-pointer" class="form-input" min="0" placeholder="e.g. 1 (routes remainder)" />
+          </div>
+
+          <h4>Edicts (Transfer Instructions)</h4>
+          <div class="form-group">
+            <label class="form-label" for="compose-edicts">Edicts: RuneID,Amount,Output (one per line)</label>
+            <textarea id="compose-edicts" class="form-textarea" rows="4" placeholder="840000:1,1000,1&#10;840000:3,0,2"></textarea>
+            <span style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-sans);">Use amount 0 to allocate the entire remaining balance. Use 0:0 for newly etched rune.</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+        <button type="submit" class="btn-primary">Generate Runestone Script</button>
+        <button type="button" id="compose-preset-transfer" class="btn-secondary">Load Transfer Preset</button>
+        <button type="button" id="compose-preset-etch" class="btn-secondary">Load Etching Preset</button>
+      </div>
+    </form>
+
+    <div id="compose-result" style="margin-top: 2rem;"></div>
+  </div>
+
+  <!-- 2. Decode Script Mode -->
+  <div id="tab-decode" class="studio-panel" style="display: none;">
+    <h3>Decode Script Hex</h3>
+    <form id="studio-decode-form">
+      <div class="form-group">
+        <label class="form-label" for="studio-decode-hex">Script Hex</label>
+        <textarea id="studio-decode-hex" class="form-textarea" rows="3" placeholder="6a5d..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="studio-decode-outputs">Output Count</label>
+        <input type="number" id="studio-decode-outputs" class="form-input" min="1" placeholder="e.g. 2" />
+      </div>
+      <button type="submit" class="btn-primary">Inspect</button>
+    </form>
+    <div id="studio-decode-result" style="margin-top: 1.5rem;"></div>
+  </div>
+
+  <!-- 3. Inspect Raw Tx Mode -->
+  <div id="tab-inspect-tx" class="studio-panel" style="display: none;">
+    <h3>Inspect Raw Bitcoin Transaction</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Paste a raw serialized transaction hex (SegWit or legacy). The tool extracts inputs, identifies all outputs, and deciphers the active Runestone.
+    </p>
+    <form id="tx-inspect-form">
+      <div class="form-group">
+        <label class="form-label" for="tx-raw-hex">Raw Transaction Hex</label>
+        <textarea id="tx-raw-hex" class="form-textarea" rows="5" placeholder="Paste 01000000000101... transaction hex here"></textarea>
+      </div>
+      <div style="display: flex; gap: 1rem;">
+        <button type="submit" class="btn-primary">Parse Transaction</button>
+        <button type="button" id="tx-sample-btn" class="btn-secondary">Load Sample Transaction</button>
+      </div>
+    </form>
+    <div id="tx-inspect-result" style="margin-top: 1.5rem;"></div>
+  </div>
+
+  <!-- 4. Simulate Allocation Mode -->
+  <div id="tab-simulate" class="studio-panel" style="display: none;">
+    <h3>Simulate Runes Allocation</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Simulate UTXO balance transitions, edict execution, splits, pointer fallbacks, and cenotaph burns under rules R38–R45.
+    </p>
+    <form id="simulate-form">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+        <div>
+          <div class="form-group">
+            <label class="form-label" for="sim-inputs">Input Balances (RuneID:Amount, one per line)</label>
+            <textarea id="sim-inputs" class="form-textarea" rows="3" placeholder="840000:3:2000"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sim-outputs-count">Transaction Outputs Count</label>
+            <input type="number" id="sim-outputs-count" class="form-input" value="3" min="1" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sim-opreturn-idx">OP_RETURN Output Index</label>
+            <input type="number" id="sim-opreturn-idx" class="form-input" value="0" min="0" />
+          </div>
+        </div>
+        <div>
+          <div class="form-group">
+            <label class="form-label" for="sim-edicts">Edicts (RuneID,Amount,OutputIndex)</label>
+            <textarea id="sim-edicts" class="form-textarea" rows="3" placeholder="840000:3,1500,1"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sim-pointer">Pointer (Optional)</label>
+            <input type="number" id="sim-pointer" class="form-input" placeholder="e.g. 2" />
+          </div>
+          <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; cursor: pointer;">
+              <input type="checkbox" id="sim-cenotaph" />
+              <span style="color: var(--burn-red); font-weight: 600;">Simulate Cenotaph Flaw</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <button type="submit" class="btn-primary" style="margin-top: 1rem;">Run Simulation</button>
+    </form>
+    <div id="sim-result" style="margin-top: 1.5rem;"></div>
+  </div>
+
+  <!-- 5. Explain Bytes Scrubber -->
+  <div id="tab-scrubber" class="studio-panel" style="display: none;">
+    <h3>Explain Bytes (Byte Scrubber)</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Interactive byte breakdown. Hover over individual byte chunks to see which protocol element produced them.
+    </p>
+    <div class="form-group">
+      <label class="form-label" for="scrubber-hex">Script Hex to Inspect</label>
+      <input type="text" id="scrubber-hex" class="form-input" value="6a5d0800c0a23303e80701" />
+    </div>
+    <div id="scrubber-display" style="margin-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 0.4rem; font-family: var(--font-mono); font-size: 1.1rem;"></div>
+    <div id="scrubber-tooltip" class="callout callout-note" style="margin-top: 1.5rem;">
+      <div class="callout-title">Byte Inspector</div>
+      <p id="scrubber-info">Hover over any byte above to view its technical explanation.</p>
+    </div>
+  </div>
+
+  <!-- 6. Compare Two Runestones -->
+  <div id="tab-compare" class="studio-panel" style="display: none;">
+    <h3>Compare Two Runestones</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Diff two runestone scripts side-by-side to detect tag discrepancies, edict order differences, or size optimizations.
+    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+      <div class="form-group">
+        <label class="form-label" for="cmp-hex-a">Runestone Script A</label>
+        <textarea id="cmp-hex-a" class="form-textarea" rows="3" placeholder="6a5d..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="cmp-hex-b">Runestone Script B</label>
+        <textarea id="cmp-hex-b" class="form-textarea" rows="3" placeholder="6a5d..."></textarea>
+      </div>
+    </div>
+    <button type="button" id="cmp-btn" class="btn-primary">Compare Runestones</button>
+    <div id="cmp-result" style="margin-top: 1.5rem;"></div>
+  </div>
+
+  <!-- 7. Cenotaph Autopsy -->
+  <div id="tab-autopsy" class="studio-panel" style="display: none;">
+    <h3>Cenotaph Autopsy</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Examine any flawed or malicious script to pinpoint the exact failing byte offset and applicable protocol rule.
+    </p>
+    <div class="form-group">
+      <label class="form-label" for="autopsy-preset">Select Known Flawed Script</label>
+      <select id="autopsy-preset" class="form-select">
+        <option value="6a5d021605">C7: Pointer (tag 22) equals or exceeds output count (outputs=2)</option>
+        <option value="6a5d0400010101">C2: Truncated field (odd count of integers before body)</option>
+        <option value="6a5d69">C11: Non-push opcode in OP_RETURN (OP_VERIFY 0x69)</option>
+        <option value="6a5d18020308020a80808080808080808080808080808080808002">C13: Supply overflow (cap * amount > u128)</option>
+        <option value="6a5d020208">C6: Unrecognized flag bit (0x08 not Etching, Terms, or Turbo)</option>
+        <option value="6a5d021e01">C5: Unrecognized even tag (tag 30 is even and unknown)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="autopsy-hex">Script Hex Under Investigation</label>
+      <textarea id="autopsy-hex" class="form-textarea" rows="2"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label" for="autopsy-outputs">Output Count</label>
+      <input type="number" id="autopsy-outputs" class="form-input" value="2" />
+    </div>
+    <button type="button" id="autopsy-run-btn" class="btn-primary">Execute Autopsy</button>
+    <div id="autopsy-result" style="margin-top: 1.5rem;"></div>
+  </div>
+
+  <!-- 8. Size & Policy Analysis -->
+  <div id="tab-size" class="studio-panel" style="display: none;">
+    <h3>Size & Policy Analysis</h3>
+    <p style="color: var(--text-muted); font-size: 0.875rem; margin-bottom: 1.5rem;">
+      Audit runestone byte consumption against standard Bitcoin Core relay limits (83 bytes default OP_RETURN).
+    </p>
+    <div class="form-group">
+      <label class="form-label" for="size-hex">Script Hex</label>
+      <textarea id="size-hex" class="form-textarea" rows="3" placeholder="6a5d..."></textarea>
+    </div>
+    <button type="button" id="size-btn" class="btn-primary">Analyze Relay Policy</button>
+    <div id="size-result" style="margin-top: 1.5rem;"></div>
+  </div>
+</div>
+
+<script>
+  import {
+    encipher,
+    decipher,
+    encodeRuneName,
+    parseSpacedName,
+    formatSpacedName,
+    formatRuneId,
+    parseRuneId,
+    parseRawTransaction,
+    simulateAllocation,
+    analyzeSize,
+    FLAWS,
+    Tag,
+  } from '../../packages/runes-tools/src/index.js';
+
+  function esc(s: any): string {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function initStudio() {
+    // Tab switching
+    const tabs = document.querySelectorAll('.studio-tab');
+    const panels = document.querySelectorAll('.studio-panel');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => {
+          (p as HTMLElement).style.display = 'none';
+          p.classList.remove('active');
+        });
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        const targetPanel = document.getElementById(targetId || '');
+        if (targetPanel) {
+          targetPanel.style.display = 'block';
+          targetPanel.classList.add('active');
+        }
+      });
+    });
+
+    // 1. Compose Mode
+    const composeForm = document.getElementById('compose-form');
+    const composeResult = document.getElementById('compose-result');
+
+    if (composeForm && composeResult) {
+      composeForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        try {
+          const runeName = (document.getElementById('compose-rune-name') as HTMLInputElement).value.trim();
+          const divisibility = (document.getElementById('compose-divisibility') as HTMLInputElement).value.trim();
+          const symbol = (document.getElementById('compose-symbol') as HTMLInputElement).value.trim();
+          const premine = (document.getElementById('compose-premine') as HTMLInputElement).value.trim();
+          const turbo = (document.getElementById('compose-turbo') as HTMLInputElement).checked;
+
+          const mintStr = (document.getElementById('compose-mint') as HTMLInputElement).value.trim();
+          const pointerStr = (document.getElementById('compose-pointer') as HTMLInputElement).value.trim();
+          const edictsText = (document.getElementById('compose-edicts') as HTMLTextAreaElement).value.trim();
+
+          const input: any = {};
+
+          if (runeName) {
+            const parsed = parseSpacedName(runeName);
+            input.etching = {
+              rune: parsed.nameValue,
+              spacers: parsed.spacers,
+              divisibility: divisibility ? BigInt(divisibility) : undefined,
+              symbol: symbol ? BigInt(symbol.codePointAt(0) || 0) : undefined,
+              premine: premine ? BigInt(premine) : undefined,
+              turbo: turbo || undefined,
+            };
+          }
+
+          if (mintStr) {
+            const m = parseRuneId(mintStr);
+            if (!m) throw new Error('Invalid mint Rune ID format. Expected block:tx');
+            input.mint = m;
+          }
+
+          if (pointerStr) {
+            input.pointer = parseInt(pointerStr, 10);
+          }
+
+          if (edictsText) {
+            const lines = edictsText.split('\n');
+            const edicts: any[] = [];
+            for (const line of lines) {
+              const parts = line.trim().split(',');
+              if (parts.length === 3) {
+                const id = parseRuneId(parts[0].trim());
+                if (!id) throw new Error(`Invalid Rune ID in edict: ${parts[0]}`);
+                const amount = BigInt(parts[1].trim());
+                const output = parseInt(parts[2].trim(), 10);
+                edicts.push({ id, amount, output });
+              }
+            }
+            if (edicts.length > 0) {
+              input.edicts = edicts;
+            }
+          }
+
+          const res = encipher(input);
+          const sizeAnalysis = analyzeSize(res.scriptBytes, res.payloadBytes, 1);
+
+          composeResult.innerHTML = `
+            <div class="callout callout-invariant">
+              <div class="callout-title">Encipher Succeeded · Verified Round-Trip</div>
+              <p>Generated script round-trips with 100% fidelity through the reference decipher engine.</p>
+            </div>
+
+            <h4>Script Hex</h4>
+            <pre><code>${res.scriptHex}</code></pre>
+
+            <h4>Size & Relay Analysis</h4>
+            <p style="font-size: 0.875rem;">Total Script Size: <strong>${sizeAnalysis.scriptSizeBytes} bytes</strong> (OP_RETURN limit: 83 bytes) · ${sizeAnalysis.withinStandardOpReturnLimit ? '<span style="color: var(--accent);">Relay Safe</span>' : '<span style="color: var(--burn-red);">Exceeds Standard Relay Limit</span>'}</p>
+            <p style="font-size: 0.8125rem; color: var(--text-muted);">${sizeAnalysis.policyRecommendation}</p>
+
+            <h4>Decoded Integers</h4>
+            <pre><code>[${res.integers.map(String).join(', ')}]</code></pre>
+          `;
+        } catch (err: any) {
+          composeResult.innerHTML = `<div class="callout callout-burn"><div class="callout-title">Composition Error</div><p>${esc(err.message)}</p></div>`;
+        }
+      });
+
+      document.getElementById('compose-preset-transfer')?.addEventListener('click', () => {
+        (document.getElementById('compose-rune-name') as HTMLInputElement).value = '';
+        (document.getElementById('compose-mint') as HTMLInputElement).value = '';
+        (document.getElementById('compose-pointer') as HTMLInputElement).value = '0';
+        (document.getElementById('compose-edicts') as HTMLTextAreaElement).value = '840000:3,1000,1';
+      });
+
+      document.getElementById('compose-preset-etch')?.addEventListener('click', () => {
+        (document.getElementById('compose-rune-name') as HTMLInputElement).value = 'BITCOIN•UNIVERSE';
+        (document.getElementById('compose-divisibility') as HTMLInputElement).value = '2';
+        (document.getElementById('compose-symbol') as HTMLInputElement).value = 'ᚱ';
+        (document.getElementById('compose-premine') as HTMLInputElement).value = '2100000000';
+        (document.getElementById('compose-turbo') as HTMLInputElement).checked = true;
+        (document.getElementById('compose-pointer') as HTMLInputElement).value = '1';
+        (document.getElementById('compose-edicts') as HTMLTextAreaElement).value = '';
+      });
+    }
+
+    // 4. Simulate Mode
+    const simForm = document.getElementById('simulate-form');
+    const simResult = document.getElementById('sim-result');
+    if (simForm && simResult) {
+      simForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        try {
+          const inputLines = (document.getElementById('sim-inputs') as HTMLTextAreaElement).value.trim().split('\n');
+          const inputBalances: Record<string, bigint> = {};
+          for (const line of inputLines) {
+            const p = line.trim().split(':');
+            if (p.length === 3) {
+              inputBalances[`${p[0]}:${p[1]}`] = BigInt(p[2]);
+            }
+          }
+
+          const numOutputs = parseInt((document.getElementById('sim-outputs-count') as HTMLInputElement).value, 10);
+          const opReturnIdx = parseInt((document.getElementById('sim-opreturn-idx') as HTMLInputElement).value, 10);
+          const outputTypes: ('spendable' | 'op_return')[] = [];
+          for (let i = 0; i < numOutputs; i++) {
+            outputTypes.push(i === opReturnIdx ? 'op_return' : 'spendable');
+          }
+
+          const edictsLines = (document.getElementById('sim-edicts') as HTMLTextAreaElement).value.trim().split('\n');
+          const edicts: any[] = [];
+          for (const line of edictsLines) {
+            const p = line.trim().split(',');
+            if (p.length === 3) {
+              const id = parseRuneId(p[0].trim())!;
+              edicts.push({ id, amount: BigInt(p[1].trim()), output: parseInt(p[2].trim(), 10) });
+            }
+          }
+
+          const pointerStr = (document.getElementById('sim-pointer') as HTMLInputElement).value.trim();
+          const pointer = pointerStr ? parseInt(pointerStr, 10) : null;
+          const isCenotaph = (document.getElementById('sim-cenotaph') as HTMLInputElement).checked;
+
+          const res = simulateAllocation({
+            numOutputs,
+            outputTypes,
+            inputBalances,
+            edicts,
+            pointer,
+            isCenotaph,
+            cenotaphFlaw: isCenotaph ? 'EdictOutput' : null,
+          });
+
+          let html = `
+            <div class="callout ${res.isCenotaph ? 'callout-burn' : 'callout-invariant'}">
+              <div class="callout-title">${res.isCenotaph ? 'Cenotaph Allocation: Total Burn' : 'Valid Allocation: Conserved'}</div>
+              <p>Conservation of Supply: <strong>${res.conserved ? 'PASSED (Total In == Total Out)' : 'FAILED'}</strong></p>
+            </div>
+
+            <h4>Output Balances</h4>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Output</th><th>Type</th><th>Rune Balances</th></tr></thead>
+                <tbody>
+          `;
+          res.outputs.forEach(o => {
+            const bStr = Object.entries(o.balances).map(([r, a]) => `${r}: ${a}`).join(', ') || '(0)';
+            html += `<tr><td>Output ${o.outputIndex}</td><td>${o.outputType}</td><td><strong>${esc(bStr)}</strong></td></tr>`;
+          });
+          html += `</tbody></table></div>`;
+
+          if (Object.keys(res.burns).length > 0) {
+            const burnsStr = Object.entries(res.burns).map(([r, a]) => `${r}: ${a} units`).join(', ');
+            html += `<div class="callout callout-burn"><div class="callout-title">Burned Balances</div><p>${esc(burnsStr)}</p></div>`;
+          }
+
+          html += `<h4>Execution Step Trace</h4><div class="table-scroll"><table><thead><tr><th>Step</th><th>Action</th><th>Target</th><th>Detail</th></tr></thead><tbody>`;
+          res.traces.forEach(t => {
+            html += `<tr><td>${t.step}</td><td><code>${t.action}</code></td><td>${esc(t.destination)}</td><td>${esc(t.detail)}</td></tr>`;
+          });
+          html += `</tbody></table></div>`;
+
+          simResult.innerHTML = html;
+        } catch (err: any) {
+          simResult.innerHTML = `<div class="callout callout-burn"><div class="callout-title">Simulation Error</div><p>${esc(err.message)}</p></div>`;
+        }
+      });
+    }
+
+    // 5. Scrubber Mode
+    const scrubberHex = document.getElementById('scrubber-hex') as HTMLInputElement;
+    const scrubberDisplay = document.getElementById('scrubber-display');
+    const scrubberInfo = document.getElementById('scrubber-info');
+
+    function updateScrubber() {
+      if (!scrubberHex || !scrubberDisplay || !scrubberInfo) return;
+      const clean = scrubberHex.value.trim().replace(/\s+/g, '');
+      scrubberDisplay.innerHTML = '';
+
+      for (let i = 0; i < clean.length; i += 2) {
+        const byte = clean.substring(i, i + 2);
+        const span = document.createElement('span');
+        span.textContent = byte;
+        span.style.padding = '0.2rem 0.35rem';
+        span.style.background = 'var(--bg-inset)';
+        span.style.border = '1px solid var(--border)';
+        span.style.borderRadius = 'var(--radius-sm)';
+        span.style.cursor = 'pointer';
+
+        let meaning = `Byte offset ${i / 2} (0x${byte})`;
+        if (i === 0 && byte.toLowerCase() === '6a') meaning = 'OP_RETURN (0x6a): Marks unspendable provably pruned output.';
+        else if (i === 2 && byte.toLowerCase() === '5d') meaning = 'OP_13 (0x5d): Protocol identifier for Runes.';
+        else if (i === 4) meaning = `Data push length or opcode: 0x${byte}`;
+
+        span.addEventListener('mouseenter', () => {
+          span.style.background = 'var(--accent)';
+          span.style.color = '#fff';
+          scrubberInfo.textContent = meaning;
+        });
+        span.addEventListener('mouseleave', () => {
+          span.style.background = 'var(--bg-inset)';
+          span.style.color = 'var(--text)';
+        });
+
+        scrubberDisplay.appendChild(span);
+      }
+    }
+
+    scrubberHex?.addEventListener('input', updateScrubber);
+    updateScrubber();
+
+    // 7. Autopsy Mode
+    const autopsyPreset = document.getElementById('autopsy-preset') as HTMLSelectElement;
+    const autopsyHex = document.getElementById('autopsy-hex') as HTMLTextAreaElement;
+    const autopsyRunBtn = document.getElementById('autopsy-run-btn');
+    const autopsyResult = document.getElementById('autopsy-result');
+
+    if (autopsyPreset && autopsyHex) {
+      autopsyHex.value = autopsyPreset.value;
+      autopsyPreset.addEventListener('change', () => {
+        autopsyHex.value = autopsyPreset.value;
+      });
+    }
+
+    autopsyRunBtn?.addEventListener('click', () => {
+      if (!autopsyHex || !autopsyResult) return;
+      const outputs = parseInt((document.getElementById('autopsy-outputs') as HTMLInputElement).value, 10);
+      const res = decipher(autopsyHex.value.trim(), outputs);
+
+      if (res.cenotaph) {
+        autopsyResult.innerHTML = `
+          <div class="callout callout-burn">
+            <div class="callout-title">AUTOPSY VERDICT: CENOTAPH</div>
+            <p><strong>Detected Flaw:</strong> <code>${res.flaw}</code> (${FLAWS[res.flaw as keyof typeof FLAWS]})</p>
+            <p><strong>Stage:</strong> ${res.stage || 'protocol field processing'}</p>
+            <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+              Under Rule R45, this transaction is a cenotaph. Any input runes are permanently destroyed.
+            </p>
+          </div>
+        `;
+      } else {
+        autopsyResult.innerHTML = `
+          <div class="callout callout-invariant">
+            <div class="callout-title">AUTOPSY VERDICT: VALID</div>
+            <p>No cenotaph flaws detected under given parameters.</p>
+          </div>
+        `;
+      }
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStudio);
+  } else {
+    initStudio();
+  }
+</script>

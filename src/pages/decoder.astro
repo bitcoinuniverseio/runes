@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import DecoderIsland from '../components/DecoderIsland.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'tool', text: 'Runestone Decoder' },
+  { id: 'how-it-works', text: 'How Inspection Works' },
+  { id: 'url-params', text: 'Sharing & Deep Linking' },
+];
+---
+
+<BaseLayout
+  title="Runestone Decoder"
+  description="Interactive, client-side Runestone script decoder with field-by-field dissection and cenotaph flaw diagnosis."
+  currentRoute="decoder.html"
+  kicker="Interactive Inspection Tool"
+  toc={toc}
+>
+  <div class="status-line">
+    Pure client-side execution · No network requests · 100% private and offline-capable.
+  </div>
+
+  <h2 id="tool">Runestone Decoder</h2>
+  <p>
+    Paste any raw <code>OP_RETURN</code> script hex or transaction output into the inspector below to decipher fields, examine varints, and diagnose cenotaph flaws in real time.
+  </p>
+
+  <DecoderIsland />
+
+  <h2 id="how-it-works">How Inspection Works</h2>
+  <p>
+    The decoder executes the pure TypeScript <code>@bitcoinuniverse/runes-tools</code> core library in your browser:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Carrier Check:</strong> Verifies the script begins with <code>OP_RETURN (0x6a)</code> followed by <code>OP_13 (0x5d)</code>.</li>
+    <li><strong>Push Concatenation:</strong> Extracts all contiguous data pushes and concatenates them into a single payload buffer.</li>
+    <li><strong>LEB128 Decoding:</strong> Parses the payload into an array of unsigned integers, checking for overlong or truncated varints.</li>
+    <li><strong>Field Consumption:</strong> Identifies tag-value pairs, extracts flags, etching parameters, mint targets, pointer, and edicts.</li>
+    <li><strong>Flaw Analysis:</strong> Checks for unrecognized even tags, unrecognized flag bits, and supply overflows.</li>
+  </ol>
+
+  <h2 id="url-params">Sharing & Deep Linking</h2>
+  <p>
+    You can share links directly to a decoded script using query parameters:
+  </p>
+  <pre><code>https://bitcoinuniverseio.github.io/runes/decoder.html?hex=6a5d0800c0a23303e80701&outputs=2</code></pre>
+
+  <FeedbackWidget pageTitle="Runestone Decoder" />
+</BaseLayout>

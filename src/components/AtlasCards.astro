@@ -1,0 +1,65 @@
+---
+import casesData from '../data/atlas/cases.json';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="atlas-grid" style="display: flex; flex-direction: column; gap: 2.5rem;">
+  {casesData.map((c) => (
+    <article class="studio-container" id={c.id.toLowerCase()}>
+      <div class="studio-panel">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
+          <h3 style="margin: 0;">
+            <a href={`#${c.id.toLowerCase()}`} style="color: var(--text); text-decoration: none;">
+              {c.id}: {c.title}
+            </a>
+          </h3>
+          <span class="badge" style="background: var(--bg-inset); border: 1px solid var(--border); padding: 0.2rem 0.5rem; font-family: var(--font-sans); font-size: 0.75rem; border-radius: var(--radius-sm);">
+            {c.network.toUpperCase()} · Block {c.blockHeight.toLocaleString()}
+          </span>
+        </div>
+
+        <p style="font-size: 0.95rem; color: var(--text-muted); margin-bottom: 1rem;">
+          {c.summary}
+        </p>
+
+        <div style="font-family: var(--font-mono); font-size: 0.8125rem; background: var(--bg-inset); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); margin-bottom: 1.25rem; word-break: break-all;">
+          <strong>TxID:</strong> {c.txid}
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 1.25rem;">
+          <div>
+            <h4 style="margin-top: 0; font-size: 0.875rem; text-transform: uppercase; color: var(--text-faint);">Transaction Structure</h4>
+            <ul style="font-family: var(--font-sans); font-size: 0.875rem; padding-left: 1.25rem;">
+              <li><strong>Inputs:</strong> {c.inputsCount} UTXOs</li>
+              <li><strong>Outputs:</strong> {c.outputsCount} total</li>
+              <li><strong>OP_RETURN Index:</strong> Output {c.opReturnIndex}</li>
+              <li><strong>Runestone Status:</strong> {c.isCenotaph ? <span style="color: var(--burn-red); font-weight: 600;">Cenotaph ({c.cenotaphFlaw})</span> : <span style="color: var(--accent); font-weight: 600;">Valid</span>}</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="margin-top: 0; font-size: 0.875rem; text-transform: uppercase; color: var(--text-faint);">Runestone Payload</h4>
+            <div style="font-family: var(--font-mono); font-size: 0.8125rem; word-break: break-all; background: var(--bg); padding: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+              <code>{c.scriptHex}</code>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-note" style="margin-bottom: 1rem;">
+          <div class="callout-title">Engineering Takeaway & Forensic Analysis</div>
+          <p style="font-size: 0.875rem; margin-bottom: 0;">{c.takeaway}</p>
+        </div>
+
+        <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+          <a href={`${base}/decoder.html?hex=${c.scriptHex}&outputs=${c.outputsCount}`} class="page-action-btn">
+            Inspect in Standalone Decoder →
+          </a>
+          <a href={`https://mempool.space/tx/${c.txid}`} target="_blank" rel="noreferrer" class="page-action-btn">
+            View on Mempool.space ↗
+          </a>
+        </div>
+      </div>
+    </article>
+  ))}
+</div>

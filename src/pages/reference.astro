@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'terms', text: '1. Terminology' },
+  { id: 'pipeline', text: '2. Indexer Pipeline' },
+  { id: 'terms-eval', text: '3. Open Mint Terms Evaluation' },
+  { id: 'confirmation', text: '4. Confirmation Rules' },
+  { id: 'reorg', text: '5. Reorganization Handling' },
+  { id: 'sizes', text: '6. Script Sizes & Relay Policy' },
+  { id: 'limits', text: '7. Protocol Limits' },
+  { id: 'security', text: '8. Security & Cenotaph Prevention' },
+  { id: 'checklist', text: '9. Implementation Checklist' },
+];
+---
+
+<BaseLayout
+  title="Runes Implementer Reference"
+  description="Technical reference manual for developers building indexers, node software, block explorers, and non-custodial wallets for the Runes protocol."
+  currentRoute="reference.html"
+  kicker="Engineering & Architecture Reference"
+  toc={toc}
+>
+  <div class="status-line">
+    Technical reference for Bitcoin indexer and wallet engineers · Pinned to ord 0.29.0.
+  </div>
+
+  <h2 id="terms">1. Terminology</h2>
+  <dl style="margin-bottom: 1.5rem;">
+    <dt><strong>Runestone:</strong></dt>
+    <dd style="margin-left: 1.5rem; margin-bottom: 0.75rem;">A valid protocol message contained within an <code>OP_RETURN OP_13</code> script output that defines state transitions.</dd>
+    <dt><strong>Cenotaph:</strong></dt>
+    <dd style="margin-left: 1.5rem; margin-bottom: 0.75rem;">A malformed runestone. When a cenotaph is encountered, all input runes entering the transaction are burned to prevent protocol fragmentation.</dd>
+    <dt><strong>Edict:</strong></dt>
+    <dd style="margin-left: 1.5rem; margin-bottom: 0.75rem;">A 4-tuple <code>(RuneId, Amount, OutputIndex)</code> specifying a transfer of runes from the transaction balance pool to a specific output.</dd>
+    <dt><strong>Pointer:</strong></dt>
+    <dd style="margin-left: 1.5rem; margin-bottom: 0.75rem;">An output index specified via Tag 22 that receives all unallocated remainder balances after all edicts execute.</dd>
+    <dt><strong>Spacers:</strong></dt>
+    <dd style="margin-left: 1.5rem; margin-bottom: 0.75rem;">A bitmask specifying where display bullets (<code>•</code>) appear between letters in a rune name.</dd>
+  </dl>
+
+  <h2 id="pipeline">2. Indexer Pipeline</h2>
+  <p>
+    An indexer processes blocks strictly in blockchain order. For each block:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>Initialize the block transaction counter at 0.</li>
+    <li>For each transaction, inspect outputs in order from 0 to N-1 to locate the first output beginning with <code>OP_RETURN OP_13</code>.</li>
+    <li>If found, extract data pushes and attempt LEB128 integer decoding.</li>
+    <li>Drain all spent input balances from the database into the transaction unallocated pool.</li>
+    <li>Apply etchings, mints, and edicts. If any cenotaph flaw occurs, burn the unallocated pool.</li>
+    <li>Commit output balances and burned amounts to the persistent database.</li>
+  </ol>
+
+  <h2 id="terms-eval">3. Open Mint Terms Evaluation</h2>
+  <p>
+    When a transaction contains a Mint instruction (Tag 20), the indexer verifies all terms:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Cap Check:</strong> If <code>mints &gt;= cap</code>, the mint is ignored.</li>
+    <li><strong>Absolute Height:</strong> If <code>heightStart</code> or <code>heightEnd</code> are defined, block height must satisfy <code>height &gt;= heightStart</code> and <code>height &lt; heightEnd</code>.</li>
+    <li><strong>Relative Offset:</strong> If <code>offsetStart</code> or <code>offsetEnd</code> are defined, block height must satisfy <code>height &gt;= etchingBlock + offsetStart</code> and <code>height &lt; etchingBlock + offsetEnd</code>.</li>
+  </ul>
+
+  <h2 id="confirmation">4. Confirmation Rules</h2>
+  <p>
+    Etchings require a two-phase commitment:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Commitment:</strong> A Taproot output containing a script with the little-endian bytes of the rune name.</li>
+    <li><strong>Maturity:</strong> The commitment transaction must have at least 6 confirmations before being spent by the reveal transaction (Rule R27).</li>
+    <li><strong>Early Reveal:</strong> If revealed with fewer than 6 confirmations, the etching is not invalid, but the requested name is disregarded and replaced with a reserved sequence name (Rule R28).</li>
+  </ul>
+
+  <h2 id="reorg">5. Reorganization Handling</h2>
+  <p>
+    In the event of a blockchain reorganization:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>All state transitions in disconnected blocks must be reverted in reverse order.</li>
+    <li>Rune IDs (<code>Block:Tx</code>) are inherently tied to block height and transaction position. If transactions are reordered or confirmed at different heights in the reorged chain, their assigned Rune IDs will change.</li>
+    <li>Wallets must wait for 6 confirmations before considering rune balances final.</li>
+  </ul>
+
+  <h2 id="sizes">6. Script Sizes & Relay Policy</h2>
+  <p>
+    Standard Bitcoin nodes relay transactions with an <code>OP_RETURN</code> output up to <strong>83 bytes</strong> by default.
+    Transactions exceeding 83 bytes are valid under consensus if included in a block, but will not propagate through standard mempools unless nodes configure a higher <code>-datacarriersize</code>.
+  </p>
+
+  <h2 id="limits">7. Protocol Limits</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Dimension</th><th>Maximum Bound</th><th>Controlling Rule</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Divisibility</td><td>38 decimal places</td><td>R24</td></tr>
+        <tr><td>Spacers</td><td>0x07FFFFFF (27 bits)</td><td>R25</td></tr>
+        <tr><td>Varint Size</td><td>19 bytes (u128)</td><td>R8</td></tr>
+        <tr><td>Supply Bound</td><td>2^128 - 1</td><td>R29</td></tr>
+        <tr><td>Pushes per Script</td><td>Unlimited (chunked at 520 bytes)</td><td>R2</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="security">8. Security & Cenotaph Prevention</h2>
+  <p>
+    To prevent accidental cenotaph creation:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>Never encode unrecognized even tags.</li>
+    <li>Always verify that edict output indices are strictly less than the total transaction output count.</li>
+    <li>Ensure pointer output index is strictly less than the transaction output count.</li>
+    <li>Ensure <code>premine + cap * amount</code> does not overflow 128-bit unsigned arithmetic.</li>
+  </ul>
+
+  <h2 id="checklist">9. Implementation Checklist</h2>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>[ ] Accept non-minimal LEB128 varints during decoding (Rule R10).</li>
+    <li>[ ] Emit minimal LEB128 varints during encoding (Rule R11).</li>
+    <li>[ ] Enforce 19-byte limit on varints with overflow mask check at byte 19.</li>
+    <li>[ ] Ignore unrecognized odd tags (Rule R16).</li>
+    <li>[ ] Reject unrecognized even tags as cenotaphs (Rule R17).</li>
+    <li>[ ] Implement delta decoding for Rune IDs in edicts (Rule R35).</li>
+    <li>[ ] Verify all 24 authoritative conformance test vectors.</li>
+  </ul>
+
+  <FeedbackWidget pageTitle="Runes Implementer Reference" />
+</BaseLayout>

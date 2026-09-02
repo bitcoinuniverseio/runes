@@ -1,0 +1,307 @@
+---
+// DecoderIsland.astro - Pure client-side Runestone decoder island
+---
+
+<div class="studio-container" id="decoder-container">
+  <div class="studio-panel">
+    <form id="decoder-form">
+      <div class="form-group">
+        <label class="form-label" for="script-hex">Runestone Output Script (Hex)</label>
+        <textarea
+          id="script-hex"
+          class="form-textarea"
+          rows="3"
+          placeholder="Paste OP_RETURN script hex beginning 6a 5d... e.g. 6a5d0800c0a23303e80701"
+          spellcheck="false"
+        ></textarea>
+      </div>
+
+      <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+        <div class="form-group" style="flex: 1; min-width: 200px; margin-bottom: 0;">
+          <label class="form-label" for="tx-outputs">Transaction Output Count (Optional)</label>
+          <input
+            id="tx-outputs"
+            class="form-input"
+            type="number"
+            min="1"
+            placeholder="e.g. 2 (required for pointer and split range checks)"
+          />
+        </div>
+
+        <button type="submit" class="btn-primary" style="height: 38px;">Decipher Script</button>
+        <button type="button" id="clear-btn" class="btn-secondary" style="height: 38px;">Clear</button>
+      </div>
+    </form>
+
+    <div style="margin-top: 1.5rem;">
+      <span style="font-family: var(--font-sans); font-size: 0.8125rem; color: var(--text-muted); font-weight: 600;">Sample Test Vectors:</span>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d" data-outputs="2">V1: Empty</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d0800c0a23303e80701" data-outputs="2">V2: Transfer</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d0d00c0a23303e807010019f40300" data-outputs="2">V3: Multi-Rune</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d0700c0a233030003" data-outputs="3">V5: Split</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d0614c0a2331403" data-outputs="2">V6: Mint</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065" data-outputs="2">V8: Full Etch</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d021605" data-outputs="2" style="border-color: var(--burn-border); color: var(--burn-red);">C7: Pointer Flaw</button>
+        <button type="button" class="page-action-btn sample-btn" data-hex="6a5d69" data-outputs="2" style="border-color: var(--burn-border); color: var(--burn-red);">C11: Opcode Flaw</button>
+      </div>
+    </div>
+
+    <div id="decode-output" style="margin-top: 2rem;">
+      <p style="color: var(--text-muted); font-size: 0.95rem;">Paste an OP_RETURN script hex or click any sample vector above to inspect.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { decipher, formatSpacedName, FLAWS } from '../../packages/runes-tools/src/index.js';
+
+  function esc(s: any): string {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderResult(result: any, container: HTMLElement) {
+    if (result.inputError) {
+      container.innerHTML = `<div class="callout callout-warning"><div class="callout-title">Input Error</div><p>${esc(result.inputError)}</p></div>`;
+      return;
+    }
+    if (result.notRunestone) {
+      container.innerHTML = `<div class="callout callout-note"><div class="callout-title">Not A Runestone</div><p>${esc(result.notRunestone)}</p></div>`;
+      return;
+    }
+
+    let html = '';
+    if (result.cenotaph) {
+      const flawDesc = FLAWS[result.flaw as keyof typeof FLAWS] || '';
+      html += `
+        <div class="callout callout-burn">
+          <div class="callout-title">Cenotaph Detected (Flaw: ${esc(result.flaw)})</div>
+          <p><strong>Reason:</strong> ${esc(flawDesc)}</p>
+          <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+            <strong>Protocol Consequences (Rule R45):</strong> All input rune balances in this transaction are burned.
+            Any etched rune is created but permanently unmintable with default properties.
+            Any mint increments the target's mint count but its minted units are burned.
+          </p>
+        </div>
+      `;
+    } else {
+      html += `
+        <div class="callout callout-invariant">
+          <div class="callout-title">Valid Runestone</div>
+          <p>This script decodes to a valid, well-formed Runestone under ord 0.29.0 consensus rules.</p>
+        </div>
+      `;
+    }
+
+    // Payload & Integers
+    if (result.payload) {
+      const hexStr = Array.from(result.payload as Uint8Array).map(b => b.toString(16).padStart(2, '0')).join(' ');
+      html += `
+        <h3 style="margin-top: 1.5rem;">Carrier Payload</h3>
+        <p style="font-size: 0.875rem; color: var(--text-muted);">${result.payload.length} bytes concatenated across ${result.pushes} data push(es):</p>
+        <pre><code>${esc(hexStr || '(empty payload)')}</code></pre>
+      `;
+    }
+
+    if (result.integers) {
+      html += `
+        <h3>Decoded Varint Integers</h3>
+        <pre><code>[${result.integers.map(String).join(', ')}]</code></pre>
+      `;
+    }
+
+    // Etching details
+    if (result.etching) {
+      const e = result.etching;
+      html += `
+        <h3>Etching (Tag 2 Flags: Etching)</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Property</th><th>Tag</th><th>Value</th><th>Interpretation</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Name</td>
+                <td>4</td>
+                <td><code>${e.rune !== null ? e.rune.toString() : 'None'}</code></td>
+                <td><strong>${e.rune !== null ? esc(formatSpacedName(e.rune, e.spacers ?? 0n)) : 'Reserved name assigned by indexer'}</strong></td>
+              </tr>
+              <tr>
+                <td>Divisibility</td>
+                <td>1</td>
+                <td><code>${e.divisibility ?? 0n}</code></td>
+                <td>${e.divisibility ?? 0n} decimal place(s)</td>
+              </tr>
+              <tr>
+                <td>Spacers Bitmap</td>
+                <td>3</td>
+                <td><code>${e.spacers ?? 0n}</code></td>
+                <td>Bitmap: ${e.spacers ?? 0n}</td>
+              </tr>
+              <tr>
+                <td>Currency Symbol</td>
+                <td>5</td>
+                <td><code>${e.symbol ? 'U+' + e.symbol.toString(16).toUpperCase().padStart(4, '0') : 'None'}</code></td>
+                <td>${e.symbol ? String.fromCodePoint(Number(e.symbol)) : '¤ (Generic)'}</td>
+              </tr>
+              <tr>
+                <td>Premine</td>
+                <td>6</td>
+                <td><code>${e.premine ?? 0n}</code></td>
+                <td>${e.premine ?? 0n} atomic units to transaction</td>
+              </tr>
+              <tr>
+                <td>Turbo Flag</td>
+                <td>-</td>
+                <td><code>${e.turbo ? 'True' : 'False'}</code></td>
+                <td>${e.turbo ? 'Opted in to future protocol changes' : 'Standard'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+
+      if (e.terms) {
+        html += `
+          <h4>Mint Terms</h4>
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Term Field</th><th>Tag</th><th>Value</th></tr></thead>
+              <tbody>
+                <tr><td>Amount per Mint</td><td>10</td><td><code>${e.terms.amount ?? 'None'}</code></td></tr>
+                <tr><td>Mint Cap</td><td>8</td><td><code>${e.terms.cap ?? 'None'}</code></td></tr>
+                <tr><td>Height Start / End</td><td>12 / 14</td><td><code>${e.terms.heightStart ?? 'Open'} -> ${e.terms.heightEnd ?? 'Open'}</code></td></tr>
+                <tr><td>Offset Start / End</td><td>16 / 18</td><td><code>${e.terms.offsetStart ?? 'None'} -> ${e.terms.offsetEnd ?? 'None'}</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+    }
+
+    // Mint
+    if (result.mint) {
+      html += `
+        <h3>Mint Instruction (Tag 20)</h3>
+        <p>Mints rune <code>${result.mint.block}:${result.mint.tx}</code>. If terms hold at this block height, minted units join the unallocated pool.</p>
+      `;
+    }
+
+    // Pointer
+    if (result.pointer !== null && result.pointer !== undefined && !result.cenotaph) {
+      html += `
+        <h3>Pointer Destination (Tag 22)</h3>
+        <p>Unallocated runes remaining after edicts route to output <code>${result.pointer}</code>.</p>
+      `;
+    }
+
+    // Edicts table
+    if (result.edicts && result.edicts.length > 0) {
+      html += `
+        <h3>Edicts (${result.edicts.length})</h3>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>#</th><th>Rune ID</th><th>Amount</th><th>Output</th><th>Meaning</th></tr></thead>
+            <tbody>
+      `;
+      result.edicts.forEach((ed: any, idx: number) => {
+        const idText = (ed.id.block === 0n && ed.id.tx === 0) ? '0:0 (Current Etching)' : `${ed.id.block}:${ed.id.tx}`;
+        const amtText = ed.amount === 0n ? '0 (Entire remaining balance)' : `${ed.amount} units`;
+        html += `
+          <tr>
+            <td>${idx + 1}</td>
+            <td><code>${esc(idText)}</code></td>
+            <td>${esc(amtText)}</td>
+            <td><code>Output ${ed.output}</code></td>
+            <td>Transfers ${esc(amtText)} to output ${ed.output}</td>
+          </tr>
+        `;
+      });
+      html += `</tbody></table></div>`;
+    }
+
+    if (result.leftoverEven && result.leftoverEven.length > 0) {
+      html += `
+        <div class="callout callout-burn">
+          <div class="callout-title">Unconsumed Even Tags: ${result.leftoverEven.join(', ')}</div>
+          <p>Even tags must be recognized and consumed. Leftover even tag data triggers flaw UnrecognizedEvenTag (Rule R17).</p>
+        </div>
+      `;
+    }
+
+    if (result.caveats && result.caveats.length > 0) {
+      html += `
+        <div class="callout callout-warning">
+          <div class="callout-title">Analysis Caveats</div>
+          <ul>
+            ${result.caveats.map((c: string) => `<li>${esc(c)}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function setup() {
+    const form = document.getElementById('decoder-form');
+    const hexInput = document.getElementById('script-hex') as HTMLTextAreaElement;
+    const outInput = document.getElementById('tx-outputs') as HTMLInputElement;
+    const outputContainer = document.getElementById('decode-output');
+    const clearBtn = document.getElementById('clear-btn');
+
+    if (!form || !hexInput || !outputContainer) return;
+
+    function runDecode() {
+      const hex = hexInput.value.trim();
+      if (!hex) {
+        outputContainer.innerHTML = '<p style="color: var(--text-muted); font-size: 0.95rem;">Paste an OP_RETURN script hex or click any sample vector above to inspect.</p>';
+        return;
+      }
+      const outputsVal = outInput ? outInput.value.trim() : '';
+      const numOutputs = outputsVal ? parseInt(outputsVal, 10) : null;
+      const res = decipher(hex, isNaN(numOutputs!) ? null : numOutputs);
+      renderResult(res, outputContainer);
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      runDecode();
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        hexInput.value = '';
+        if (outInput) outInput.value = '';
+        runDecode();
+      });
+    }
+
+    document.querySelectorAll('.sample-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const hex = btn.getAttribute('data-hex');
+        const outputs = btn.getAttribute('data-outputs');
+        if (hex) hexInput.value = hex;
+        if (outInput && outputs) outInput.value = outputs;
+        runDecode();
+      });
+    });
+
+    // Parse URL params
+    const params = new URLSearchParams(window.location.search);
+    const initialHex = params.get('hex');
+    const initialOutputs = params.get('outputs');
+    if (initialHex) {
+      hexInput.value = initialHex;
+      if (initialOutputs && outInput) {
+        outInput.value = initialOutputs;
+      }
+      runDecode();
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setup);
+  } else {
+    setup();
+  }
+</script>

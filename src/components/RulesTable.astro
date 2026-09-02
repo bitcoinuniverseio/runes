@@ -1,0 +1,37 @@
+---
+import rulesData from '../data/protocol/rules.json';
+
+interface Props {
+  category?: string;
+}
+
+const { category } = Astro.props;
+const rules = category ? rulesData.filter((r: any) => r.sectionId === category || r.category === category) : rulesData;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="rules-list">
+  {rules.map((rule: any) => (
+    <article class="rule-card" id={rule.id.toLowerCase()} style="border-left: 3px solid var(--accent); padding-left: 1rem; margin-bottom: 2rem;">
+      <div style="display: flex; align-items: baseline; gap: 0.75rem; flex-wrap: wrap;">
+        <h4 style="margin: 0; font-family: var(--font-sans); font-size: 1.05rem;">
+          <a href={`#${rule.id.toLowerCase()}`} style="text-decoration: none; color: var(--accent);">
+            <strong>{rule.id}</strong>: {rule.title}
+          </a>
+        </h4>
+        <span style="font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-faint);">[{rule.sectionTitle || rule.sectionId}]</span>
+      </div>
+
+      <p style="margin-top: 0.5rem; margin-bottom: 0.5rem; font-size: 1rem;">{rule.text}</p>
+
+      <div style="display: flex; gap: 1rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); flex-wrap: wrap;">
+        <span><strong>ord Source:</strong> <code>{rule.ordSource}</code></span>
+        {rule.flaw && (
+          <span style="color: var(--burn-red);">
+            <strong>Violating Flaw:</strong> <code>{rule.flaw}</code>
+          </span>
+        )}
+      </div>
+    </article>
+  ))}
+</div>

@@ -1,0 +1,82 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'doc-3-0-0', text: 'Documentation Platform 3.0.0' },
+  { id: 'doc-2-0-0', text: 'Documentation 2.0.0' },
+  { id: 'doc-1-0-0', text: 'Documentation 1.0.0' },
+  { id: 'protocol', text: 'Protocol Milestones' },
+  { id: 'versioning', text: 'Versioning Policy' },
+];
+---
+
+<BaseLayout
+  title="Runes Documentation Changelog"
+  description="Chronological record of documentation releases, protocol milestones, and platform enhancements."
+  currentRoute="changelog.html"
+  kicker="Release History"
+  toc={toc}
+>
+  <div class="status-line">
+    Documentation releases follow Semantic Versioning (SemVer 2.0.0).
+  </div>
+
+  <h2 id="doc-3-0-0">Documentation Platform 3.0.0 (2026-09-02)</h2>
+  <div class="status-line">Major architectural expansion and interactive tooling release.</div>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Runic Ledger Theme:</strong> Implemented accessible, high-contrast light and dark visual system with engraved borders and responsive 3-column layout.</li>
+    <li><strong>Shared Protocol Core:</strong> Released <code>@bitcoinuniverse/runes-tools</code> pure TypeScript library powering all browser tooling, simulations, and CLI.</li>
+    <li><strong>Runestone Studio:</strong> Built 8 interactive modes including script decoder, raw tx parser, visual composer, allocation simulator, byte scrubber, side-by-side comparison, cenotaph autopsy, and relay size audit.</li>
+    <li><strong>Guided Safety Wizards:</strong> Released Transfer Safety Wizard, Mint Readiness Wizard, and Etching Commitment Planner.</li>
+    <li><strong>Learning Academy:</strong> Added 7 curriculum tracks from basics to indexer development with interactive quizzes and local progress saving.</li>
+    <li><strong>Real Transaction Atlas:</strong> Documented 12 verified mainnet transactions including Genesis etchings, multi-rune transfers, and cenotaph burns.</li>
+    <li><strong>Agent-Ready Suite:</strong> Published <code>llms.txt</code>, <code>llms-full.txt</code>, machine-readable schemas, and local stdio MCP server.</li>
+    <li><strong>Offline-First PWA:</strong> Added service worker, web app manifest, and self-contained offline download bundle.</li>
+  </ul>
+
+  <h2 id="doc-2-0-0">Documentation 2.0.0 (2025-06-15)</h2>
+  <div class="status-line">Authoritative reference restructuring and browser decoder.</div>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>Formalized numbered specification rules R1 through R47.</li>
+    <li>Added full 24-vector conformance suite (V1–V8, C1–C14, N1–N2).</li>
+    <li>Introduced client-side browser Runestone decoder.</li>
+    <li>Added Implementer Reference with indexer pipeline and reorg safety guidance.</li>
+  </ul>
+
+  <h2 id="doc-1-0-0">Documentation 1.0.0 (2024-04-20)</h2>
+  <div class="status-line">Genesis release coincident with Bitcoin block 840,000.</div>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>Initial documentation of Runes protocol principles, tags, and edicts.</li>
+    <li>Coverage of Genesis rune <code>UNCOMMON•GOODS</code>.</li>
+  </ul>
+
+  <h2 id="protocol">Protocol Milestones</h2>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Date</th><th>Block Height</th><th>Milestone</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>2024-04-20</td><td>840,000</td><td>Runes protocol activates on Bitcoin mainnet. Genesis rune etched.</td></tr>
+        <tr><td>2024-09-01</td><td>857,500</td><td>First name length step-down: 12-letter rune names unlock.</td></tr>
+        <tr><td>2028-04-01 (Est.)</td><td>1,050,000</td><td>All rune names unlock (length 1). Genesis mint period concludes.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2 id="versioning">Versioning Policy</h2>
+  <p>
+    This documentation platform uses Semantic Versioning (<code>MAJOR.MINOR.PATCH</code>):
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>MAJOR:</strong> Substantial platform rewrites, major design overhauls, or breaking protocol upgrades.</li>
+    <li><strong>MINOR:</strong> New tooling modes, educational tracks, transaction atlas cases, or protocol rule expansions.</li>
+    <li><strong>PATCH:</strong> Typo fixes, explanatory clarifications, or link updates.</li>
+  </ul>
+
+  <FeedbackWidget pageTitle="Runes Documentation Changelog" />
+</BaseLayout>

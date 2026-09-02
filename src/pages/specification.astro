@@ -1,0 +1,153 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import RulesTable from '../components/RulesTable.astro';
+import TagsTable from '../components/TagsTable.astro';
+import FlawsTable from '../components/FlawsTable.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'carrier', text: '1. Carrier Output (R1–R7)' },
+  { id: 'varints', text: '2. Integers and Varints (R8–R11)' },
+  { id: 'message', text: '3. Message Structure (R12–R15)' },
+  { id: 'tags', text: '4. Tag Dictionary (R16–R17)' },
+  { id: 'flags', text: '5. Flag Bitfield (R18–R19)' },
+  { id: 'etching', text: '6. Etching (R20–R30)' },
+  { id: 'minting', text: '7. Minting (R31–R33)' },
+  { id: 'edicts', text: '8. Edicts (R34–R38)' },
+  { id: 'pointer', text: '9. Pointer (R39)' },
+  { id: 'allocation', text: '10. Allocation & State (R40–R44)' },
+  { id: 'cenotaphs', text: '11. Cenotaphs & Flaws (R45–R47)' },
+  { id: 'genesis', text: '12. Genesis Rune' },
+];
+---
+
+<BaseLayout
+  title="Runes Protocol Specification"
+  description="Normative consensus specification for the Runes protocol on Bitcoin, numbered rules R1 through R47, tag dictionaries, and cenotaph flaw definitions."
+  currentRoute="specification.html"
+  kicker="Normative Protocol Specification"
+  toc={toc}
+>
+  <div class="status-line">
+    Pinned to Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> 0.29.0 (ordinals crate 0.0.17, commit <code>7e37a3b</code>) · Activation Block: 840,000.
+  </div>
+
+  <p>
+    This document constitutes the authoritative, normative specification of the Runes protocol on Bitcoin.
+    Every numbered statement (R1 through R47) defines an immutable protocol rule verified by consensus indexers.
+  </p>
+
+  <Callout type="invariant" title="Zero External Dependencies">
+    <p>
+      Runes is fully self-contained on the Bitcoin blockchain. It does not use witness data, external state commitments, off-chain DA layers, or second-layer sidechains. All state transitions derive purely from transaction inputs, outputs, and OP_RETURN script pushes.
+    </p>
+  </Callout>
+
+  <h2 id="carrier">1. Carrier Output</h2>
+  <p>
+    A transaction communicates protocol messages through a standard Bitcoin data carrier output.
+  </p>
+  <RulesTable category="carrier" />
+
+  <h2 id="varints">2. Integers and Varints</h2>
+  <p>
+    All integers inside a Runestone payload are encoded using unsigned LEB128 varints.
+  </p>
+  <RulesTable category="varints" />
+
+  <Callout type="note" title="LEB128 Encoding vs Decoding Asymmetry">
+    <p>
+      Under Rule R10, indexers accept non-minimal LEB128 encodings (such as <code>0x80 0x00</code> for zero). However, under Rule R11, serializers should always emit the minimal representation to conserve byte budget within the standard 83-byte relay limit.
+    </p>
+  </Callout>
+
+  <h2 id="message">3. Message Structure</h2>
+  <p>
+    The integer stream is partitioned into tag-value pairs followed by an optional edicts body.
+  </p>
+  <RulesTable category="message" />
+
+  <h2 id="tags">4. Tag Dictionary</h2>
+  <p>
+    Tags identify message fields. The parity of the tag determines indexer behavior when encountering an unrecognized field.
+  </p>
+  <TagsTable />
+  <RulesTable category="tags" />
+
+  <h2 id="flags">5. Flag Bitfield</h2>
+  <p>
+    The Flags field (Tag 2) contains a bitfield controlling etching, open mint terms, and protocol flags.
+  </p>
+  <div class="table-scroll">
+    <table>
+      <thead>
+        <tr><th>Flag Bit</th><th>Name</th><th>Mask</th><th>Meaning</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>0</td><td><strong>Etching</strong></td><td><code>0x01 (1 &lt;&lt; 0)</code></td><td>Transaction etches a new rune. Enables Tags 1, 3, 4, 5, 6.</td></tr>
+        <tr><td>1</td><td><strong>Terms</strong></td><td><code>0x02 (1 &lt;&lt; 1)</code></td><td>Etching includes open mint terms. Enables Tags 8, 10, 12, 14, 16, 18.</td></tr>
+        <tr><td>2</td><td><strong>Turbo</strong></td><td><code>0x04 (1 &lt;&lt; 2)</code></td><td>Opts the etched rune into future protocol rule additions.</td></tr>
+        <tr><td>127</td><td><strong>Cenotaph</strong></td><td><code>1 &lt;&lt; 127</code></td><td>Reserved for future cenotaph signaling.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <RulesTable category="flags" />
+
+  <h2 id="etching">6. Etching</h2>
+  <p>
+    An etching creates a new fungible token on Bitcoin. It may be an open mint, premined, or fixed supply.
+  </p>
+  <RulesTable category="etching" />
+
+  <Callout type="warning" title="Commitment Requirement (Rule R27)">
+    <p>
+      Any non-reserved rune name requires a prior Taproot commitment transaction confirmed at least 6 blocks prior. Revealing the etching earlier causes the name to be silently disregarded and replaced with a reserved sequence name.
+    </p>
+  </Callout>
+
+  <h2 id="minting">7. Minting</h2>
+  <p>
+    A transaction may mint units of an active, open-mint rune using Tag 20.
+  </p>
+  <RulesTable category="minting" />
+
+  <h2 id="edicts">8. Edicts</h2>
+  <p>
+    Edicts transfer rune balances from the transaction unallocated pool to specific output indices.
+  </p>
+  <RulesTable category="edicts" />
+
+  <h2 id="pointer">9. Pointer</h2>
+  <p>
+    Tag 22 specifies which output index receives all unallocated remainder balances after all edicts execute.
+  </p>
+  <RulesTable category="pointer" />
+
+  <h2 id="allocation">10. Allocation & State Machine</h2>
+  <p>
+    The deterministic allocation state machine rules R40 through R44 govern UTXO rune balances.
+  </p>
+  <RulesTable category="allocation" />
+
+  <h2 id="cenotaphs">11. Cenotaphs & Flaw Reference</h2>
+  <p>
+    A cenotaph is a malformed runestone. When a cenotaph is detected, the transaction loses all input rune balances.
+  </p>
+  <Callout type="burn" title="Total Destruction on Malformation (Rule R45)">
+    <p>
+      All input runes entering a cenotaph transaction are permanently burned. They cannot be recovered, redirected, or spent. Any etching becomes unmintable, and any mint is burned.
+    </p>
+  </Callout>
+  <FlawsTable />
+  <RulesTable category="cenotaphs" />
+
+  <h2 id="genesis">12. Genesis Rune</h2>
+  <p>
+    Rune <code>1:0</code> (<code>UNCOMMON•GOODS</code>) was etched at the activation height of the protocol (Block 840,000) by Casey Rodarmor. It has divisibility 0, currency symbol <code>⧈</code>, mint amount 1, no cap, and minting remains open until the next Bitcoin halving at Block 1,050,000.
+  </p>
+
+  <FeedbackWidget pageTitle="Runes Protocol Specification" />
+</BaseLayout>

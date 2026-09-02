@@ -1,0 +1,49 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import WizardIsland from '../../components/WizardIsland.astro';
+import Callout from '../../components/Callout.astro';
+import FeedbackWidget from '../../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'wizard', text: 'Transfer Safety Wizard' },
+  { id: 'pitfalls', text: 'Common Transfer Pitfalls' },
+  { id: 'invariants', text: 'Consensus Guarantees' },
+];
+---
+
+<BaseLayout
+  title="Transfer Safety Wizard"
+  description="Interactive step-by-step transfer builder with real-time cenotaph prevention, change protection, and output range checks."
+  currentRoute="wizards/transfer.html"
+  kicker="Guided Safety Wizards"
+  toc={toc}
+>
+  <div class="status-line">
+    Interactive transfer planner · Prevents cenotaph flaw EdictOutput and accidental burns.
+  </div>
+
+  <h2 id="wizard">Transfer Safety Wizard</h2>
+  <p>
+    Configure your planned transfer below. The wizard validates that recipient and change output indices stay within bounds, prevents accidental assignment to the OP_RETURN script, and generates a minimal runestone script.
+  </p>
+
+  <WizardIsland type="transfer" />
+
+  <h2 id="pitfalls">Common Transfer Pitfalls</h2>
+  <ul style="padding-left: 1.5rem; margin-bottom: 2rem;">
+    <li><strong>Sending Change to OP_RETURN:</strong> Setting a pointer or edict to the OP_RETURN output burns all runes sent there permanently.</li>
+    <li><strong>Output Count Overflow:</strong> Specifying an edict output index greater than or equal to total outputs (except the split sentinel) triggers cenotaph flaw <code>EdictOutput</code>, burning all input runes.</li>
+    <li><strong>Forgetting Change:</strong> If no pointer is specified, change falls back to the first non-OP_RETURN output, which may inadvertently mix runes with Bitcoin fees or recipient outputs.</li>
+  </ul>
+
+  <h2 id="invariants">Consensus Guarantees</h2>
+  <Callout type="invariant" title="Conservation of Supply (Rule R40)">
+    <p>
+      In a valid transaction without mints or etchings, the sum of all output rune balances plus explicit burns exactly equals the sum of all input rune balances.
+    </p>
+  </Callout>
+
+  <FeedbackWidget pageTitle="Transfer Safety Wizard" />
+</BaseLayout>

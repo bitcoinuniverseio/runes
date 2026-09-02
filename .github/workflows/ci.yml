@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [develop, main]
+  pull_request:
+    branches: [develop, main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.19.0
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Packages
+        run: npm run build
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+      - name: Run Conformance Vectors
+        run: npm run test:conformance
+
+      - name: Validate Content & Schemas
+        run: node scripts/check-content.mjs
+
+      - name: Build Platform Static Site
+        run: npx astro build

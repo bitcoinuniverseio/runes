@@ -1,0 +1,123 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Callout from '../components/Callout.astro';
+import FeedbackWidget from '../components/FeedbackWidget.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const toc = [
+  { id: 'model', text: '1. Mental Model' },
+  { id: 'transfer', text: '2. Basic Transfer' },
+  { id: 'two-edicts', text: '3. Two Edicts & Change' },
+  { id: 'split', text: '4. Splitting Balances' },
+  { id: 'mint', text: '5. Minting Runes' },
+  { id: 'etch', text: '6. Etching a Rune' },
+  { id: 'etch-fails', text: '7. How Etchings Fail' },
+  { id: 'burn', text: '8. Burning Runes' },
+  { id: 'review', text: '9. Review Checklist' },
+  { id: 'support', text: '10. Protocol Support' },
+];
+---
+
+<BaseLayout
+  title="Step-by-Step Guide to Runes"
+  description="Practical, worked examples demonstrating transfers, multi-rune edicts, balance splits, open mints, and etchings on Bitcoin."
+  currentRoute="guide.html"
+  kicker="Worked Tutorial"
+  toc={toc}
+>
+  <div class="status-line">
+    Practical worked walkthroughs with exact hex scripts and byte breakdowns.
+  </div>
+
+  <h2 id="model">1. Mental Model</h2>
+  <p>
+    When working with Runes, remember that runes are not stored inside the runestone itself.
+    The runestone is merely an instruction sheet telling the Bitcoin transaction how to route the runes that entered through the spent inputs.
+  </p>
+
+  <h2 id="transfer">2. Basic Transfer</h2>
+  <p>
+    Suppose you have a UTXO containing 1,000 units of rune <code>840000:3</code>.
+    You want to send all 1,000 units to a recipient at output 1.
+  </p>
+  <p>
+    The simplest way is to omit all edicts and set the <strong>Pointer</strong> (Tag 22) to 1:
+  </p>
+  <pre><code>OP_RETURN OP_13 OP_PUSHBYTES_2 16 01</code></pre>
+  <p>
+    <code>16</code> is varint 22 (Pointer), and <code>01</code> is output index 1.
+    All unallocated runes entering the transaction route directly to output 1.
+  </p>
+
+  <h2 id="two-edicts">3. Two Edicts & Change</h2>
+  <p>
+    Suppose you hold 5,000 units of rune <code>840000:3</code>. You want to send 2,000 units to Alice (output 1), 1,000 units to Bob (output 2), and return the remaining 2,000 units to yourself (output 3).
+  </p>
+  <p>
+    You construct two edicts and set the pointer to your change output:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>Edict 1: <code>840000:3</code>, amount 2,000 -> output 1</li>
+    <li>Edict 2: <code>840000:3</code>, amount 1,000 -> output 2</li>
+    <li>Pointer: Output 3 (receives the remaining 2,000 units)</li>
+  </ul>
+
+  <h2 id="split">4. Splitting Balances</h2>
+  <p>
+    Under Rule R38, if an edict specifies an output index equal to the total number of transaction outputs, the specified amount is divided across all non-OP_RETURN outputs:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>If amount is 0: The entire unallocated balance divides evenly across all spendable outputs.</li>
+    <li>If amount is non-zero: Units are distributed in order to each spendable output until the balance runs out.</li>
+  </ul>
+
+  <h2 id="mint">5. Minting Runes</h2>
+  <p>
+    To mint an active rune, include Tag 20 with the target Rune ID:
+  </p>
+  <pre><code>OP_RETURN OP_13 OP_PUSHBYTES_6 14 c0 a2 33 14 03</code></pre>
+  <p>
+    Tag 20 appears twice: first for the block height (840,000), then for the transaction index (3).
+    The minted units enter the unallocated pool and route to the pointer or first spendable output.
+  </p>
+
+  <h2 id="etch">6. Etching a Rune</h2>
+  <p>
+    Etching requires two transactions:
+  </p>
+  <ol style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Commitment:</strong> A Taproot output containing the little-endian bytes of the name.</li>
+    <li><strong>Reveal:</strong> After 6 blocks, spend the commitment output with a runestone containing Tag 2 (Flags: Etching) and Tag 4 (Rune name value).</li>
+  </ol>
+
+  <h2 id="etch-fails">7. How Etchings Fail</h2>
+  <p>
+    Common reasons etchings do not succeed as intended:
+  </p>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li><strong>Too Young:</strong> Spending the commitment before 6 confirmations (causes name to be disregarded and assigned a reserved sequence name).</li>
+    <li><strong>Locked Name:</strong> Etching a name with fewer letters than unlocked at the current block height (silently disregarded).</li>
+    <li><strong>Already Etched:</strong> Name was etched earlier by another transaction (silently disregarded).</li>
+  </ul>
+
+  <h2 id="burn">8. Burning Runes</h2>
+  <p>
+    Runes can be deliberately burned by explicitly directing an edict to an <code>OP_RETURN</code> output.
+    Any units directed to an <code>OP_RETURN</code> output are permanently destroyed.
+  </p>
+
+  <h2 id="review">9. Review Checklist</h2>
+  <ul style="padding-left: 1.5rem; margin-bottom: 1.5rem;">
+    <li>[ ] Confirm output indices match planned addresses.</li>
+    <li>[ ] Check that pointer output index is strictly less than total outputs.</li>
+    <li>[ ] Verify total script size is under 83 bytes for fast standard relay.</li>
+  </ul>
+
+  <h2 id="support">10. Protocol Support</h2>
+  <p>
+    For interactive experiments and testing, launch the <a href={`${base}/studio.html`}>Runestone Studio</a> or test your scripts in the <a href={`${base}/decoder.html`}>Standalone Decoder</a>.
+  </p>
+
+  <FeedbackWidget pageTitle="Step-by-Step Guide to Runes" />
+</BaseLayout>

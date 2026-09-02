@@ -1,0 +1,175 @@
+---
+interface Lesson {
+  id: string;
+  title: string;
+  summary: string;
+  ruleRefs: string[];
+}
+
+interface Quiz {
+  question: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+  ruleRef?: string;
+}
+
+interface Track {
+  id: string;
+  slug: string;
+  title: string;
+  audience: string;
+  prerequisites: string;
+  outcomes: string;
+  estimatedMinutes: number;
+  lessons: Lesson[];
+  quiz: Quiz[];
+}
+
+interface Props {
+  track: Track;
+}
+
+const { track } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="academy-track" id={track.slug}>
+  <div class="status-line">
+    <strong>Audience:</strong> {track.audience} · <strong>Duration:</strong> ~{track.estimatedMinutes} minutes
+  </div>
+
+  <div class="callout callout-note" style="margin-bottom: 2rem;">
+    <div class="callout-title">Learning Outcomes</div>
+    <p style="margin-bottom: 0.25rem;"><strong>Prerequisites:</strong> {track.prerequisites}</p>
+    <p style="margin-bottom: 0;"><strong>Outcomes:</strong> {track.outcomes}</p>
+  </div>
+
+  <h2>Curriculum Lessons</h2>
+  <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;">
+    {track.lessons.map((lesson, idx) => (
+      <div class="lesson-card" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+          <h4 style="margin: 0; font-size: 1.05rem;">
+            <span>{idx + 1}. {lesson.title}</span>
+          </h4>
+          <label style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); cursor: pointer;">
+            <input type="checkbox" class="lesson-progress-check" data-track={track.slug} data-lesson={idx} />
+            <span>Mark Completed</span>
+          </label>
+        </div>
+        <p style="font-size: 0.9375rem; margin-bottom: 0.5rem;">{lesson.summary}</p>
+        {lesson.ruleRefs && lesson.ruleRefs.length > 0 && (
+          <div style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted);">
+            Controlling Rules: {lesson.ruleRefs.map((r, rIdx) => (
+              <span>
+                <a href={`${base}/specification.html#${r.toLowerCase()}`}>{r}</a>{rIdx < lesson.ruleRefs.length - 1 ? ', ' : ''}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+
+  <h2>Track Knowledge Assessment</h2>
+  <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+    Answer the questions below to test your understanding of this track's consensus invariants.
+  </p>
+
+  <div class="quiz-container" style="display: flex; flex-direction: column; gap: 1.75rem;">
+    {track.quiz.map((q, qIdx) => (
+      <div class="quiz-card" style="border: 1px solid var(--border); background: var(--bg-inset); padding: 1.25rem; border-radius: var(--radius-sm);" data-quiz={qIdx}>
+        <h4 style="margin-top: 0; font-size: 1rem; margin-bottom: 0.75rem;">
+          Question {qIdx + 1}: {q.question}
+        </h4>
+
+        <div class="quiz-options" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+          {q.options.map((opt, oIdx) => (
+            <label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; background: var(--bg); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); cursor: pointer;">
+              <input type="radio" name={`quiz-${track.slug}-${qIdx}`} value={oIdx} />
+              <span>{opt}</span>
+            </label>
+          ))}
+        </div>
+
+        <button type="button" class="btn-primary quiz-submit-btn" data-track={track.slug} data-q={qIdx} data-ans={q.correctIndex}>
+          Verify Answer
+        </button>
+
+        <div class="quiz-feedback" id={`quiz-fb-${track.slug}-${qIdx}`} style="display: none; margin-top: 1rem;">
+          <div class="callout callout-note">
+            <div class="callout-title">Protocol Explanation</div>
+            <p class="fb-text">{q.explanation}</p>
+            {q.ruleRef && (
+              <p style="margin-bottom: 0; font-size: 0.75rem; font-family: var(--font-sans);">
+                Controlling Rule: <a href={`${base}/specification.html#${q.ruleRef.toLowerCase()}`}>{q.ruleRef}</a>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  function initAcademy() {
+    const checks = document.querySelectorAll('.lesson-progress-check');
+    const KEY = 'runes-academy-progress';
+    let progress: Record<string, boolean> = {};
+    try {
+      progress = JSON.parse(localStorage.getItem(KEY) || '{}');
+    } catch(e) {}
+
+    checks.forEach(c => {
+      const input = c as HTMLInputElement;
+      const t = input.getAttribute('data-track');
+      const l = input.getAttribute('data-lesson');
+      const id = `${t}-${l}`;
+      if (progress[id]) input.checked = true;
+
+      input.addEventListener('change', () => {
+        progress[id] = input.checked;
+        try {
+          localStorage.setItem(KEY, JSON.stringify(progress));
+        } catch(e) {}
+      });
+    });
+
+    const quizButtons = document.querySelectorAll('.quiz-submit-btn');
+    quizButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.getAttribute('data-track');
+        const q = btn.getAttribute('data-q');
+        const correct = parseInt(btn.getAttribute('data-ans') || '0', 10);
+        const selected = document.querySelector(`input[name="quiz-${t}-${q}"]:checked`) as HTMLInputElement;
+        const fbContainer = document.getElementById(`quiz-fb-${t}-${q}`);
+        if (!fbContainer) return;
+
+        if (!selected) {
+          alert('Please select an option before checking.');
+          return;
+        }
+
+        const userAns = parseInt(selected.value, 10);
+        fbContainer.style.display = 'block';
+        const callout = fbContainer.querySelector('.callout');
+
+        if (userAns === correct) {
+          callout?.classList.remove('callout-burn');
+          callout?.classList.add('callout-invariant');
+        } else {
+          callout?.classList.remove('callout-invariant');
+          callout?.classList.add('callout-burn');
+        }
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAcademy);
+  } else {
+    initAcademy();
+  }
+</script>

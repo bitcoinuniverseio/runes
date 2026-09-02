@@ -1,0 +1,62 @@
+[
+  {
+    "flaw": "Opcode",
+    "condition": "Non-pushdata opcode after OP_13",
+    "rule": "R5",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "InvalidScript",
+    "condition": "Unparseable script after OP_13",
+    "rule": "R6",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "Varint",
+    "condition": "Overlong, overflowing, or unterminated varint",
+    "rule": "R10",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "TruncatedField",
+    "condition": "Tag with no value",
+    "rule": "R13",
+    "ordSource": "crates/ordinals/src/runestone/message.rs"
+  },
+  {
+    "flaw": "TrailingIntegers",
+    "condition": "Edict group shorter than four integers",
+    "rule": "R15",
+    "ordSource": "crates/ordinals/src/runestone/message.rs"
+  },
+  {
+    "flaw": "UnrecognizedEvenTag",
+    "condition": "Unconsumed even-tag value, any cause",
+    "rule": "R17",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "UnrecognizedFlag",
+    "condition": "Flag bit left set after consumption",
+    "rule": "R19",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "SupplyOverflow",
+    "condition": "premine + cap * amount overflows u128",
+    "rule": "R27",
+    "ordSource": "crates/ordinals/src/runestone.rs"
+  },
+  {
+    "flaw": "EdictRuneId",
+    "condition": "Edict ID accumulation invalid or overflowing",
+    "rule": "R36",
+    "ordSource": "crates/ordinals/src/runestone/message.rs"
+  },
+  {
+    "flaw": "EdictOutput",
+    "condition": "Edict output greater than the output count",
+    "rule": "R37",
+    "ordSource": "crates/ordinals/src/runestone/message.rs"
+  }
+]

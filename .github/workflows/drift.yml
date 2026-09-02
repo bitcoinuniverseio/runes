@@ -1,0 +1,24 @@
+name: Upstream Drift Monitor
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday
+  workflow_dispatch:
+
+jobs:
+  check-drift:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Check ord Latest Tag
+        run: |
+          LATEST_TAG=$(curl -s https://api.github.com/repos/ordinals/ord/releases/latest | jq -r .tag_name)
+          echo "Latest ord tag: $LATEST_TAG"
+          PINNED_TAG="0.29.0"
+          if [ "$LATEST_TAG" != "$PINNED_TAG" ]; then
+            echo "::warning::New ord release detected: $LATEST_TAG (pinned: $PINNED_TAG)"
+          else
+            echo "ord reference tag matches pinned $PINNED_TAG"
+          fi

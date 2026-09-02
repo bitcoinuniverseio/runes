@@ -1,0 +1,93 @@
+{
+  "transfer": {
+    "id": "transfer",
+    "title": "Transfer Safety Wizard",
+    "description": "Step-by-step non-signable transfer planner with allocation simulation and risk checks.",
+    "steps": [
+      {
+        "id": "inputs",
+        "title": "1. Specify Rune Inputs",
+        "description": "Select rune-bearing outpoints and their known atomic balances."
+      },
+      {
+        "id": "recipients",
+        "title": "2. Define Recipients & Amounts",
+        "description": "Enter destination script/address and rune amounts."
+      },
+      {
+        "id": "outputs",
+        "title": "3. Configure Output Order",
+        "description": "Set final output ordering, change output, and OP_RETURN location."
+      },
+      {
+        "id": "simulation",
+        "title": "4. Simulate Allocation",
+        "description": "Verify that all balances are conserved and unallocated runes go where intended."
+      },
+      {
+        "id": "review",
+        "title": "5. Review Safety Checklist",
+        "description": "Pre-signing warnings: unallocated balances, dust limits, and co-located asset checks."
+      }
+    ]
+  },
+  "mint": {
+    "id": "mint",
+    "title": "Mint Readiness Wizard",
+    "description": "Evaluate terms, absolute and relative windows, remaining cap, and destination output.",
+    "steps": [
+      {
+        "id": "target",
+        "title": "1. Target Rune ID",
+        "description": "Enter block and transaction index of the rune to mint."
+      },
+      {
+        "id": "terms",
+        "title": "2. Inspect Mint Terms",
+        "description": "Review cap, amount per mint, HeightStart/End, and OffsetStart/End."
+      },
+      {
+        "id": "height",
+        "title": "3. Current Block Height",
+        "description": "Compare current chain height against the effective window."
+      },
+      {
+        "id": "verdict",
+        "title": "4. Readiness Verdict",
+        "description": "Deterministic verdict: Open, Closed, Not Started, or Cap Reached."
+      }
+    ]
+  },
+  "etch": {
+    "id": "etch",
+    "title": "Etching Planner",
+    "description": "Plan and inspect an etching from base-26 name encoding through 6-confirmation commitment to reveal script.",
+    "steps": [
+      {
+        "id": "name",
+        "title": "1. Rune Name & Spacers",
+        "description": "Validate A-Z characters, spacers bitmap, and modified base-26 integer."
+      },
+      {
+        "id": "unlock",
+        "title": "2. Name Unlock Schedule",
+        "description": "Verify name length against activation block 840,000 and current height."
+      },
+      {
+        "id": "commitment",
+        "title": "3. Commitment Transaction Plan",
+        "description": "Calculate little-endian trimmed commitment bytes and 6-confirmation timeline."
+      },
+      {
+        "id": "terms",
+        "title": "4. Configure Supply & Terms",
+        "description": "Set premine, cap, amount, divisibility, and symbol with u128 overflow check."
+      },
+      {
+        "id": "reveal",
+        "title": "5. Generate Reveal Runestone",
+        "description": "Produce and verify the complete OP_RETURN OP_13 reveal script."
+      }
+    ]
+  }
+}
