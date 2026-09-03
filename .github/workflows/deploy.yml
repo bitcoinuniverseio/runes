@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, universe-linux]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +25,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24.19.0
-          cache: npm
 
       - name: Install Dependencies
         run: npm ci
@@ -54,7 +53,7 @@ jobs:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, universe-linux]
     needs: build
     steps:
       - name: Deploy to GitHub Pages
