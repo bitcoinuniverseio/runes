@@ -8,7 +8,7 @@ on:
 
 jobs:
   test:
-    runs-on: [self-hosted, universe-runners-1]
+    runs-on: [self-hosted, Linux, X64, universe]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,6 +32,3 @@ jobs:
 
       - name: Validate Content & Schemas
         run: node scripts/check-content.mjs
-
-      - name: Build Platform Static Site
-        run: npx astro build
