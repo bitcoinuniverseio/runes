@@ -32,6 +32,3 @@ jobs:
 
       - name: Validate Content & Schemas
         run: node scripts/check-content.mjs
-
-      - name: Build Platform Static Site
-        run: npx astro build
