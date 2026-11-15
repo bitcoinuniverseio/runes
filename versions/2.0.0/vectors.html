@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes test vectors: valid runestones and every cenotaph flaw</title>
+<meta name="description" content="Twenty-four Runes test vectors as complete OP_RETURN script hex, with expected decoding outcomes: eight valid runestones, fourteen cenotaphs covering all ten flaws, and two non-runestone scripts.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/vectors.html">
+<meta property="og:title" content="Runes test vectors">
+<meta property="og:description" content="Valid and invalid runestone byte strings with expected outcomes, covering all ten cenotaph flaws.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/vectors.html">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html" aria-current="page">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Conformance</p>
+  <h1>Test vectors</h1>
+  <p class="lede">Twenty-four cases: eight valid runestones, fourteen cenotaphs covering all ten flaws, and two scripts that are not runestones at all. Each <code>script</code> is the complete output script in hex, ready to paste into the <a href="decoder.html">decoder</a>.</p>
+  <p class="status-line">Every vector on this page was encoded from the ord 0.29.0 rules and verified to decode to the stated outcome. Outcomes depending on the transaction's output count state the count assumed, since the same bytes can be valid in one transaction and a cenotaph in another.</p>
+
+  <h2 id="how">How to use these</h2>
+  <ol>
+    <li>Feed the script hex to your parser along with the stated output count.</li>
+    <li>Compare against the expected outcome column: either a decoded runestone, or a cenotaph with a specific flaw, or no artifact at all.</li>
+    <li>For cenotaphs, also assert the burn consequences: input runes burned, mint counted but burned, etching (if any) recorded as unmintable with default properties.</li>
+  </ol>
+  <p>A parser that agrees on all twenty-four still needs testing against real chain data, but a parser that disagrees on any one of them will diverge from the index and, eventually, report the wrong owner of real value.</p>
+
+  <h2 id="valid">Valid runestones</h2>
+  <div class="table-scroll">
+  <table>
+    <caption>Expected outcome: a well-formed runestone</caption>
+    <thead><tr><th scope="col">ID</th><th scope="col">Case</th><th scope="col">Script hex</th><th scope="col">Outputs</th><th scope="col">Expected decoding</th></tr></thead>
+    <tbody>
+      <tr id="v1"><td>V1</td><td>Empty runestone</td><td><code>6a5d</code></td><td>2</td><td>Runestone with no fields. Input runes transfer to the first non-OP_RETURN output.</td></tr>
+      <tr id="v2"><td>V2</td><td>Single edict transfer</td><td><code>6a5d0800c0a23303e80701</code></td><td>2</td><td>One edict: rune <code>840000:3</code>, amount 1000, output 1. Remainder to output 0.</td></tr>
+      <tr id="v3"><td>V3</td><td>Two edicts, delta encoded</td><td><code>6a5d0d00c0a23303e807010019f40300</code></td><td>2</td><td>Edict 1: <code>840000:3</code>, 1000, output 1. Edict 2: block delta 0 and tx delta 25 give <code>840000:28</code>, 500, output 0.</td></tr>
+      <tr id="v4"><td>V4</td><td>Sweep, amount zero</td><td><code>6a5d0700c0a233030001</code></td><td>2</td><td>One edict: <code>840000:3</code>, amount 0 meaning the entire remaining balance, to output 1.</td></tr>
+      <tr id="v5"><td>V5</td><td>Even split</td><td><code>6a5d0700c0a233030003</code></td><td>3</td><td>Output index 3 equals the output count, so the balance is divided evenly across all non-OP_RETURN outputs, earlier outputs taking the remainder. The identical bytes with 2 outputs are vector <a href="#c6">C6</a>.</td></tr>
+      <tr id="v6"><td>V6</td><td>Mint</td><td><code>6a5d0614c0a2331403</code></td><td>2</td><td>Mint of rune <code>840000:3</code> (tag 20 given twice: block, then tx). Minted amount goes to output 0.</td></tr>
+      <tr id="v7"><td>V7</td><td>Mint with pointer</td><td><code>6a5d0814c0a23314031601</code></td><td>2</td><td>Same mint, plus pointer (tag 22) = 1, so the minted amount goes to output 1.</td></tr>
+      <tr id="v8"><td>V8</td><td>Full etching</td><td><code>6a5d22020704c2e1d8f3d9a4f589cf100102034005924d06c0843d0ae8070888a40112a065</code></td><td>2</td><td>Etching of <code>BITCOIN•UNIVERSE</code>: flags 7 (Etching, Terms, Turbo), name value 153272084900779274434, divisibility 2, spacers 64, symbol U+2692, premine 1000000, amount 1000, cap 21000, offset end 12960. Max supply 22,000,000 atomic units.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="cenotaph-vectors">Cenotaphs</h2>
+  <p>Every one of these burns all input runes. All ten flaws are covered.</p>
+  <div class="table-scroll">
+  <table>
+    <caption>Expected outcome: cenotaph with the named flaw</caption>
+    <thead><tr><th scope="col">ID</th><th scope="col">Case</th><th scope="col">Script hex</th><th scope="col">Outputs</th><th scope="col">Flaw</th><th scope="col">Why</th></tr></thead>
+    <tbody>
+      <tr id="c1"><td>C1</td><td>Rune tag without Etching flag</td><td><code>6a5d020404</code></td><td>2</td><td><code>UnrecognizedEvenTag</code></td><td>Tag 4 is an etching field. With no Etching flag it is never consumed, and an unconsumed even tag is fatal.</td></tr>
+      <tr id="c2"><td>C2</td><td>Unrecognized flag bit</td><td><code>6a5d020208</code></td><td>2</td><td><code>UnrecognizedFlag</code></td><td>Flags value 8 sets bit 3, which has no assigned meaning. Bits left set after consumption are fatal.</td></tr>
+      <tr id="c3"><td>C3</td><td>Tag with no value</td><td><code>6a5d03020302</code></td><td>2</td><td><code>TruncatedField</code></td><td>Integers are <code>2, 3, 2</code>: the trailing tag 2 has no following value.</td></tr>
+      <tr id="c4"><td>C4</td><td>Trailing integers in body</td><td><code>6a5d0400010101</code></td><td>2</td><td><code>TrailingIntegers</code></td><td>After the Body tag, three integers remain. Edicts come in groups of exactly four.</td></tr>
+      <tr id="c5"><td>C5</td><td>Invalid edict rune ID</td><td><code>6a5d050000010200</code></td><td>2</td><td><code>EdictRuneId</code></td><td>Block delta 0 with tx delta 1 yields ID <code>0:1</code>. Block 0 with a nonzero tx index is not a valid rune ID.</td></tr>
+      <tr id="c6"><td>C6</td><td>Edict output beyond count</td><td><code>6a5d0800c0a23303e80705</code></td><td>2</td><td><code>EdictOutput</code></td><td>Output index 5 exceeds the output count of 2. Only equality is allowed, as a split.</td></tr>
+      <tr id="c7"><td>C7</td><td>Pointer beyond output count</td><td><code>6a5d021605</code></td><td>2</td><td><code>UnrecognizedEvenTag</code></td><td>Pointer 5 is not less than the output count, so the range check fails, the value is left unconsumed, and the even-tag rule fires. Note the flaw is not a dedicated pointer flaw.</td></tr>
+      <tr id="c8"><td>C8</td><td>Partial mint</td><td><code>6a5d0414c0a233</code></td><td>2</td><td><code>UnrecognizedEvenTag</code></td><td>Tag 20 needs two values. One value cannot be consumed, so it remains and is fatal.</td></tr>
+      <tr id="c9"><td>C9</td><td>Reserved even tag</td><td><code>6a5d027e00</code></td><td>2</td><td><code>UnrecognizedEvenTag</code></td><td>Tag 126 is reserved and unrecognized by definition.</td></tr>
+      <tr id="c10"><td>C10</td><td>Supply overflow</td><td><code>6a5d18020308020a80808080808080808080808080808080808002</code></td><td>2</td><td><code>SupplyOverflow</code></td><td>Etching with Terms, cap 2 and amount 2<sup>127</sup>. <code>cap × amount</code> overflows u128.</td></tr>
+      <tr id="c11"><td>C11</td><td>Non-pushdata opcode</td><td><code>6a5d69</code></td><td>2</td><td><code>Opcode</code></td><td><code>0x69</code> is OP_VERIFY. Anything that is not a pushdata opcode after OP_13 is fatal, including OP_PUSHNUM opcodes.</td></tr>
+      <tr id="c12"><td>C12</td><td>Push runs past end of script</td><td><code>6a5d04beef</code></td><td>2</td><td><code>InvalidScript</code></td><td>A 4-byte push is declared but only 2 bytes follow, so the script does not parse.</td></tr>
+      <tr id="c13"><td>C13</td><td>Unterminated varint</td><td><code>6a5d0180</code></td><td>2</td><td><code>Varint</code></td><td>The single payload byte <code>0x80</code> has the continuation bit set with nothing after it.</td></tr>
+      <tr id="c14"><td>C14</td><td>Overlong varint</td><td><code>6a5d148080808080808080808080808080808080808000</code></td><td>2</td><td><code>Varint</code></td><td>Nineteen continuation bytes then a terminator: the varint exceeds the 19-byte limit.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="non-runestone">Not runestones</h2>
+  <p>These produce no artifact at all. The distinction matters: a transaction with no artifact leaves rune balances following the default transfer rule, while a cenotaph burns them.</p>
+  <div class="table-scroll">
+  <table>
+    <caption>Expected outcome: no artifact</caption>
+    <thead><tr><th scope="col">ID</th><th scope="col">Case</th><th scope="col">Script hex</th><th scope="col">Expected</th></tr></thead>
+    <tbody>
+      <tr id="n1"><td>N1</td><td>Not an OP_RETURN output</td><td><code>51</code></td><td>Skipped when searching for a runestone. No artifact.</td></tr>
+      <tr id="n2"><td>N2</td><td>OP_RETURN without OP_13</td><td><code>6a04deadbeef</code></td><td>A plain data-carrier output. Skipped. No artifact, no cenotaph.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2 id="ignored">Values that are ignored, not fatal</h2>
+  <p>Three range checks sit on odd tags, and failing them is silent. A conformant parser must ignore the value and continue rather than rejecting the etching:</p>
+  <ul>
+    <li><strong>Divisibility above 38</strong> (tag 1): ignored, etching proceeds with divisibility 0.</li>
+    <li><strong>Spacers above <code>0x07FFFFFF</code></strong> (tag 3): ignored, etching proceeds with no spacers.</li>
+    <li><strong>Symbol that is not a Unicode scalar value</strong> (tag 5): ignored, etching proceeds with no symbol.</li>
+  </ul>
+  <p>The same out-of-range value on an <em>even</em> tag produces a cenotaph instead, because the value stays unconsumed. Vector <a href="#c7">C7</a> is that asymmetry in action.</p>
+
+  <h2 id="beyond">Beyond the payload</h2>
+  <p>These cases cannot be expressed as a single output script and need transaction-level or chain-level fixtures. Test them against a regtest chain:</p>
+  <ul>
+    <li>An etching whose name has no valid taproot commitment, or a commitment younger than 6 confirmations: the etching is disregarded, and this is not a cenotaph.</li>
+    <li>An etching of an already-taken name, ignoring spacers: disregarded.</li>
+    <li>An etching of a name still locked at the current height: disregarded.</li>
+    <li>An etching with no name at all: the indexer assigns a reserved name, no commitment required.</li>
+    <li>A mint whose terms are not satisfied: silently produces nothing and does not consume cap.</li>
+    <li>A runestone in the second output, after a non-matching OP_RETURN in the first: found normally.</li>
+    <li>An unparseable script in an earlier output: skipped without error, and a later valid runestone is still found.</li>
+    <li>An edict with rune ID <code>0:0</code> in a transaction that etches: refers to the newly etched rune. In a transaction that does not etch: skipped with no effect.</li>
+    <li>An edict or pointer directed at an OP_RETURN output: those runes are burned.</li>
+    <li>A transaction with rune inputs and no non-OP_RETURN outputs: everything is burned.</li>
+  </ul>
+</main>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>vectors.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/vectors.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>

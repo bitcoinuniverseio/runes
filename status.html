@@ -1,0 +1,247 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Platform &amp; Conformance Status | Runes Documentation Platform</title><meta name="description" content="Real-time build status, protocol conformance test metrics, upstream pins, and cryptographic integrity verification."><link rel="alternate" href="https://bitcoinuniverseio.github.io/runes/status.html"><meta property="og:title" content="Platform &amp; Conformance Status"><meta property="og:description" content="Real-time build status, protocol conformance test metrics, upstream pins, and cryptographic integrity verification."><meta property="og:type" content="article"><meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/status.html"><meta name="theme-color" content="#F3EFE6"><script>
+    try {
+      var t = localStorage.getItem('runes-theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  </script><link rel="stylesheet" href="/runes/_astro/BaseLayout.DSnUhiE_.css"></head> <body> <a class="skip-link" href="#main">Skip to main content</a> <header class="site-header"> <div class="header-inner"> <div class="brand-group"> <a class="brand-link" href="/runes/"> <span>ᚱ</span> <span>Runes</span> </a> <span class="brand-badge">v3.0.0</span> </div> <button id="search-trigger" class="search-trigger-btn" type="button" aria-label="Open command center search"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> <span>Search protocol or type /</span> <span class="kbd-shortcut">/</span> </button> <div class="header-actions"> <select id="version-select" class="theme-toggle-btn" aria-label="Documentation version" onchange="window.location.href=this.value"> <option value="/runes/" selected>v3.0.0 (Latest)</option> <option value="/runes/versions/2.0.0/">v2.0.0 (Archived)</option> <option value="/runes/versions.html">Compare versions...</option> </select> <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle light/dark theme">Limestone</button> </div> </div> </header> <div class="shell-container"> <aside class="doc-rail" aria-label="Documentation navigation"> <div class="rail-section"> <div class="rail-section-title">Core Protocol</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/">Overview</a></li> <li><a class="rail-link" href="/runes/specification.html">Specification (R1–R47)</a></li> <li><a class="rail-link" href="/runes/reference.html">Implementer Reference</a></li> <li><a class="rail-link" href="/runes/guide.html">Step-by-Step Guide</a></li> <li><a class="rail-link" href="/runes/vectors.html">Test Vectors (24 Cases)</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Interactive Tooling</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/studio.html">Runestone Studio</a></li> <li><a class="rail-link" href="/runes/decoder.html">Standalone Decoder</a></li> <li><a class="rail-link" href="/runes/wizards/transfer.html">Transfer Wizard</a></li> <li><a class="rail-link" href="/runes/wizards/mint.html">Mint Readiness Wizard</a></li> <li><a class="rail-link" href="/runes/wizards/etch.html">Etching Planner</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Education & Evidence</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/learn.html">Learning Academy</a></li> <li><a class="rail-link" href="/runes/atlas.html">Transaction Atlas</a></li> <li><a class="rail-link" href="/runes/conformance.html">Conformance Center</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Developers & Agents</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/developers.html">Developer Hub & SDK</a></li> <li><a class="rail-link" href="/runes/agents.html">Agent Docs & MCP</a></li> <li><a class="rail-link" href="/runes/provenance.html">Source Provenance</a></li> <li><a class="rail-link active" href="/runes/status.html">Platform Status</a></li> <li><a class="rail-link" href="/runes/changelog.html">Changelog</a></li> </ul> </div> </aside> <main id="main" class="main-column"> <div class="reading-container"> <div class="breadcrumbs"> <a href="/runes/">Runes</a> <span>/</span> <span>Platform &amp; Conformance Status</span> </div> <p class="kicker">Build &amp; Verification Status</p> <h1>Platform &amp; Conformance Status</h1> <p class="lede">Real-time build status, protocol conformance test metrics, upstream pins, and cryptographic integrity verification.</p>  <div class="status-line">
+Platform status: OPERATIONAL · 100% Conformance Verified · Upstream ord 0.29.0 synchronized.
+</div> <h2 id="conformance-status">1. Conformance & Parity Status</h2> <div class="table-scroll"> <table> <thead> <tr><th>Test Harness</th><th>Scope</th><th>Passing</th><th>Status</th></tr> </thead> <tbody> <tr> <td><strong>Authoritative Vectors</strong></td> <td>V1–V8, C1–C14, N1–N2 (24 vectors)</td> <td>24 / 24</td> <td><span style="color: var(--accent); font-weight: 600;">100% PASS ✓</span></td> </tr> <tr> <td><strong>Chain-Level Fixtures</strong></td> <td>F1–F12 (Maturity, reorg, unlock, splits)</td> <td>12 / 12</td> <td><span style="color: var(--accent); font-weight: 600;">100% PASS ✓</span></td> </tr> <tr> <td><strong>Differential Invariants</strong></td> <td>Tag enums, flag bitfields, flaw taxonomy, LEB128 boundaries</td> <td>6 / 6</td> <td><span style="color: var(--accent); font-weight: 600;">100% PASS ✓</span></td> </tr> <tr> <td><strong>Mainnet Transaction Atlas</strong></td> <td>12 verified mainnet transaction case studies</td> <td>12 / 12</td> <td><span style="color: var(--accent); font-weight: 600;">100% PASS ✓</span></td> </tr> </tbody> </table> </div> <h2 id="toolchain">2. Toolchain & Environment</h2> <div class="table-scroll"> <table> <thead> <tr><th>Component</th><th>Pinned Version</th><th>Specification / Standard</th></tr> </thead> <tbody> <tr><td><strong>Node.js</strong></td><td><code>24.19.0 LTS</code></td><td>Execution environment</td></tr> <tr><td><strong>npm</strong></td><td><code>11.17.0</code></td><td>Package manager & workspaces</td></tr> <tr><td><strong>Astro</strong></td><td><code>7.2.10</code></td><td>Static site generator</td></tr> <tr><td><strong>TypeScript</strong></td><td><code>5.9.3</code></td><td>Compiler & strict typing</td></tr> <tr><td><strong>Vitest</strong></td><td><code>4.1.11</code></td><td>Unit & conformance runner</td></tr> <tr><td><strong>Upstream ord</strong></td><td><code>0.29.0</code> (commit <code>7e37a3b</code>)</td><td>Consensus authority</td></tr> <tr><td><strong>Upstream crate</strong></td><td><code>ordinals 0.0.17</code></td><td>Rust reference crate</td></tr> </tbody> </table> </div> <h2 id="hashes">3. Release Hashes & Verification</h2> <p>
+Verify the integrity of distributed documentation bundles against our published SHA-256 checksums:
+</p> <pre><code># Verify SHA-256 of downloaded documentation pack
+sha256sum runes-docs-v3.0.0.zip</code></pre> <div class="feedback-widget" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm); margin-top: 3rem; margin-bottom: 2rem; font-family: var(--font-sans);"> <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;"> <div> <h4 style="margin: 0; font-size: 0.9375rem; color: var(--text);">Was this page technically accurate and helpful?</h4> <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted);">Your feedback helps maintain rigorous consensus documentation.</p> </div> <div style="display: flex; gap: 0.5rem;" id="feedback-buttons"> <button type="button" id="fb-yes-btn" class="page-action-btn">Yes</button> <button type="button" id="fb-no-btn" class="page-action-btn">Report Issue</button> </div> </div> <div id="fb-response" style="display: none; margin-top: 0.75rem; font-size: 0.8125rem; color: var(--accent);">
+Thank you for your feedback!
+</div> </div> <script type="module">var e=document.getElementById(`fb-yes-btn`),t=document.getElementById(`fb-no-btn`),n=document.getElementById(`fb-response`);e&&n&&e.addEventListener(`click`,()=>{e.style.display=`none`,t&&(t.style.display=`none`),n.style.display=`block`}),t&&t.addEventListener(`click`,()=>{let e=encodeURIComponent(`Documentation Feedback: ${document.title}`),t=encodeURIComponent(`URL: ${window.location.href}\n\nPlease describe what was inaccurate, missing, or confusing:`);window.open(`https://github.com/bitcoinuniverseio/runes/issues/new?title=${e}&body=${t}`,`_blank`)});</script>  <div class="page-actions" aria-label="Page tools"> <button id="copy-markdown-btn" class="page-action-btn" type="button">Copy Markdown</button> <a class="page-action-btn" href="/runes/status.md" target="_blank">Raw Markdown</a> <button id="copy-url-btn" class="page-action-btn" type="button">Copy Link</button> <a class="page-action-btn" href="https://github.com/bitcoinuniverseio/runes/edit/main/src/pages/status.html" target="_blank" rel="noreferrer">Edit on GitHub</a> <button id="print-page-btn" class="page-action-btn" type="button" onclick="window.print()">Print Document</button> </div> </div> </main> <aside class="toc-rail" aria-label="In-page navigation"> <div class="toc-title">On This Page</div> <ul class="toc-list"> <li> <a class="toc-link" href="#conformance-status" style> 1. Conformance &amp; Parity Status </a> </li><li> <a class="toc-link" href="#toolchain" style> 2. Toolchain &amp; Environment </a> </li><li> <a class="toc-link" href="#hashes" style> 3. Release Hashes &amp; Verification </a> </li> </ul> </aside> </div> <!-- Search and Command Modal --> <div id="command-modal" class="modal-backdrop" hidden> <div class="command-modal" role="dialog" aria-modal="true" aria-label="Command search"> <div class="command-input-wrap"> <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> <input id="command-input" class="command-input" type="text" placeholder="Search rules (R31), flaws (C7), tags, topics..." autocomplete="off"> <button type="button" id="command-close-btn" class="kbd-shortcut" style="cursor: pointer;">ESC</button> </div> <div class="command-body"> <ul id="command-results" class="command-results"></ul> </div> <div class="command-footer"> <div class="command-footer-hints"> <span><kbd>↑</kbd> <kbd>↓</kbd> Navigate</span> <span><kbd>↵</kbd> Select</span> <span><kbd>ESC</kbd> Close</span> </div> <span class="command-footer-badge">152 Search Items</span> </div> </div> </div> <footer class="site-footer"> <div class="footer-inner"> <p> <strong>Runes Documentation Platform 3.0</strong> · Authoritative protocol documentation, simulator, and tooling.
+</p> <p>
+Documented against Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> 0.29.0 (ordinals crate 0.0.17) · Chain: Bitcoin mainnet, activation block 840,000 · Verified 2026-09-02.
+</p> <p>
+Part of the <a href="https://github.com/bitcoinuniverseio" target="_blank" rel="noreferrer">Bitcoin Universe</a> ecosystem · <a href="/runes/offline.html">Offline mode</a> · <a href="/runes/status.html">System status</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Security reports</a> </p> </div> </footer> <script>
+    // Theme toggle
+    var root = document.documentElement;
+    var KEY = 'runes-theme';
+    var toggleBtn = document.getElementById('theme-toggle');
+    function currentTheme() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function updateThemeBtn() {
+      if (!toggleBtn) return;
+      toggleBtn.textContent = currentTheme() === 'dark' ? 'Basalt (Dark)' : 'Limestone (Light)';
+    }
+    updateThemeBtn();
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        var next = currentTheme() === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem(KEY, next); } catch(e) {}
+        updateThemeBtn();
+      });
+    }
+
+    // Command Center Search
+    var modal = document.getElementById('command-modal');
+    var trigger = document.getElementById('search-trigger');
+    var input = document.getElementById('command-input');
+    var results = document.getElementById('command-results');
+    var closeBtn = document.getElementById('command-close-btn');
+    var searchIndex = null;
+    var selectedIndex = -1;
+    var currentItems = [];
+
+    var SUGGESTIONS = [
+      { page: 'specification.html', anchor: 'r1', title: 'R1: OP_RETURN and OP_13 Carrier Script', where: 'Rule [Carrier]', text: 'Carrier output identifier (0x6a 0x5d) defining standard Runestone payload boundaries.' },
+      { page: 'specification.html', anchor: 'r27', title: 'R27: Taproot Commitment for Etching Names', where: 'Rule [Etching]', text: '6-block commit requirement preventing frontrunning of named rune deployments.' },
+      { page: 'specification.html', anchor: 'r34', title: 'R34: Edict Delta Encoding and Ordering', where: 'Rule [Edicts]', text: 'Ordered edict execution (RuneId, Amount, Output) with cumulative ID delta compaction.' },
+      { page: 'specification.html', anchor: 'r45', title: 'R45: Cenotaph Consequences & Permanent Burns', where: 'Rule [Cenotaphs]', text: 'All input runes are permanently burned on malformation. Etchings rendered unmintable.' },
+      { page: 'studio.html', title: 'Runestone Studio (8 Diagnostic Modes)', where: 'Interactive Tool', text: 'Visual composer, raw transaction parser, UTXO balance simulator, and side-by-side compare.' },
+      { page: 'decoder.html', title: 'Standalone Runestone Decoder', where: 'Interactive Tool', text: 'Pure client-side script decoder with field breakdown and sharable permalinks.' },
+      { page: 'vectors.html', title: 'Conformance Test Vectors (24 Cases)', where: 'Conformance', text: 'Authoritative V1-V8 valid, C1-C14 cenotaphs, and N1-N2 non-runestone test suite.' },
+      { page: 'learn.html', title: 'Runes Learning Academy (7 Tracks)', where: 'Academy', text: 'Structured curriculum from fundamentals to indexer architecture with interactive quizzes.' },
+      { page: 'atlas.html', title: 'Transaction Atlas (12 Case Studies)', where: 'Forensics', text: 'Verified Bitcoin mainnet transactions dissecting genesis etchings and cenotaph autopsies.' },
+      { page: 'agents.html', title: 'Agent Suite & @bitcoinuniverse/runes-docs-mcp', where: 'Agents', text: '17 MCP tools, llms.txt, and developer skill format for autonomous AI coding agents.' }
+    ];
+
+    function getBasePath() {
+      var p = window.location.pathname;
+      if (p.indexOf('/runes') === 0) return '/runes';
+      return '';
+    }
+
+    function renderItems(items, isInitial) {
+      currentItems = items;
+      selectedIndex = items.length > 0 ? 0 : -1;
+      if (!results) return;
+
+      if (items.length === 0) {
+        results.innerHTML = '<li class="command-empty">No matching protocol rules or topics found.</li>';
+        return;
+      }
+
+      var headerHtml = isInitial ? '<li class="command-section-label">Quick Navigation</li>' : '';
+      var itemsHtml = items.map(function(m, idx) {
+        var base = getBasePath();
+        var targetPage = m.page ? (m.page.charAt(0) === '/' ? m.page : '/' + m.page) : '/';
+        var href = base + targetPage + (m.anchor ? '#' + m.anchor : '');
+        var activeClass = idx === selectedIndex ? ' active' : '';
+        return '<li class="command-item' + activeClass + '" data-index="' + idx + '" data-href="' + href + '">' +
+          '<div class="command-item-header">' +
+            '<span class="command-item-title">' + m.title + '</span>' +
+            '<span class="command-item-badge">' + (m.where || 'Topic') + '</span>' +
+          '</div>' +
+          '<span class="command-item-snippet">' + (m.text ? m.text.substring(0, 110) + '...' : '') + '</span>' +
+          '</li>';
+      }).join('');
+
+      results.innerHTML = headerHtml + itemsHtml;
+
+      // Add click listeners to items
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li) {
+        li.addEventListener('click', function() {
+          var h = li.getAttribute('data-href');
+          if (h) window.location.href = h;
+        });
+      });
+    }
+
+    function updateActiveItem() {
+      if (!results) return;
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li, idx) {
+        if (idx === selectedIndex) {
+          li.classList.add('active');
+          li.scrollIntoView({ block: 'nearest' });
+        } else {
+          li.classList.remove('active');
+        }
+      });
+    }
+
+    function loadIndex() {
+      if (searchIndex) return;
+      var base = getBasePath();
+      fetch(base + '/search-index.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          searchIndex = d;
+          if (modal && !modal.hidden && input && !input.value.trim()) {
+            renderItems(SUGGESTIONS, true);
+          }
+        })
+        .catch(function() {});
+    }
+
+    function openSearch() {
+      if (!modal) return;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      renderItems(SUGGESTIONS, true);
+      loadIndex();
+    }
+
+    function closeSearch() {
+      if (!modal) return;
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      if (input) input.value = '';
+      if (results) results.innerHTML = '';
+      currentItems = [];
+      selectedIndex = -1;
+    }
+
+    if (trigger) trigger.addEventListener('click', openSearch);
+    if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeSearch();
+      });
+    }
+
+    // Preload search index when idle
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(loadIndex);
+    } else {
+      setTimeout(loadIndex, 2000);
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal && modal.hidden) openSearch(); else closeSearch();
+      } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        openSearch();
+      } else if (e.key === 'Escape' && modal && !modal.hidden) {
+        closeSearch();
+      } else if (modal && !modal.hidden) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex + 1) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex - 1 + currentItems.length) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < currentItems.length) {
+            var item = currentItems[selectedIndex];
+            var base = getBasePath();
+            var targetPage = item.page ? (item.page.charAt(0) === '/' ? item.page : '/' + item.page) : '/';
+            window.location.href = base + targetPage + (item.anchor ? '#' + item.anchor : '');
+          }
+        }
+      }
+    });
+
+    if (input) {
+      input.addEventListener('input', function() {
+        var q = input.value.trim().toLowerCase();
+        if (!q) {
+          renderItems(SUGGESTIONS, true);
+          return;
+        }
+        if (!searchIndex) {
+          renderItems([], false);
+          return;
+        }
+        var matches = searchIndex.filter(function(item) {
+          return item.title.toLowerCase().indexOf(q) !== -1 ||
+            (item.aliases && item.aliases.some(function(a) { return a.toLowerCase().indexOf(q) !== -1; })) ||
+            (item.text && item.text.toLowerCase().indexOf(q) !== -1);
+        }).slice(0, 12);
+
+        renderItems(matches, false);
+      });
+    }
+
+    // Copy actions
+    var copyUrlBtn = document.getElementById('copy-url-btn');
+    if (copyUrlBtn) {
+      copyUrlBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(window.location.href);
+        var prev = copyUrlBtn.textContent;
+        copyUrlBtn.textContent = 'Copied URL!';
+        setTimeout(function() { copyUrlBtn.textContent = prev; }, 1500);
+      });
+    }
+
+    var copyMdBtn = document.getElementById('copy-markdown-btn');
+    if (copyMdBtn) {
+      copyMdBtn.addEventListener('click', function() {
+        var text = '# ' + document.title + '\n\n' + (document.querySelector('.reading-container') ? document.querySelector('.reading-container').innerText : '');
+        navigator.clipboard.writeText(text);
+        var prev = copyMdBtn.textContent;
+        copyMdBtn.textContent = 'Copied Markdown!';
+        setTimeout(function() { copyMdBtn.textContent = prev; }, 1500);
+      });
+    }
+  </script></body> </html>

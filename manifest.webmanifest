@@ -1,0 +1,22 @@
+{
+  "name": "Runes Documentation Platform",
+  "short_name": "Runes Docs",
+  "start_url": "/runes/",
+  "scope": "/runes/",
+  "display": "standalone",
+  "background_color": "#F3EFE6",
+  "theme_color": "#F3EFE6",
+  "description": "Authoritative protocol documentation, simulator, and tooling for Runes on Bitcoin.",
+  "icons": [
+    {
+      "src": "/runes/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/runes/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

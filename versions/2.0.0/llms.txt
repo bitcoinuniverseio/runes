@@ -1,0 +1,44 @@
+# Runes
+
+> Runes is a UTXO-native fungible token protocol on Bitcoin. A compact message called a runestone, carried in an OP_RETURN output beginning OP_RETURN OP_13, etches a new rune, mints an existing one, or transfers balances between transaction outputs. Balances are held by transaction outputs, not accounts. The protocol originated outside Bitcoin Universe: it was designed by Casey Rodarmor as part of the Ordinals project, and activated on Bitcoin mainnet at block 840,000 (the fourth halving, April 2024).
+
+This site documents the protocol as the ecosystem implements it, grounded in the ord reference implementation version 0.29.0 (ordinals crate 0.0.17). It is published by Bitcoin Universe, which indexes runes as read-only first-party data.
+
+Site base: https://bitcoinuniverseio.github.io/runes/
+Owning repository: https://github.com/bitcoinuniverseio/runes
+Chain: Bitcoin, mainnet. Activation height 840,000.
+Document version: 2.0.0. Lifecycle: stable. Last verified 2026-09-01.
+
+## Pages
+
+- [Overview](https://bitcoinuniverseio.github.io/runes/): what Runes is in plain language, the anatomy of a runes transaction, what a runestone can do (etch, mint, transfer), how rune IDs work as BLOCK:TX, the hardcoded genesis rune UNCOMMON•GOODS, who the documentation is for, and links to source and ecosystem.
+- [Specification](https://bitcoinuniverseio.github.io/runes/specification.html): 47 numbered normative rules in twelve sections. Carrier and transaction anatomy (OP_RETURN OP_13, push concatenation, at most one runestone per transaction); LEB128 varint encoding with the 19-byte limit; message structure of tag and value pairs plus the edict body; the complete tag table (Body 0, Flags 2, Rune 4, Premine 6, Cap 8, Amount 10, HeightStart 12, HeightEnd 14, OffsetStart 16, OffsetEnd 18, Mint 20, Pointer 22, Cenotaph 126, Divisibility 1, Spacers 3, Symbol 5, Nop 127) with the even-must-understand and odd-may-ignore rule; flags; etching including modified base-26 name encoding, the reserved-name threshold, the taproot commitment requirement with 6 confirmations, and the name unlock schedule; minting and terms; edicts and rune ID delta encoding; the pointer; state transitions; and all ten cenotaph flaws with the conditions that produce them.
+- [Guide](https://bitcoinuniverseio.github.io/runes/guide.html): plain-language walkthroughs with complete worked byte-level examples for transfer, multi-edict transfer, sweep, split, mint, mint with pointer, and a full etching of BITCOIN•UNIVERSE decoded field by field. Also covers ways an etching quietly fails, burning, a pre-signing review checklist, and a support matrix for Bitcoin Universe products.
+- [Reference](https://bitcoinuniverseio.github.io/runes/reference.html): terminology; the per-transaction indexer pipeline in order; terms evaluation including how start takes the maximum and end takes the minimum of absolute heights and offsets; confirmation and mempool semantics; reorg behavior and savepoint rewinding; exact encoded runestone sizes and the 83-byte relay policy limit; protocol limitations; security considerations; and a thirteen-step implementation checklist.
+- [Test vectors](https://bitcoinuniverseio.github.io/runes/vectors.html): 24 verified cases given as complete output script hex with expected outcomes. Eight valid runestones, fourteen cenotaphs covering all ten flaws (Opcode, InvalidScript, Varint, TruncatedField, TrailingIntegers, UnrecognizedEvenTag, UnrecognizedFlag, SupplyOverflow, EdictRuneId, EdictOutput), and two scripts that produce no artifact. Also documents which range-check failures are silently ignored rather than fatal, and which cases need chain-level fixtures.
+- [Runestone decoder](https://bitcoinuniverseio.github.io/runes/decoder.html): an interactive tool. Paste an OP_RETURN script hex and it decodes varints into tags and fields, renders etching, mint, edicts, and pointer with explanations, and flags cenotaph conditions with their burn consequences. Pure client-side JavaScript; nothing pasted is logged or transmitted. Optionally takes the transaction output count, which two validity checks depend on.
+- [Changelog](https://bitcoinuniverseio.github.io/runes/changelog.html): documentation version history and protocol milestones, including activation at block 840,000 and full name unlock at block 1,050,000.
+
+## Key facts
+
+- Carrier: an output script beginning OP_RETURN (0x6a) then OP_13 (0x5d). The first matching output in the transaction is the runestone.
+- Encoding: data pushes are concatenated into a payload of LEB128 varints holding unsigned 128-bit integers, parsed as tag and value pairs until tag 0 (Body), after which edicts appear in groups of four integers.
+- Rune ID: BLOCK:TX, the etching block height and the transaction index within that block. Edicts encode IDs as deltas from a running value starting at 0:0.
+- Etching fixes name, divisibility (at most 38), spacers, symbol, premine, and optional mint terms permanently. Claiming a name requires a taproot tapscript commitment confirmed at least 6 blocks before the etching.
+- Cenotaph: a malformed runestone. All input runes are burned, an etched rune becomes permanently unmintable with default properties, and a mint still counts against the cap while its output is burned. Cenotaphs are the protocol's forward-compatibility mechanism.
+- Default destination: unallocated runes go to the pointer output if given, otherwise the first non-OP_RETURN output, otherwise they are burned.
+
+## Bitcoin Universe support
+
+Verified against the marketplace protocol registry and its deployed policy for protocol id `runes`. Viewing, discovery, collection views, activity, and transaction views are supported. Listing, buying, offers, settlement, and building or broadcasting etch, mint, or transfer transactions from inside Bitcoin Universe products are not currently supported: the deployed policy for runes is read-only. Universe operates its own Runes indexer producing a normalized read-only feed whose coverage is reported as partial, because it carries no exhaustive rune mempool stream. Rune amounts are asset-defined by the etching's divisibility.
+
+## User safety
+
+Malformed runestones become cenotaphs and burn every rune in the transaction's inputs, not just the amount being sent. Decode the OP_RETURN before signing, confirm that the first non-OP_RETURN output is yours, keep rune-bearing outputs above the dust threshold, and never blind-sign.
+
+## Upstream and community resources
+
+- ord, the reference implementation: https://github.com/ordinals/ord
+- Upstream protocol documentation: https://docs.ordinals.com/runes.html
+- Upstream specification: https://docs.ordinals.com/runes/specification.html
+- Bitcoin Universe documentation platform: https://docs.bitcoinuniverse.io

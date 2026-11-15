@@ -1,0 +1,42 @@
+# Runes Protocol Documentation (ord 0.29.0)
+
+> Authoritative, offline-ready documentation, state machine simulation, and developer tooling for Runes on Bitcoin.
+> Pinned to Casey Rodarmor's `ord` 0.29.0 (ordinals crate 0.0.17, commit `7e37a3bd3391044b39f5f11f20dfdb8b3764cd0e`).
+> Activation Block: 840,000 (Bitcoin mainnet halving block).
+
+## Protocol Overview
+
+Runes is a simple, UTXO-native fungible token protocol for Bitcoin.
+Token balances are held directly by Bitcoin outpoints (UTXOs).
+State transitions are signaled through a single `OP_RETURN` output followed by `OP_13` (byte `0x5d`), termed a **Runestone**.
+The payload consists of unsigned LEB128 varints defining tag-value message pairs followed by an optional edicts body.
+
+## Core Invariants
+
+1. **Carrier Output (Rules R1–R7):** Output script begins `0x6a 0x5d`. Only the first matching output is processed; any subsequent runestones in the same transaction are ignored.
+2. **Varints (Rules R8–R11):** Unsigned LEB128 up to 128-bit integers (max 19 bytes). Minimal encoding recommended.
+3. **Tags (Rules R16–R17):** Unrecognized odd tags are ignored silently. Unrecognized even tags trigger a **Cenotaph**.
+4. **Flags (Rules R18–R19):** Bit 0 = Etching, Bit 1 = Terms, Bit 2 = Turbo. Any other set bit triggers a Cenotaph.
+5. **Etching Commitments (Rules R27–R28):** Named etchings require a Taproot commitment confirmed at least 6 blocks prior. Revealing earlier disregards the name and assigns a reserved sequence name.
+6. **Edicts (Rules R34–R38):** Transfer instructions `(RuneId, Amount, OutputIndex)` delta-encoded after Tag 0 (Body). Edict output indices exceeding total outputs trigger Cenotaph flaw `EdictOutput`.
+7. **Cenotaphs (Rule R45):** A malformed runestone is a Cenotaph. All input runes entering a cenotaph transaction are permanently burned. Newly etched runes become permanently unmintable.
+
+## Documentation Navigation
+
+- Overview & Mental Model: `/runes/`
+- Normative Specification (R1–R47): `/runes/specification.html`
+- Implementer Reference: `/runes/reference.html`
+- Step-by-Step Guide: `/runes/guide.html`
+- Conformance Test Vectors (24 Cases): `/runes/vectors.html`
+- Runestone Decoder: `/runes/decoder.html`
+- Runestone Studio (8 Diagnostic Modes): `/runes/studio.html`
+- Transfer Safety Wizard: `/runes/wizards/transfer.html`
+- Mint Readiness Wizard: `/runes/wizards/mint.html`
+- Etching Planner: `/runes/wizards/etch.html`
+- Learning Academy (7 Tracks): `/runes/learn.html`
+- Real Transaction Atlas (12 Cases): `/runes/atlas.html`
+- Conformance Center & CLI: `/runes/conformance.html`
+- Developer Hub & TypeScript SDK: `/runes/developers.html`
+- Source Provenance: `/runes/provenance.html`
+- Full Unrolled Document: `/runes/llms-full.txt`
+- Official Agent Skill: `/runes/skill.md`

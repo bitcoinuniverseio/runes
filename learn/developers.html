@@ -1,0 +1,257 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Track 6: Build a Wallet or Application Integration | Runes Documentation Platform</title><meta name="description" content="Integrate @bitcoinuniverse/runes-tools, manage cardinal inputs, build safe review screens, and prevent balance destruction."><link rel="alternate" href="https://bitcoinuniverseio.github.io/runes/learn/developers.html"><meta property="og:title" content="Track 6: Build a Wallet or Application Integration"><meta property="og:description" content="Integrate @bitcoinuniverse/runes-tools, manage cardinal inputs, build safe review screens, and prevent balance destruction."><meta property="og:type" content="article"><meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/learn/developers.html"><meta name="theme-color" content="#F3EFE6"><script>
+    try {
+      var t = localStorage.getItem('runes-theme');
+      if (t) document.documentElement.setAttribute('data-theme', t);
+    } catch(e) {}
+  </script><link rel="stylesheet" href="/runes/_astro/BaseLayout.DSnUhiE_.css"></head> <body> <a class="skip-link" href="#main">Skip to main content</a> <header class="site-header"> <div class="header-inner"> <div class="brand-group"> <a class="brand-link" href="/runes/"> <span>ᚱ</span> <span>Runes</span> </a> <span class="brand-badge">v3.0.0</span> </div> <button id="search-trigger" class="search-trigger-btn" type="button" aria-label="Open command center search"> <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> <span>Search protocol or type /</span> <span class="kbd-shortcut">/</span> </button> <div class="header-actions"> <select id="version-select" class="theme-toggle-btn" aria-label="Documentation version" onchange="window.location.href=this.value"> <option value="/runes/" selected>v3.0.0 (Latest)</option> <option value="/runes/versions/2.0.0/">v2.0.0 (Archived)</option> <option value="/runes/versions.html">Compare versions...</option> </select> <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="Toggle light/dark theme">Limestone</button> </div> </div> </header> <div class="shell-container"> <aside class="doc-rail" aria-label="Documentation navigation"> <div class="rail-section"> <div class="rail-section-title">Core Protocol</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/">Overview</a></li> <li><a class="rail-link" href="/runes/specification.html">Specification (R1–R47)</a></li> <li><a class="rail-link" href="/runes/reference.html">Implementer Reference</a></li> <li><a class="rail-link" href="/runes/guide.html">Step-by-Step Guide</a></li> <li><a class="rail-link" href="/runes/vectors.html">Test Vectors (24 Cases)</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Interactive Tooling</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/studio.html">Runestone Studio</a></li> <li><a class="rail-link" href="/runes/decoder.html">Standalone Decoder</a></li> <li><a class="rail-link" href="/runes/wizards/transfer.html">Transfer Wizard</a></li> <li><a class="rail-link" href="/runes/wizards/mint.html">Mint Readiness Wizard</a></li> <li><a class="rail-link" href="/runes/wizards/etch.html">Etching Planner</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Education & Evidence</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/learn.html">Learning Academy</a></li> <li><a class="rail-link" href="/runes/atlas.html">Transaction Atlas</a></li> <li><a class="rail-link" href="/runes/conformance.html">Conformance Center</a></li> </ul> </div> <div class="rail-section"> <div class="rail-section-title">Developers & Agents</div> <ul class="rail-links"> <li><a class="rail-link" href="/runes/developers.html">Developer Hub & SDK</a></li> <li><a class="rail-link" href="/runes/agents.html">Agent Docs & MCP</a></li> <li><a class="rail-link" href="/runes/provenance.html">Source Provenance</a></li> <li><a class="rail-link" href="/runes/status.html">Platform Status</a></li> <li><a class="rail-link" href="/runes/changelog.html">Changelog</a></li> </ul> </div> </aside> <main id="main" class="main-column"> <div class="reading-container"> <div class="breadcrumbs"> <a href="/runes/">Runes</a> <span>/</span> <span>Track 6: Build a Wallet or Application Integration</span> </div> <p class="kicker">Runes Learning Academy</p> <h1>Track 6: Build a Wallet or Application Integration</h1> <p class="lede">Integrate @bitcoinuniverse/runes-tools, manage cardinal inputs, build safe review screens, and prevent balance destruction.</p>  <div style="margin-bottom: 1.5rem;"> <a href="/runes/learn.html" style="font-family: var(--font-sans); font-size: 0.8125rem; text-decoration: none;">
+← Back to All Academy Tracks
+</a> </div> <div class="academy-track" id="developers"> <div class="status-line"> <strong>Audience:</strong> Wallet architects, frontend engineers, and Bitcoin backend developers. · <strong>Duration:</strong> ~30 minutes
+</div> <div class="callout callout-note" style="margin-bottom: 2rem;"> <div class="callout-title">Learning Outcomes</div> <p style="margin-bottom: 0.25rem;"><strong>Prerequisites:</strong> TypeScript/JavaScript and Bitcoin transaction serialization experience.</p> <p style="margin-bottom: 0;"><strong>Outcomes:</strong> Integrate @bitcoinuniverse/runes-tools, manage cardinal inputs, build safe review screens, and prevent balance destruction.</p> </div> <h2>Curriculum Lessons</h2> <div style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2.5rem;"> <div class="lesson-card" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);"> <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;"> <h4 style="margin: 0; font-size: 1.05rem;"> <span>1. Rune Outpoint Inventory</span> </h4> <label style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); cursor: pointer;"> <input type="checkbox" class="lesson-progress-check" data-track="developers" data-lesson="0"> <span>Mark Completed</span> </label> </div> <p style="font-size: 0.9375rem; margin-bottom: 0.5rem;">Track UTXO rune balances separately to avoid spending rune UTXOs as fee inputs.</p> <div style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted);">
+Controlling Rules: <span> <a href="/runes/specification.html#r44">R44</a> </span> </div> </div><div class="lesson-card" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);"> <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;"> <h4 style="margin: 0; font-size: 1.05rem;"> <span>2. Runestone Assembly Pipeline</span> </h4> <label style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); cursor: pointer;"> <input type="checkbox" class="lesson-progress-check" data-track="developers" data-lesson="1"> <span>Mark Completed</span> </label> </div> <p style="font-size: 0.9375rem; margin-bottom: 0.5rem;">Encode edicts, sort by RuneId, calculate minimal varints, and assemble scriptPubKey.</p> <div style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted);">
+Controlling Rules: <span> <a href="/runes/specification.html#r4">R4</a>,  </span><span> <a href="/runes/specification.html#r34">R34</a> </span> </div> </div><div class="lesson-card" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);"> <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;"> <h4 style="margin: 0; font-size: 1.05rem;"> <span>3. Pre-Signing Validation Gate</span> </h4> <label style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); cursor: pointer;"> <input type="checkbox" class="lesson-progress-check" data-track="developers" data-lesson="2"> <span>Mark Completed</span> </label> </div> <p style="font-size: 0.9375rem; margin-bottom: 0.5rem;">Decode built runestones locally before requesting signatures.</p> <div style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted);">
+Controlling Rules: <span> <a href="/runes/specification.html#r17">R17</a>,  </span><span> <a href="/runes/specification.html#r45">R45</a> </span> </div> </div><div class="lesson-card" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm);"> <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;"> <h4 style="margin: 0; font-size: 1.05rem;"> <span>4. Avoiding Blind Signing</span> </h4> <label style="display: flex; align-items: center; gap: 0.4rem; font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted); cursor: pointer;"> <input type="checkbox" class="lesson-progress-check" data-track="developers" data-lesson="3"> <span>Mark Completed</span> </label> </div> <p style="font-size: 0.9375rem; margin-bottom: 0.5rem;">Surface exact rune amounts, change destination, and burn warnings to users.</p> <div style="font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-muted);">
+Controlling Rules: <span> <a href="/runes/specification.html#r38">R38</a>,  </span><span> <a href="/runes/specification.html#r41">R41</a> </span> </div> </div> </div> <h2>Track Knowledge Assessment</h2> <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+Answer the questions below to test your understanding of this track's consensus invariants.
+</p> <div class="quiz-container" style="display: flex; flex-direction: column; gap: 1.75rem;"> <div class="quiz-card" style="border: 1px solid var(--border); background: var(--bg-inset); padding: 1.25rem; border-radius: var(--radius-sm);" data-quiz="0"> <h4 style="margin-top: 0; font-size: 1rem; margin-bottom: 0.75rem;">
+Question 1: Why must a wallet maintain a separate rune outpoint inventory? </h4> <div class="quiz-options" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;"> <label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; background: var(--bg); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); cursor: pointer;"> <input type="radio" name="quiz-developers-0" value="0"> <span>To display token logos</span> </label><label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; background: var(--bg); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); cursor: pointer;"> <input type="radio" name="quiz-developers-0" value="1"> <span>To prevent rune-bearing UTXOs from being consumed as ordinary fee inputs</span> </label><label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; background: var(--bg); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); cursor: pointer;"> <input type="radio" name="quiz-developers-0" value="2"> <span>To broadcast transactions faster</span> </label><label style="display: flex; align-items: center; gap: 0.5rem; font-family: var(--font-sans); font-size: 0.875rem; background: var(--bg); padding: 0.5rem 0.75rem; border: 1px solid var(--border-light); border-radius: var(--radius-sm); cursor: pointer;"> <input type="radio" name="quiz-developers-0" value="3"> <span>To bypass the dust limit</span> </label> </div> <button type="button" class="btn-primary quiz-submit-btn" data-track="developers" data-q="0" data-ans="1">
+Verify Answer
+</button> <div class="quiz-feedback" id="quiz-fb-developers-0" style="display: none; margin-top: 1rem;"> <div class="callout callout-note"> <div class="callout-title">Protocol Explanation</div> <p class="fb-text">Rune-unaware coin selection destroys value: spending a rune-bearing UTXO as fee releases its runes into the unallocated pool where they follow output 0.</p>  </div> </div> </div> </div> </div> <script type="module">function e(){let e=document.querySelectorAll(`.lesson-progress-check`),t=`runes-academy-progress`,n={};try{n=JSON.parse(localStorage.getItem(t)||`{}`)}catch{}e.forEach(e=>{let r=e,i=`${r.getAttribute(`data-track`)}-${r.getAttribute(`data-lesson`)}`;n[i]&&(r.checked=!0),r.addEventListener(`change`,()=>{n[i]=r.checked;try{localStorage.setItem(t,JSON.stringify(n))}catch{}})}),document.querySelectorAll(`.quiz-submit-btn`).forEach(e=>{e.addEventListener(`click`,()=>{let t=e.getAttribute(`data-track`),n=e.getAttribute(`data-q`),r=parseInt(e.getAttribute(`data-ans`)||`0`,10),i=document.querySelector(`input[name="quiz-${t}-${n}"]:checked`),a=document.getElementById(`quiz-fb-${t}-${n}`);if(!a)return;if(!i){alert(`Please select an option before checking.`);return}let o=parseInt(i.value,10);a.style.display=`block`;let s=a.querySelector(`.callout`);o===r?(s?.classList.remove(`callout-burn`),s?.classList.add(`callout-invariant`)):(s?.classList.remove(`callout-invariant`),s?.classList.add(`callout-burn`))})})}document.readyState===`loading`?document.addEventListener(`DOMContentLoaded`,e):e();</script> <div style="display: flex; justify-content: space-between; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-family: var(--font-sans); font-size: 0.875rem;"> <a href="/runes/learn/etch.html">
+← Previous: Track 5 </a> <a href="/runes/learn/indexers.html">
+Next: Track 7 →
+</a> </div> <div class="feedback-widget" style="border: 1px solid var(--border); background: var(--bg-card); padding: 1.25rem; border-radius: var(--radius-sm); margin-top: 3rem; margin-bottom: 2rem; font-family: var(--font-sans);"> <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;"> <div> <h4 style="margin: 0; font-size: 0.9375rem; color: var(--text);">Was this page technically accurate and helpful?</h4> <p style="margin: 0; font-size: 0.8125rem; color: var(--text-muted);">Your feedback helps maintain rigorous consensus documentation.</p> </div> <div style="display: flex; gap: 0.5rem;" id="feedback-buttons"> <button type="button" id="fb-yes-btn" class="page-action-btn">Yes</button> <button type="button" id="fb-no-btn" class="page-action-btn">Report Issue</button> </div> </div> <div id="fb-response" style="display: none; margin-top: 0.75rem; font-size: 0.8125rem; color: var(--accent);">
+Thank you for your feedback!
+</div> </div> <script type="module">var e=document.getElementById(`fb-yes-btn`),t=document.getElementById(`fb-no-btn`),n=document.getElementById(`fb-response`);e&&n&&e.addEventListener(`click`,()=>{e.style.display=`none`,t&&(t.style.display=`none`),n.style.display=`block`}),t&&t.addEventListener(`click`,()=>{let e=encodeURIComponent(`Documentation Feedback: ${document.title}`),t=encodeURIComponent(`URL: ${window.location.href}\n\nPlease describe what was inaccurate, missing, or confusing:`);window.open(`https://github.com/bitcoinuniverseio/runes/issues/new?title=${e}&body=${t}`,`_blank`)});</script>  <div class="page-actions" aria-label="Page tools"> <button id="copy-markdown-btn" class="page-action-btn" type="button">Copy Markdown</button> <a class="page-action-btn" href="/runes/learn/developers.md" target="_blank">Raw Markdown</a> <button id="copy-url-btn" class="page-action-btn" type="button">Copy Link</button> <a class="page-action-btn" href="https://github.com/bitcoinuniverseio/runes/edit/main/src/pages/learn/developers.html" target="_blank" rel="noreferrer">Edit on GitHub</a> <button id="print-page-btn" class="page-action-btn" type="button" onclick="window.print()">Print Document</button> </div> </div> </main> <aside class="toc-rail" aria-label="In-page navigation"> <div class="toc-title">On This Page</div> <ul class="toc-list"> <li> <a class="toc-link" href="#lessons" style> Curriculum Lessons </a> </li><li> <a class="toc-link" href="#quiz" style> Knowledge Assessment </a> </li> </ul> </aside> </div> <!-- Search and Command Modal --> <div id="command-modal" class="modal-backdrop" hidden> <div class="command-modal" role="dialog" aria-modal="true" aria-label="Command search"> <div class="command-input-wrap"> <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path></svg> <input id="command-input" class="command-input" type="text" placeholder="Search rules (R31), flaws (C7), tags, topics..." autocomplete="off"> <button type="button" id="command-close-btn" class="kbd-shortcut" style="cursor: pointer;">ESC</button> </div> <div class="command-body"> <ul id="command-results" class="command-results"></ul> </div> <div class="command-footer"> <div class="command-footer-hints"> <span><kbd>↑</kbd> <kbd>↓</kbd> Navigate</span> <span><kbd>↵</kbd> Select</span> <span><kbd>ESC</kbd> Close</span> </div> <span class="command-footer-badge">152 Search Items</span> </div> </div> </div> <footer class="site-footer"> <div class="footer-inner"> <p> <strong>Runes Documentation Platform 3.0</strong> · Authoritative protocol documentation, simulator, and tooling.
+</p> <p>
+Documented against Casey Rodarmor's <a href="https://github.com/ordinals/ord" target="_blank" rel="noreferrer">ord</a> 0.29.0 (ordinals crate 0.0.17) · Chain: Bitcoin mainnet, activation block 840,000 · Verified 2026-09-02.
+</p> <p>
+Part of the <a href="https://github.com/bitcoinuniverseio" target="_blank" rel="noreferrer">Bitcoin Universe</a> ecosystem · <a href="/runes/offline.html">Offline mode</a> · <a href="/runes/status.html">System status</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Security reports</a> </p> </div> </footer> <script>
+    // Theme toggle
+    var root = document.documentElement;
+    var KEY = 'runes-theme';
+    var toggleBtn = document.getElementById('theme-toggle');
+    function currentTheme() {
+      var t = root.getAttribute('data-theme');
+      if (t) return t;
+      return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    function updateThemeBtn() {
+      if (!toggleBtn) return;
+      toggleBtn.textContent = currentTheme() === 'dark' ? 'Basalt (Dark)' : 'Limestone (Light)';
+    }
+    updateThemeBtn();
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', function() {
+        var next = currentTheme() === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem(KEY, next); } catch(e) {}
+        updateThemeBtn();
+      });
+    }
+
+    // Command Center Search
+    var modal = document.getElementById('command-modal');
+    var trigger = document.getElementById('search-trigger');
+    var input = document.getElementById('command-input');
+    var results = document.getElementById('command-results');
+    var closeBtn = document.getElementById('command-close-btn');
+    var searchIndex = null;
+    var selectedIndex = -1;
+    var currentItems = [];
+
+    var SUGGESTIONS = [
+      { page: 'specification.html', anchor: 'r1', title: 'R1: OP_RETURN and OP_13 Carrier Script', where: 'Rule [Carrier]', text: 'Carrier output identifier (0x6a 0x5d) defining standard Runestone payload boundaries.' },
+      { page: 'specification.html', anchor: 'r27', title: 'R27: Taproot Commitment for Etching Names', where: 'Rule [Etching]', text: '6-block commit requirement preventing frontrunning of named rune deployments.' },
+      { page: 'specification.html', anchor: 'r34', title: 'R34: Edict Delta Encoding and Ordering', where: 'Rule [Edicts]', text: 'Ordered edict execution (RuneId, Amount, Output) with cumulative ID delta compaction.' },
+      { page: 'specification.html', anchor: 'r45', title: 'R45: Cenotaph Consequences & Permanent Burns', where: 'Rule [Cenotaphs]', text: 'All input runes are permanently burned on malformation. Etchings rendered unmintable.' },
+      { page: 'studio.html', title: 'Runestone Studio (8 Diagnostic Modes)', where: 'Interactive Tool', text: 'Visual composer, raw transaction parser, UTXO balance simulator, and side-by-side compare.' },
+      { page: 'decoder.html', title: 'Standalone Runestone Decoder', where: 'Interactive Tool', text: 'Pure client-side script decoder with field breakdown and sharable permalinks.' },
+      { page: 'vectors.html', title: 'Conformance Test Vectors (24 Cases)', where: 'Conformance', text: 'Authoritative V1-V8 valid, C1-C14 cenotaphs, and N1-N2 non-runestone test suite.' },
+      { page: 'learn.html', title: 'Runes Learning Academy (7 Tracks)', where: 'Academy', text: 'Structured curriculum from fundamentals to indexer architecture with interactive quizzes.' },
+      { page: 'atlas.html', title: 'Transaction Atlas (12 Case Studies)', where: 'Forensics', text: 'Verified Bitcoin mainnet transactions dissecting genesis etchings and cenotaph autopsies.' },
+      { page: 'agents.html', title: 'Agent Suite & @bitcoinuniverse/runes-docs-mcp', where: 'Agents', text: '17 MCP tools, llms.txt, and developer skill format for autonomous AI coding agents.' }
+    ];
+
+    function getBasePath() {
+      var p = window.location.pathname;
+      if (p.indexOf('/runes') === 0) return '/runes';
+      return '';
+    }
+
+    function renderItems(items, isInitial) {
+      currentItems = items;
+      selectedIndex = items.length > 0 ? 0 : -1;
+      if (!results) return;
+
+      if (items.length === 0) {
+        results.innerHTML = '<li class="command-empty">No matching protocol rules or topics found.</li>';
+        return;
+      }
+
+      var headerHtml = isInitial ? '<li class="command-section-label">Quick Navigation</li>' : '';
+      var itemsHtml = items.map(function(m, idx) {
+        var base = getBasePath();
+        var targetPage = m.page ? (m.page.charAt(0) === '/' ? m.page : '/' + m.page) : '/';
+        var href = base + targetPage + (m.anchor ? '#' + m.anchor : '');
+        var activeClass = idx === selectedIndex ? ' active' : '';
+        return '<li class="command-item' + activeClass + '" data-index="' + idx + '" data-href="' + href + '">' +
+          '<div class="command-item-header">' +
+            '<span class="command-item-title">' + m.title + '</span>' +
+            '<span class="command-item-badge">' + (m.where || 'Topic') + '</span>' +
+          '</div>' +
+          '<span class="command-item-snippet">' + (m.text ? m.text.substring(0, 110) + '...' : '') + '</span>' +
+          '</li>';
+      }).join('');
+
+      results.innerHTML = headerHtml + itemsHtml;
+
+      // Add click listeners to items
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li) {
+        li.addEventListener('click', function() {
+          var h = li.getAttribute('data-href');
+          if (h) window.location.href = h;
+        });
+      });
+    }
+
+    function updateActiveItem() {
+      if (!results) return;
+      var lis = results.querySelectorAll('.command-item');
+      lis.forEach(function(li, idx) {
+        if (idx === selectedIndex) {
+          li.classList.add('active');
+          li.scrollIntoView({ block: 'nearest' });
+        } else {
+          li.classList.remove('active');
+        }
+      });
+    }
+
+    function loadIndex() {
+      if (searchIndex) return;
+      var base = getBasePath();
+      fetch(base + '/search-index.json')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          searchIndex = d;
+          if (modal && !modal.hidden && input && !input.value.trim()) {
+            renderItems(SUGGESTIONS, true);
+          }
+        })
+        .catch(function() {});
+    }
+
+    function openSearch() {
+      if (!modal) return;
+      modal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      renderItems(SUGGESTIONS, true);
+      loadIndex();
+    }
+
+    function closeSearch() {
+      if (!modal) return;
+      modal.hidden = true;
+      document.body.style.overflow = '';
+      if (input) input.value = '';
+      if (results) results.innerHTML = '';
+      currentItems = [];
+      selectedIndex = -1;
+    }
+
+    if (trigger) trigger.addEventListener('click', openSearch);
+    if (closeBtn) closeBtn.addEventListener('click', closeSearch);
+    if (modal) {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeSearch();
+      });
+    }
+
+    // Preload search index when idle
+    if (window.requestIdleCallback) {
+      window.requestIdleCallback(loadIndex);
+    } else {
+      setTimeout(loadIndex, 2000);
+    }
+
+    window.addEventListener('keydown', function(e) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        if (modal && modal.hidden) openSearch(); else closeSearch();
+      } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        openSearch();
+      } else if (e.key === 'Escape' && modal && !modal.hidden) {
+        closeSearch();
+      } else if (modal && !modal.hidden) {
+        if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex + 1) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          if (currentItems.length > 0) {
+            selectedIndex = (selectedIndex - 1 + currentItems.length) % currentItems.length;
+            updateActiveItem();
+          }
+        } else if (e.key === 'Enter') {
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < currentItems.length) {
+            var item = currentItems[selectedIndex];
+            var base = getBasePath();
+            var targetPage = item.page ? (item.page.charAt(0) === '/' ? item.page : '/' + item.page) : '/';
+            window.location.href = base + targetPage + (item.anchor ? '#' + item.anchor : '');
+          }
+        }
+      }
+    });
+
+    if (input) {
+      input.addEventListener('input', function() {
+        var q = input.value.trim().toLowerCase();
+        if (!q) {
+          renderItems(SUGGESTIONS, true);
+          return;
+        }
+        if (!searchIndex) {
+          renderItems([], false);
+          return;
+        }
+        var matches = searchIndex.filter(function(item) {
+          return item.title.toLowerCase().indexOf(q) !== -1 ||
+            (item.aliases && item.aliases.some(function(a) { return a.toLowerCase().indexOf(q) !== -1; })) ||
+            (item.text && item.text.toLowerCase().indexOf(q) !== -1);
+        }).slice(0, 12);
+
+        renderItems(matches, false);
+      });
+    }
+
+    // Copy actions
+    var copyUrlBtn = document.getElementById('copy-url-btn');
+    if (copyUrlBtn) {
+      copyUrlBtn.addEventListener('click', function() {
+        navigator.clipboard.writeText(window.location.href);
+        var prev = copyUrlBtn.textContent;
+        copyUrlBtn.textContent = 'Copied URL!';
+        setTimeout(function() { copyUrlBtn.textContent = prev; }, 1500);
+      });
+    }
+
+    var copyMdBtn = document.getElementById('copy-markdown-btn');
+    if (copyMdBtn) {
+      copyMdBtn.addEventListener('click', function() {
+        var text = '# ' + document.title + '\n\n' + (document.querySelector('.reading-container') ? document.querySelector('.reading-container').innerText : '');
+        navigator.clipboard.writeText(text);
+        var prev = copyMdBtn.textContent;
+        copyMdBtn.textContent = 'Copied Markdown!';
+        setTimeout(function() { copyMdBtn.textContent = prev; }, 1500);
+      });
+    }
+  </script></body> </html>

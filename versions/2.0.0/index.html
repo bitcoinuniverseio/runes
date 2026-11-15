@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Runes: the UTXO-native fungible token protocol on Bitcoin</title>
+<meta name="description" content="Runes protocol documentation: how runestones etch, mint, and transfer fungible tokens inside Bitcoin transactions. Specification, guides, test vectors, and a runestone decoder.">
+<link rel="canonical" href="https://bitcoinuniverseio.github.io/runes/">
+<meta property="og:title" content="Runes: the UTXO-native fungible token protocol on Bitcoin">
+<meta property="og:description" content="Specification, guides, test vectors, and a client-side runestone decoder for the Runes protocol.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bitcoinuniverseio.github.io/runes/">
+<meta name="theme-color" content="#131211">
+<link rel="stylesheet" href="styles.css">
+<script>try{var t=localStorage.getItem("runes-theme");if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site">
+  <div class="masthead">
+    <a class="brand" href="./">Runes</a>
+    <nav class="site-nav" aria-label="Site">
+      <a href="./" aria-current="page">Overview</a>
+      <a href="specification.html">Specification</a>
+      <a href="guide.html">Guide</a>
+      <a href="reference.html">Reference</a>
+      <a href="vectors.html">Test vectors</a>
+      <a href="decoder.html">Decoder</a>
+      <a href="changelog.html">Changelog</a>
+    </nav>
+    <div class="tools">
+      <div class="search" id="search" hidden>
+        <input type="search" id="q" placeholder="Search ( / )" autocomplete="off" aria-label="Search this site">
+        <ul id="search-results" hidden></ul>
+      </div>
+      <button id="theme-toggle" hidden type="button"></button>
+    </div>
+  </div>
+</header>
+<main id="main">
+  <p class="kicker">Bitcoin · mainnet · protocol documentation</p>
+  <h1>Runes</h1>
+  <p class="lede">Runes is a fungible token protocol carved directly into Bitcoin transactions. A compact message called a runestone, carried in an OP_RETURN output, etches a new token, mints an existing one, or moves balances between transaction outputs. Balances live in UTXOs, so runes move the way bitcoin moves.</p>
+  <p class="status-line">Protocol origin: Casey Rodarmor, the Ordinals project · Activated at block 840,000 (the fourth halving, April 2024) · Documented against ord 0.29.0 (ordinals crate 0.0.17) · Lifecycle: stable</p>
+
+  <h2 id="in-one-look">The protocol in one look</h2>
+  <figure>
+    <svg class="glyph-strip" viewBox="0 0 720 250" role="img" aria-labelledby="fig1-title fig1-desc">
+      <title id="fig1-title">Anatomy of a runes transaction</title>
+      <desc id="fig1-desc">Two inputs carrying rune balances flow into a transaction. The transaction has three outputs: output 0 receives 600 units, output 1 receives 400 units, and output 2 is an OP_RETURN runestone holding the instructions. The runestone directs balances but holds none itself.</desc>
+      <g fill="none" stroke="var(--rule)">
+        <rect x="20" y="40" width="170" height="54"/>
+        <rect x="20" y="120" width="170" height="54"/>
+        <rect x="300" y="70" width="130" height="120"/>
+        <rect x="520" y="30" width="180" height="44"/>
+        <rect x="520" y="94" width="180" height="44"/>
+        <rect x="520" y="158" width="180" height="44" stroke="var(--accent)"/>
+        <path d="M190 67 H300 M190 147 H300 M430 52 H520 M430 116 H520 M430 180 H520" stroke="var(--rule)"/>
+      </g>
+      <g fill="var(--ink)" font-size="13" letter-spacing="1.5">
+        <text x="30" y="62">INPUT 0</text>
+        <text x="30" y="142">INPUT 1</text>
+        <text x="312" y="100">TX</text>
+        <text x="530" y="48">OUTPUT 0</text>
+        <text x="530" y="112">OUTPUT 1</text>
+        <text x="530" y="176" fill="var(--accent)">OUTPUT 2 · RUNESTONE</text>
+      </g>
+      <g fill="var(--muted)" font-size="11" font-family="ui-monospace,Consolas,monospace">
+        <text x="30" y="82">700 RUNES</text>
+        <text x="30" y="162">300 RUNES</text>
+        <text x="312" y="130">edicts allocate</text>
+        <text x="312" y="146">input balances</text>
+        <text x="312" y="162">to outputs</text>
+        <text x="530" y="66">600 RUNES</text>
+        <text x="530" y="130">400 RUNES</text>
+        <text x="530" y="194">OP_RETURN OP_13 …  0 sats</text>
+      </g>
+    </svg>
+    <figcaption>Rune balances ride on transaction outputs. The runestone is an instruction, not a vault: it says where input balances go, and holds nothing itself.</figcaption>
+  </figure>
+
+  <h2 id="what-it-does">What a runestone can do</h2>
+  <dl>
+    <dt>Etch</dt>
+    <dd>Create a new rune and fix its properties forever: name (A to Z, with optional spacer dots like <code>UNCOMMON•GOODS</code>), divisibility, currency symbol, an optional premine for the etcher, and optional open mint terms (amount per mint, mint cap, height or offset windows).</dd>
+    <dt>Mint</dt>
+    <dd>While a rune's mint terms are satisfied, anyone may mint: each mint transaction creates the fixed amount and assigns it to the transaction's outputs.</dd>
+    <dt>Transfer</dt>
+    <dd>Edicts move amounts of specific runes to specific outputs. Anything left over follows the pointer, or the first non-OP_RETURN output. Sending runes to an OP_RETURN output burns them.</dd>
+  </dl>
+  <p>A malformed runestone is a <strong>cenotaph</strong>: input runes are burned, an etched rune becomes unmintable, and mints count against the cap but burn what they mint. The <a href="specification.html#cenotaphs">specification</a> lists every cenotaph condition, and the <a href="decoder.html">decoder</a> flags them in pasted scripts.</p>
+
+  <h2 id="identity">How runes are identified</h2>
+  <p>A rune ID is the block that etched it and the transaction index inside that block, written <code>BLOCK:TX</code>. The first rune, <code>UNCOMMON•GOODS</code>, is hardcoded in the reference implementation with ID <code>1:0</code>, symbol <code>⧉</code>, and an open mint of amount 1 from block 840,000 to block 1,050,000. Every other rune's ID comes from where its etching confirmed.</p>
+
+  <h2 id="who-for">Who this documentation is for</h2>
+  <ul>
+    <li><strong>Users and collectors</strong>: start with the <a href="guide.html">guide</a> to understand what your wallet builds and what to check before signing.</li>
+    <li><strong>Wallet and app developers</strong>: the <a href="specification.html">specification</a> gives numbered encoding and validity rules; the <a href="vectors.html">test vectors</a> exercise them byte by byte.</li>
+    <li><strong>Indexer operators</strong>: the <a href="reference.html">reference</a> covers state transitions, confirmation, reorg behavior, and an implementation checklist.</li>
+  </ul>
+
+  <h2 id="entry-points">Entry points</h2>
+  <ul>
+    <li><a href="specification.html">Specification</a>: normative rules, tag table, varint encoding, edict delta encoding, cenotaph list.</li>
+    <li><a href="guide.html">Guide</a>: etch, mint, and transfer walkthroughs with worked byte-level examples, and the Bitcoin Universe support matrix.</li>
+    <li><a href="reference.html">Reference</a>: terminology, indexer semantics, fees, limitations, security considerations.</li>
+    <li><a href="vectors.html">Test vectors</a>: valid and invalid cases with expected outcomes.</li>
+    <li><a href="decoder.html">Runestone decoder</a>: paste an OP_RETURN script, get a field-by-field reading. Runs entirely in your browser.</li>
+  </ul>
+
+  <h2 id="ecosystem">Source and ecosystem</h2>
+  <ul>
+    <li>Owning repository: <a href="https://github.com/bitcoinuniverseio/runes">github.com/bitcoinuniverseio/runes</a></li>
+    <li>Central documentation platform: <a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a></li>
+    <li>Reference implementation: <a href="https://github.com/ordinals/ord">ord</a> by the Ordinals project; upstream docs at <a href="https://docs.ordinals.com/runes.html">docs.ordinals.com</a></li>
+    <li>Bitcoin Universe products: the marketplace and Token Explorer surface runes as read-only, first-party indexed data. Rune transactions are not built or broadcast in-app. Details in the <a href="guide.html#support">support matrix</a>.</li>
+    <li>Security reports: see <a href="https://github.com/bitcoinuniverseio/runes/security">private vulnerability reporting</a> on GitHub.</li>
+  </ul>
+</main>
+<footer class="site">
+  <div class="colophon">
+    <p>Owning repository <a href="https://github.com/bitcoinuniverseio/runes">bitcoinuniverseio/runes</a> · Source <code>index.html</code> · <a href="https://github.com/bitcoinuniverseio/runes/edit/main/index.html">Edit this page on GitHub</a></p>
+    <p>Documented against ord 0.29.0 (ordinals crate 0.0.17) · Site version 2.0.0 · Lifecycle: stable · Chain: Bitcoin mainnet, activation block 840,000 · Last verified 2026-09-01</p>
+    <p><a href="https://docs.bitcoinuniverse.io">docs.bitcoinuniverse.io</a> · <a href="changelog.html">Changelog</a> · <a href="https://github.com/bitcoinuniverseio/runes/security">Report a vulnerability</a></p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>
